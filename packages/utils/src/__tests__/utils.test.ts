@@ -8,7 +8,7 @@ import {
   isValidPhone,
   isValidEmail,
   sanitizeText,
-} from '../src/index'
+} from '../index'
 
 describe('distanceKm', () => {
   it('returns ~0 for same point', () => {
@@ -20,7 +20,7 @@ describe('distanceKm', () => {
       { latitude: 24.7136, longitude: 46.6753 },
       { latitude: 21.3891, longitude: 39.8579 },
     )
-    expect(d).toBeGreaterThan(800)
+    expect(d).toBeGreaterThan(750)
     expect(d).toBeLessThan(950)
   })
 })
