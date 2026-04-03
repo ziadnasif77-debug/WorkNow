@@ -7,7 +7,7 @@ import {
   View, Text, TextInput, TouchableOpacity, ActivityIndicator,
   StyleSheet, type ViewStyle, type TextStyle, type TextInputProps,
 } from 'react-native'
-import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../constants/theme'
+import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BUTTON
