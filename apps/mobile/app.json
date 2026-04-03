@@ -99,14 +99,18 @@
           "cameraPermission": "WorkFix needs camera access to take photos for orders."
         }
       ],
-      "expo-updates"
+      "expo-updates",
+      "@sentry/react-native",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
+      "hostUri": "192.168.0.8:8081",
       "router": {
-        "origin": false
+        "origin": false,
+        "root": "src/app"
       },
       "eas": {
         "projectId": "YOUR_EAS_PROJECT_ID"
@@ -124,6 +128,7 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "owner": "your-expo-username"
+    "owner": "your-expo-username",
+    "main": "expo-router/entry"
   }
 }
