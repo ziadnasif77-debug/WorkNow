@@ -153,6 +153,7 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
         const legacyTyping: Record<string, boolean> = data.typingStatus ?? {}
         for (const [uid, val] of Object.entries(legacyTyping)) {
           if (!(uid in typing)) typing[uid] = val  // only if not already set by TTL
+        }
         const unread    = data.unreadCount  ?? {}
         // Remove own typing from display
         const othersTyping = Object.fromEntries(
@@ -186,10 +187,7 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
       await fn({ conversationId: convId, text, mediaUrl, mediaType })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'فشل إرسال الرسالة'
-      set({ sendError: msg }
-    } finally {
-      set({ sendLoading: false })
-    })
+      set({ sendError: msg })
     } finally {
       set({ sendLoading: false })
     }

@@ -49,6 +49,8 @@ interface OrdersState {
   acceptQuote:             (payload: AcceptQuotePayload) => Promise<{ amount: number; currency: string } | null>
   confirmCompletion:       (orderId: string)     => Promise<void>
   cancelOrder:             (payload: CancelOrderPayload) => Promise<void>
+  submitReview:            (payload: { orderId: string; targetId: string; targetType: 'provider' | 'customer'; rating: number; comment?: string; tags?: string[] }) => Promise<void>
+  openDispute:             (payload: { orderId: string; reason: string; description: string; evidenceUrls?: string[] }) => Promise<void>
   clearError:              ()                    => void
 }
 
@@ -247,7 +249,6 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
   },
 
   // ── openDispute ────────────────────────────────────────────────────────────
-  submitReview:            (payload: { orderId: string; targetId: string; targetType: string; rating: number; comment?: string; tags?: string[] }) => Promise<void>
   openDispute: async payload => {
     set({ actionLoading: true, actionError: null })
     try {
