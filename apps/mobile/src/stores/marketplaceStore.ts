@@ -52,6 +52,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
   searchTotal:       0,
   hasMore:           false,
   lastQuery:         null,
+  _searchAbort:      null,
   selectedProvider:  null,
   profileLoading:    false,
 

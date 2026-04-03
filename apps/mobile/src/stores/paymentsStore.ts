@@ -34,8 +34,10 @@ interface PaymentsState {
   initiatePayment:  (orderId: string, method: PaymentMethod, returnUrl?: string) => Promise<string | null>
   loadWallet:       () => Promise<void>
   requestPayout:    (amount?: number) => Promise<void>
-  clearErrors:      () => void
-  reset:            () => void
+  clearErrors:         () => void
+  reset:               () => void
+  createSubscription:  (tier: string, billing: string) => Promise<{ redirectUrl?: string }>
+  saveBankAccount:     (data: { iban?: string; bankName?: string; accountNumber?: string; accountHolder?: string }) => Promise<void>
 }
 
 export const usePaymentsStore = create<PaymentsState>((set) => ({
@@ -136,7 +138,6 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
   },
 
   // ── saveBankAccount ───────────────────────────────────────────────────────
-  createSubscription:  (tier: string, billing: string) => Promise<{ redirectUrl?: string }>
   saveBankAccount: async data => {
     const uid = (await import('../lib/firebase')).firebaseAuth.currentUser?.uid
     if (!uid) throw new Error('Not authenticated')
