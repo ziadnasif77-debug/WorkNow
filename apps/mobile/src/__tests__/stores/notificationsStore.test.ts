@@ -44,11 +44,6 @@ jest.mock('firebase/firestore', () => ({
   serverTimestamp: jest.fn(() => ({ seconds: Date.now() / 1000 })),
 }))
 
-// ── react-native Platform ─────────────────────────────────────────────────────
-jest.mock('react-native/Libraries/Utilities/Platform', () => ({
-  OS:     'ios',
-  select: jest.fn((obj: Record<string, unknown>) => obj['ios']),
-}))
 
 // ── imports (after all mocks) ─────────────────────────────────────────────────
 import { useNotificationsStore } from '../../stores/notificationsStore'
@@ -122,6 +117,13 @@ describe('registerToken()', () => {
     e.getPermissionsAsync.mockResolvedValue({ status: 'granted' })
     e.requestPermissionsAsync.mockResolvedValue({ status: 'granted' })
     e.getExpoPushTokenAsync.mockResolvedValue({ data: MOCK_EXPO_TOKEN })
+    // Restore httpsCallable implementation (also wiped by clearAllMocks)
+    const { httpsCallable } = functionsMocks()
+    httpsCallable.mockImplementation((_fns: unknown, name: string) => {
+      if (name === 'registerFcmToken')
+        return jest.fn(() => Promise.resolve({ data: { ok: true } }))
+      return jest.fn(() => Promise.resolve({ data: {} }))
+    })
   })
 
   it('calls getExpoPushTokenAsync with EXPO_PUBLIC_PROJECT_ID', async () => {
