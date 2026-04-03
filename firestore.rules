@@ -1,0 +1,203 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── دوال مساعدة ────────────────────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+    function role() {
+      return request.auth.token.role;
+    }
+    function isAdmin() {
+      return isAuth() && role() in ['admin', 'superadmin'];
+    }
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+    function isProvider() {
+      return isAuth() && role() == 'provider';
+    }
+    function isCustomer() {
+      return isAuth() && role() == 'customer';
+    }
+    function isOrderParty(orderId) {
+      let order = get(/databases/$(database)/documents/orders/$(orderId)).data;
+      return isAuth() &&
+        (request.auth.uid == order.customerId ||
+         request.auth.uid == order.providerId);
+    }
+
+    // ── users ───────────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuth() && isOwner(userId);
+      allow update: if isOwner(userId) &&
+        !('role' in request.resource.data.diff(resource.data).affectedKeys()) &&
+        !('isVerified' in request.resource.data.diff(resource.data).affectedKeys());
+      allow delete: if isAdmin();
+
+      match /notifications/{notifId} {
+        allow read, update: if isOwner(userId);
+        allow create: if isAdmin() || request.auth.uid == userId;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // ── providerProfiles ────────────────────────────────────────────────────────
+    match /providerProfiles/{providerId} {
+      allow read: if isAuth();
+      allow create: if isProvider() && isOwner(providerId);
+      allow update: if (isOwner(providerId) &&
+        !('kycStatus' in request.resource.data.diff(resource.data).affectedKeys()) &&
+        !('avgRating' in request.resource.data.diff(resource.data).affectedKeys()))
+        || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── orders ──────────────────────────────────────────────────────────────────
+    match /orders/{orderId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.customerId == request.auth.uid) ||
+        (isAuth() && resource.data.providerId == request.auth.uid);
+      allow create: if isCustomer() &&
+        request.resource.data.customerId == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow update: if isAdmin() || (isAuth() &&
+        (resource.data.providerId == request.auth.uid &&
+         request.resource.data.status in ['confirmed','in_progress','completed']) ||
+        (resource.data.customerId == request.auth.uid &&
+         request.resource.data.status in ['closed','cancelled','disputed']));
+      allow delete: if false;
+
+      match /quotes/{quoteId} {
+        allow read: if isOrderParty(orderId) || isAdmin();
+        allow create: if isProvider() &&
+          request.resource.data.providerId == request.auth.uid;
+        allow update: if isAdmin() ||
+          (get(/databases/$(database)/documents/orders/$(orderId)).data.customerId
+             == request.auth.uid);
+        allow delete: if false;
+      }
+    }
+
+    // ── conversations & messages ─────────────────────────────────────────────────
+    match /conversations/{convId} {
+      // TTL-based typing: clients write typingExpiresAt.{uid} = timestamp
+      // (replaces the old boolean typingStatus — no delete write needed)
+      allow read, update: if isAuth() &&
+        (resource.data.customerId == request.auth.uid ||
+         resource.data.providerId == request.auth.uid) || isAdmin();
+      allow create: if isAuth();
+      allow delete: if false;
+
+      match /messages/{msgId} {
+        allow read: if isAuth() || isAdmin();
+        allow create: if isAuth() &&
+          request.resource.data.senderId == request.auth.uid;
+        allow update: if isAuth() &&
+          resource.data.senderId != request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['isRead','readAt']);
+        allow delete: if false;
+      }
+    }
+
+    // ── payments ─────────────────────────────────────────────────────────────────
+    match /payments/{paymentId} {
+      allow read: if isAdmin() ||
+        (isAuth() && (resource.data.customerId == request.auth.uid ||
+                      resource.data.providerId == request.auth.uid));
+      allow write: if false;
+    }
+
+    // ── reviews ──────────────────────────────────────────────────────────────────
+    match /reviews/{reviewId} {
+      allow read: if isAuth();
+      allow create: if isAuth() &&
+        request.resource.data.reviewerId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── disputes ─────────────────────────────────────────────────────────────────
+    match /disputes/{disputeId} {
+      allow read: if isAdmin() || isOrderParty(resource.data.orderId);
+      allow create: if isAuth() &&
+        request.resource.data.initiatorId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── categories & services ────────────────────────────────────────────────────
+    match /categories/{catId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create, update: if isProvider() &&
+        request.resource.data.providerId == request.auth.uid;
+      allow delete: if isAdmin() ||
+        (isProvider() && resource.data.providerId == request.auth.uid);
+    }
+
+    // ── subscriptions ────────────────────────────────────────────────────────────
+    match /subscriptions/{subId} {
+      allow read: if isAdmin() ||
+        (isProvider() && resource.data.providerId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // ── payouts ──────────────────────────────────────────────────────────────────
+    match /payouts/{payoutId} {
+      allow read: if isAdmin() ||
+        (isProvider() && resource.data.providerId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // ── adminTasks ───────────────────────────────────────────────────────────────
+    match /adminTasks/{taskId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── scheduledReleases ─────────────────────────────────────────────────────────
+    match /scheduledReleases/{docId} {
+      allow read, write: if false; // Functions only
+    }
+  }
+
+
+    // ── invoices — billing records ────────────────────────────────────────────────
+    // Customer or provider of the order can read their own invoices
+    // Write only via CF admin SDK
+    match /invoices/{invoiceId} {
+      allow read: if isAuth() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.providerId == request.auth.uid
+      ) || isAdmin();
+      allow write: if false;
+    }
+
+    // ── invoiceCounters — sequential invoice numbering ────────────────────────────
+    // Read-only for clients (counters only written by CF)
+    match /invoiceCounters/{counterId} {
+      allow read:  if isAdmin();
+      allow write: if false;
+    }
+
+    // ── dataExports — GDPR data portability ───────────────────────────────────────
+    // Users can read their own export records; writes via CF only
+    match /dataExports/{exportId} {
+      allow read: if isAuth() && resource.data.uid == request.auth.uid;
+      allow write: if false;  // CF admin SDK only
+    }
+
+    // ── deletionRequests — GDPR right to erasure ──────────────────────────────────
+    // Users can read their own deletion request; writes via CF only
+    match /deletionRequests/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;  // CF admin SDK only
+    }
+
+  }
+}

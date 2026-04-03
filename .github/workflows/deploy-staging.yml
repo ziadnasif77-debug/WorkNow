@@ -1,0 +1,94 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-functions:
+    name: Deploy Cloud Functions → dev
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages + functions
+        run: pnpm turbo build --filter=@workfix/functions...
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy Functions (dev)
+        run: firebase deploy --only functions --project dev
+        env:
+          FIREBASE_TOKEN:         ${{ secrets.FIREBASE_TOKEN }}
+          MOYASAR_SECRET_KEY:     ${{ secrets.DEV_MOYASAR_SECRET_KEY }}
+          MOYASAR_WEBHOOK_SECRET: ${{ secrets.DEV_MOYASAR_WEBHOOK_SECRET }}
+
+      - name: Deploy Firestore Rules + Indexes
+        run: firebase deploy --only firestore --project dev
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Deploy Storage Rules
+        run: firebase deploy --only storage --project dev
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+  eas-preview:
+    name: EAS Build — Preview channel
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: deploy-functions
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Update (OTA)
+        run: eas update --auto --channel preview
+        working-directory: apps/mobile
+        env:
+          EXPO_PUBLIC_FIREBASE_API_KEY:            ${{ secrets.DEV_FIREBASE_API_KEY }}
+          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN:        ${{ secrets.DEV_FIREBASE_AUTH_DOMAIN }}
+          EXPO_PUBLIC_FIREBASE_PROJECT_ID:         ${{ secrets.DEV_FIREBASE_PROJECT_ID }}
+          EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET:     ${{ secrets.DEV_FIREBASE_STORAGE_BUCKET }}
+          EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.DEV_FIREBASE_MESSAGING_SENDER_ID }}
+          EXPO_PUBLIC_FIREBASE_APP_ID:             ${{ secrets.DEV_FIREBASE_APP_ID }}

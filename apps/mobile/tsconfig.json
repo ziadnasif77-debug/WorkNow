@@ -1,0 +1,12 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@workfix/types":  ["../../packages/types/src/index.ts"],
+      "@workfix/utils":  ["../../packages/utils/src/index.ts"],
+      "@workfix/config": ["../../packages/config/src/index.ts"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.d.ts", "expo-env.d.ts"]
+}

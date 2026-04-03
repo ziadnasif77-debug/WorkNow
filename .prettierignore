@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.expo/
+.turbo/
+coverage/
+android/
+ios/
+*.lock

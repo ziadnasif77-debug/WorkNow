@@ -1,0 +1,6 @@
+{
+  "name": "@workfix/admin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Admin dashboard — uses Retool (see RETOOL_SETUP.md)"
+}

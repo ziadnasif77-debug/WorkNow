@@ -1,0 +1,78 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+    function isAuth()  { return request.auth != null; }
+    function uid()     { return request.auth.uid; }
+    function role()    { return request.auth.token.role; }
+    function isAdmin() { return role() in ['admin', 'superadmin']; }
+    function maxSizeMB(mb) {
+      return request.resource.size < mb * 1024 * 1024;
+    }
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    function isDocument() {
+      return request.resource.contentType in [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/webp'
+      ];
+    }
+
+    // ── avatars/{userId}/* ────────────────────────────────────────────────────
+    match /avatars/{userId}/{fileName} {
+      allow read:  if true;                    // public
+      allow write: if isAuth()
+        && uid() == userId
+        && isImage()
+        && maxSizeMB(5);
+      allow delete: if isAuth() && (uid() == userId || isAdmin());
+    }
+
+    // ── kyc/{userId}/* ────────────────────────────────────────────────────────
+    match /kyc/{userId}/{fileName} {
+      allow read:  if isAuth() && (uid() == userId || isAdmin());
+      allow write: if isAuth()
+        && uid() == userId
+        && isDocument()
+        && maxSizeMB(10);
+      allow delete: if isAdmin();
+    }
+
+    // ── orders/{orderId}/attachments/* ────────────────────────────────────────
+    match /orders/{orderId}/attachments/{fileName} {
+      allow read:  if isAuth();               // parties + admin; enforced in app
+      allow write: if isAuth()
+        && isDocument()
+        && maxSizeMB(10);
+      allow delete: if isAdmin();
+    }
+
+    // ── messages/{convId}/* ───────────────────────────────────────────────────
+    match /messages/{convId}/{fileName} {
+      allow read:  if isAuth();
+      allow write: if isAuth()
+        && isDocument()
+        && maxSizeMB(20);
+      allow delete: if isAdmin();
+    }
+
+    // ── portfolio/{providerId}/* ──────────────────────────────────────────────
+    match /portfolio/{providerId}/{fileName} {
+      allow read:  if true;
+      allow write: if isAuth()
+        && uid() == providerId
+        && isImage()
+        && maxSizeMB(10);
+      allow delete: if isAuth() && (uid() == providerId || isAdmin());
+    }
+
+    // ── Deny everything else ──────────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
