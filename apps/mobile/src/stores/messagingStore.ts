@@ -111,14 +111,15 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
   // ── openConversation ──────────────────────────────────────────────────────
   openConversation: async orderId => {
     try {
-    const fn  = httpsCallable<{ orderId: string }, { ok: boolean; conversationId: string }>(
-      firebaseFunctions, 'getOrCreateConversation',
-    )
-    const res = await fn({ orderId })
-    set({ activeConvId: res.data.conversationId })
-    return res.data.conversationId
-      } catch (err) {
+      const fn  = httpsCallable<{ orderId: string }, { ok: boolean; conversationId: string }>(
+        firebaseFunctions, 'getOrCreateConversation',
+      )
+      const res = await fn({ orderId })
+      set({ activeConvId: res.data.conversationId })
+      return res.data.conversationId
+    } catch (err) {
       if (__DEV__) console.warn('[Messaging] openConversation error', err)
+      return ''
     }
   },
 

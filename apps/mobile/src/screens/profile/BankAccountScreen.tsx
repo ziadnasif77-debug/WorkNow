@@ -66,7 +66,7 @@ export default function BankAccountScreen() {
       await saveBankAccount({
         iban:        cleaned,
         bankName:    bankName.trim(),
-        accountName: accName.trim(),
+        accountHolder: accName.trim(),
       })
       Alert.alert('✓', 'تم حفظ معلومات الحساب البنكي', [
         { text: t('common.done'), onPress: () => router.back() },

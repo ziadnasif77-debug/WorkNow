@@ -50,6 +50,8 @@ interface Translations {
     scheduleNow: string; scheduleLater: string; status: string
     quoteReceived: string; acceptQuote: string; rejectQuote: string
     confirmDone: string; raiseDispute: string; noOrders: string
+    downloadInvoice: string; downloadInvoiceHint: string
+    invoiceReady: string; invoiceReadyDesc: string; invoiceError: string
   }
   payment: {
     title: string; total: string; method: string; card: string
@@ -65,6 +67,33 @@ interface Translations {
     sendQuote: string; quotePrice: string; quoteDuration: string
     quoteNote: string; wallet: string; balance: string
     pending: string; requestPayout: string
+  }
+  support: {
+    offlineBanner: string; onlineBanner: string; loadingLocal: string
+    loadError: string; openBrowser: string; lastUpdated: string
+  }
+  privacy: {
+    screenTitle: string; introTitle: string; introText: string
+    exportTitle: string; exportDesc: string; exportHint: string
+    exportIncludesLabel: string; exportIncludes: string
+    requestExport: string; exportQueued: string; exportQueuedDesc: string
+    exportQueuedBadge: string; exportReady: string; exportReadyDesc: string
+    exportExpiresHint: string; download: string
+    deleteTitle: string; deleteDesc: string; deleteHint: string
+    requestDeletion: string; cancelDeletion: string; cancelDeletionHint: string
+    deletionPending: string; deletionCancelled: string; deletionCancelledDesc: string
+    deletionAlreadyRequested: string; deletionScheduled: string
+    retentionNote: string
+    deleteModalTitle: string; deleteModalWarning: string
+    deleteWillDelete: string; deleteWillDeleteItems: string
+    deleteWillKeep: string; deleteWillKeepItems: string
+    continueToDelete: string; reasonTitle: string
+    reason_no_longer_using: string; reason_privacy: string
+    reason_alternative: string; reason_other: string
+    confirmDeleteTitle: string; confirmDeleteInstr: string
+    confirmDeleteBtn: string; typeConfirmation: string
+    gracePeriodNote: string; policiesTitle: string
+    contactDPO: string; legalNote: string
   }
 }
 
@@ -217,7 +246,7 @@ const en: Translations = {
     noOrders: 'No orders yet',
     downloadInvoice: 'Download Invoice',
     downloadInvoiceHint: 'Opens the PDF invoice in your browser',
-    invoiceReady: 'Invoice Ready',
+    invoiceReady: 'Invoice ready',
     invoiceReadyDesc: 'Invoice number: {{number}}',
     invoiceError: 'Failed to generate invoice',
   },

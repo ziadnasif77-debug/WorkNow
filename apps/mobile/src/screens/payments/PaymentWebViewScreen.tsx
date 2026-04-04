@@ -140,7 +140,6 @@ export default function PaymentWebViewScreen() {
           originWhitelist={['https://*', 'workfix://*']}
           userAgent="WorkFix/1.0 Mobile"
           // Security: restrict to Tap Payments domains
-          allowedUriSchemes={['https', 'workfix']}
         />
       ) : (
         <View style={styles.error_screen}>

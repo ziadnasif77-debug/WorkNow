@@ -141,6 +141,8 @@ export interface Category {
   name: LocalizedString
   description?: LocalizedString
   iconUrl: string
+  icon?: string             // emoji or icon character for quick display
+  serviceCount?: number     // denormalized count of active services
   parentId?: string         // null = root category
   sortOrder: number
   isActive: boolean

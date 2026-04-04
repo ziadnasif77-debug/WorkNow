@@ -7,7 +7,9 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-na
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
-import { firebaseAuth } from '../../lib/firebase'
+import { firebaseAuth, firestore } from '../../lib/firebase'
+import { updateProfile } from 'firebase/auth'
+import { doc, updateDoc } from 'firebase/firestore'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Screen } from '../../components/ui'
@@ -29,6 +31,7 @@ export default function EditProfileScreen() {
     if (name.trim().length < 2) { setNameErr(t('errors.nameTooShort')); return }
     setIsLoading(true)
     try {
+      if (!user) throw new Error('Not authenticated')
       await updateProfile(user, { displayName: name.trim(), photoURL: avatarUrl ?? undefined })
       await updateDoc(doc(firestore, 'users', user.uid), {
         displayName: name.trim(), avatarUrl, bio: bio.trim() || null, updatedAt: new Date() })

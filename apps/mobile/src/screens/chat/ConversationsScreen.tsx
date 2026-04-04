@@ -101,7 +101,7 @@ function ConversationRow({
           >
             {isLastMine ? '✓ ' : ''}{conv.lastMessageText || '...'}
           </Text>
-          {hasUnread > 0 && (
+          {unread > 0 && (
             <View style={styles.unread_badge}>
               <Text style={styles.unread_text}>{unread > 99 ? '99+' : unread}</Text>
             </View>

@@ -18,11 +18,15 @@ import { firebaseFunctions, firestore } from '../lib/firebase'
 import type { AppNotification } from '@workfix/types'
 
 // ── Expo Notifications global handler config ──────────────────────────────────
+import type { NotificationBehavior } from 'expo-notifications'
+
 ExpoNotifications.setNotificationHandler({
-  handleNotification: async () => ({
+  handleNotification: async (): Promise<NotificationBehavior> => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge:  true,
+    shouldShowBanner: true,
+    shouldShowList:   true,
   }),
 })
 

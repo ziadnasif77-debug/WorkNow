@@ -173,7 +173,6 @@ export default function ChatScreen() {
           initialNumToRender={10}
           maxToRenderPerBatch={10}
           windowSize={5}
-          keyExtractor={m => m.id}
           contentContainerStyle={styles.messages_content}
           showsVerticalScrollIndicator={false}
           onLayout={() => flatRef.current?.scrollToEnd({ animated: false })}

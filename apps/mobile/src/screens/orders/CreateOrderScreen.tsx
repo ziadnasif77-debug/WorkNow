@@ -93,8 +93,7 @@ export default function CreateOrderScreen() {
       const orderId = await createOrder({
         serviceId:      serviceId ?? 'general',
         categoryId:     'general',
-        lat:            location.lat,
-        lng:            location.lng,
+        location:       { latitude: location.lat, longitude: location.lng },
         address:        address.trim() || location.city,
         description:    description.trim(),
         attachmentUrls: urls,
@@ -316,7 +315,7 @@ export default function CreateOrderScreen() {
             )}
 
             <Button
-              label={t('orders.submitOrder')} accessibilityLabel={t('orders.submitOrder')} accessibilityRole="button"
+              label={t('orders.submitOrder')}
               onPress={handleSubmit}
               isLoading={isLoading}
               style={styles.next_btn}

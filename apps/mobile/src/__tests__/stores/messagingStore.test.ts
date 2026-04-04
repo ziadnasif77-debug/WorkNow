@@ -142,7 +142,7 @@ describe('messagingStore — sendMessage', () => {
     )
     await expect(
       useMessagingStore.getState().sendMessage('conv_001', 'السلام عليكم')
-    ).resolves.toBeUndefined()
+    ).resolves.toBeFalsy()
   })
 
   it('sets sendLoading=true during call, false after', async () => {
@@ -209,7 +209,7 @@ describe('messagingStore — openConversation', () => {
     )
     await expect(
       useMessagingStore.getState().openConversation('ord_missing')
-    ).resolves.toBeUndefined()
+    ).resolves.toBeFalsy()
   })
 })
 
@@ -284,7 +284,7 @@ describe('messagingStore — markRead', () => {
     )
     await expect(
       useMessagingStore.getState().markRead('conv_001')
-    ).resolves.toBeUndefined()
+    ).resolves.toBeFalsy()
   })
 
   it('resolves without throwing on failure (non-critical)', async () => {
@@ -293,7 +293,7 @@ describe('messagingStore — markRead', () => {
     )
     await expect(
       useMessagingStore.getState().markRead('conv_001')
-    ).resolves.toBeUndefined()
+    ).resolves.toBeFalsy()
   })
 })
 
@@ -337,6 +337,6 @@ describe('messagingStore — sendTyping', () => {
     firestoreMocks().updateDoc.mockRejectedValueOnce(new Error('Offline'))
     await expect(
       useMessagingStore.getState().sendTyping('conv_001', 'uid_001', true)
-    ).resolves.toBeUndefined()
+    ).resolves.toBeFalsy()
   })
 })

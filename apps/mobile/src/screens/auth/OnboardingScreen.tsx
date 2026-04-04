@@ -66,9 +66,9 @@ export default function OnboardingScreen() {
         ref={flatRef}
         data={SLIDES}
         keyExtractor={(_item, index) => String(index)}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={5}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -76,7 +76,6 @@ export default function OnboardingScreen() {
           const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH)
           setActiveIndex(idx)
         }}
-        keyExtractor={s => s.id}
         renderItem={({ item }) => (
           <View style={[styles.slide, { width: SCREEN_WIDTH, backgroundColor: item.bg }]}>
             <Text style={styles.emoji}>{item.emoji}</Text>
