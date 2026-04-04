@@ -38,8 +38,8 @@ export function Button({
     styles.btn,
     styles[`btn_${variant}`],
     styles[`btn_${size}`],
-    fullWidth && styles.btn_full,
-    isDisabled && styles.btn_disabled,
+    ...(fullWidth ? [styles.btn_full] : []),
+    ...(isDisabled ? [styles.btn_disabled] : []),
     style ?? {},
   ]
 
@@ -107,8 +107,8 @@ export function Input({
         <TextInput
           style={[
             styles.input,
-            leftIcon  && styles.input_with_left,
-            rightIcon && styles.input_with_right,
+            ...(leftIcon  ? [styles.input_with_left]  : []),
+            ...(rightIcon ? [styles.input_with_right] : []),
             style ?? {},
           ]}
           placeholderTextColor={Colors.gray400}

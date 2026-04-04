@@ -104,14 +104,21 @@ function makeChain(snap: unknown) {
   chain['update']  = mockUpdate
   chain['set']     = mockSet
   chain['add']     = mockAdd
-  chain['doc']     = jest.fn((id?: string) => ({
-    get:    getMock,
-    update: mockUpdate,
-    set:    mockSet,
-    id:     id ?? 'doc_001',
-    ref:    { update: mockUpdate, id: id ?? 'doc_001' },
-    collection: jest.fn(() => makeChain(makeEmptySnap())),
-  }))
+  chain['doc']     = jest.fn((id?: string) => {
+    const collSnap = snap as { docs?: Array<{ id: string }> }
+    const docSnap = collSnap?.docs?.find((d) => d.id === id)
+    const docGetMock = jest.fn().mockResolvedValue(
+      docSnap ?? makeDocSnap(id ?? 'doc_001', {}, false)
+    )
+    return {
+      get:    docGetMock,
+      update: mockUpdate,
+      set:    mockSet,
+      id:     id ?? 'doc_001',
+      ref:    { update: mockUpdate, id: id ?? 'doc_001' },
+      collection: jest.fn(() => makeChain(makeEmptySnap())),
+    }
+  })
   return chain as unknown as jest.Mock
 }
 

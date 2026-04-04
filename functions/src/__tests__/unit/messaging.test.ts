@@ -99,20 +99,23 @@ function makeChain(snap: unknown) {
   chain['get']     = getMock
   chain['update']  = mockUpdate
   chain['set']     = mockSet
-  chain['doc']     = jest.fn((id?: string) => ({
-    get:    getMock,
-    update: mockUpdate,
-    set:    mockSet,
-    id:     id ?? 'doc_001',
-    ref:    { update: mockUpdate, id: id ?? 'doc_001' },
-    collection: jest.fn((subCol: string) => {
-      // Support sub-collection access for conversations/messages
-      if (subCol === 'messages') {
-        return makeChain(makeEmptySnap())
-      }
-      return makeChain(makeEmptySnap())
-    }),
-  }))
+  chain['doc']     = jest.fn((id?: string) => {
+    // When .doc(id).get() is called, find the specific document in the snap
+    // so the code receives a DocumentSnapshot (with .exists and .data()), not a QuerySnapshot
+    const collSnap = snap as { docs?: Array<{ id: string }> }
+    const docSnap = collSnap?.docs?.find((d) => d.id === id)
+    const docGetMock = jest.fn().mockResolvedValue(
+      docSnap ?? makeDocSnap(id ?? 'doc_001', {}, false)
+    )
+    return {
+      get:    docGetMock,
+      update: mockUpdate,
+      set:    mockSet,
+      id:     id ?? 'doc_001',
+      ref:    { update: mockUpdate, id: id ?? 'doc_001' },
+      collection: jest.fn(() => makeChain(makeEmptySnap())),
+    }
+  })
   return chain as unknown as jest.Mock
 }
 

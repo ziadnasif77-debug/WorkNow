@@ -7,8 +7,14 @@ import { initializeApp, getApps, getApp } from 'firebase/app'
 import {
   initializeAuth,
   getAuth,
-  getReactNativePersistence,
 } from 'firebase/auth'
+// getReactNativePersistence is a React-Native-only export — not in firebase/auth typings
+// but available at runtime via Metro's react-native resolver
+import type { Persistence } from 'firebase/auth'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { getReactNativePersistence } = require('firebase/auth') as {
+  getReactNativePersistence: (storage: unknown) => Persistence
+}
 import {
   initializeFirestore,
   getFirestore,

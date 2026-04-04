@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Analytics } from '../../lib/analytics'
+import { usePaymentsStore } from '../../stores/paymentsStore'
 import { Button, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
 import type { SubscriptionTier } from '@workfix/types'
@@ -60,6 +61,7 @@ const PLAN_FEATURES: Record<string, { ar: string; en: string }> = {
 export default function SubscriptionsScreen() {
   const { t, i18n } = useTranslation()
   const router      = useRouter()
+  const { createSubscription } = usePaymentsStore.getState()
   const lang        = (i18n.language === 'ar' ? 'ar' : 'en') as 'ar' | 'en'
 
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier>('pro')

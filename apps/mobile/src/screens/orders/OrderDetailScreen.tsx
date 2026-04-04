@@ -5,8 +5,10 @@
 import React, { useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Alert, ActivityIndicator,
+  TouchableOpacity, Alert, ActivityIndicator, Linking,
 } from 'react-native'
+import { httpsCallable } from 'firebase/functions'
+import { firebaseFunctions } from '../../lib/firebase'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useOrdersStore } from '../../stores/ordersStore'
@@ -29,6 +31,7 @@ export default function OrderDetailScreen() {
 
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancelReason,    setCancelReason]    = useState('')
+  const [invoiceLoading,  setInvoiceLoading]  = useState(false)
 
   useEffect(() => {
     if (id) void loadOrderDetail(id)
@@ -232,9 +235,6 @@ export default function OrderDetailScreen() {
             isLoading={invoiceLoading}
             variant="outline"
             style={styles.invoice_btn}
-            accessibilityRole="button"
-            accessibilityLabel={t('orders.downloadInvoice')}
-            accessibilityHint={t('orders.downloadInvoiceHint')}
           />
         )}
 
