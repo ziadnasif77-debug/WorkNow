@@ -100,7 +100,7 @@ export interface User {
   isVerified: boolean
   isActive: boolean
   fcmTokens?: string[]      // multiple devices
-  preferredLang: 'ar' | 'en'
+  preferredLang: 'ar' | 'en' | 'no' | 'sv'
   createdAt: Timestamp
   updatedAt: Timestamp
 }
