@@ -6,8 +6,8 @@
 
 | Layer | Tech |
 |-------|------|
-| Mobile | Expo SDK 51 + React Native 0.74 + TypeScript |
-| Routing | Expo Router v3 (file-based) |
+| Mobile | Expo SDK ~54.0.33 + React Native 0.81.5 + React 19.1.0 + TypeScript ^5.9.3 |
+| Routing | Expo Router v6 (file-based) |
 | State | Zustand v4 |
 | Backend | Firebase (Auth + Firestore + Storage + Cloud Functions v5) |
 | Payments | Tap Payments (SAR/AED/KWD/NOK/SEK + Vipps + Swish + Apple Pay + Mada) |
@@ -19,12 +19,14 @@
 ## المتطلبات
 
 ```
-Node.js   >= 20.0.0
+Node.js   v24.11.0  ← مطلوب بالضبط (استخدم nvm install 24.11.0)
 pnpm      >= 9.0.0
 Expo CLI  >= 10.0.0 (npm i -g expo-cli)
 EAS CLI   >= 10.0.0 (npm i -g eas-cli)
 Firebase CLI >= 13.0.0 (npm i -g firebase-tools)
 ```
+
+> **تحذير Node 24 + OpenSSL**: يجب تعيين `NODE_OPTIONS=--openssl-legacy-provider` قبل أي أمر Metro/Expo لأن Node 24 يستخدم OpenSSL 3 الذي يكسر بعض crypto algorithms المستخدمة داخلياً.
 
 ## تثبيت وتشغيل
 
@@ -46,19 +48,39 @@ pnpm build --filter=@workfix/types --filter=@workfix/utils --filter=@workfix/con
 
 ## التشغيل المحلي
 
-```bash
-# تشغيل Firebase Emulators (نافذة 1)
+### Windows — PowerShell (LAN / جهاز حقيقي)
+
+```powershell
+# نافذة 1: Firebase Emulators
 pnpm emulators
 
-# تشغيل تطبيق Expo (نافذة 2)
+# نافذة 2: Expo Metro (استبدل IP بـ IP جهازك على الشبكة المحلية)
+$env:NODE_OPTIONS = "--openssl-legacy-provider"
+$env:EXPO_PACKAGER_HOSTNAME = "192.168.0.8"
 cd apps/mobile
-pnpm start
+npx expo start --lan --clear
+```
 
-# تشغيل على iOS simulator
-pnpm ios
+> ابحث عن IP جهازك عبر: `ipconfig` ← ابحث عن IPv4 Address تحت Wi-Fi adapter
 
-# تشغيل على Android emulator
-pnpm android
+### macOS / Linux — Bash
+
+```bash
+# نافذة 1: Firebase Emulators
+pnpm emulators
+
+# نافذة 2: Expo Metro
+NODE_OPTIONS="--openssl-legacy-provider" \
+EXPO_PACKAGER_HOSTNAME="192.168.0.8" \
+npx expo start --lan --clear
+```
+
+### Simulators (بدون جهاز حقيقي)
+
+```bash
+cd apps/mobile
+NODE_OPTIONS="--openssl-legacy-provider" npx expo start --ios
+NODE_OPTIONS="--openssl-legacy-provider" npx expo start --android
 ```
 
 > **تلميح**: لتوصيل التطبيق بالـ Emulators، تأكد من `EXPO_PUBLIC_USE_EMULATOR=true` في ملف `.env`
@@ -158,6 +180,46 @@ workfix/
 └── .github/workflows/        ← CI/CD pipelines
 ```
 
+## قواعد الاستيراد (Import Rules)
+
+قواعد ثابتة لتجنب خطأ `Module not found` بسبب خطأ في مسار `theme`:
+
+| موقع الملف | المسار الصحيح لـ theme |
+|---|---|
+| `src/components/ui/*.tsx` | `../../constants/theme` |
+| `src/components/*.tsx` | `../constants/theme` |
+| `src/screens/**/*.tsx` | `../../constants/theme` |
+| `src/stores/*.ts` | لا تحتاج theme مباشرة |
+
+**السبب**: مجلد `constants/` موجود في `src/constants/` — لذا المسار يعتمد على عمق الملف النسبي.
+
+```ts
+// ✅ صحيح — داخل src/components/ui/
+import { Colors, Spacing } from '../../constants/theme'
+
+// ✅ صحيح — داخل src/components/
+import { Colors } from '../constants/theme'
+
+// ❌ خطأ شائع
+import { Colors } from '../constants/theme'  // من داخل ui/ — مسار ناقص
+```
+
+---
+
+## ملاحظة CI/CD
+
+> **GitHub Actions قيد التحديث** — بعض الـ checks مرتبطة بـ secrets خارجية:
+>
+> - **Security Audit**: يعمل — يتحقق من `pnpm audit --audit-level=high`
+> - **TypeScript + Lint**: يعمل — يتحقق من `tsc` و `eslint`
+> - **Unit Tests**: يعمل — 129 mobile + 101 utils + 116 functions
+> - **Firestore Rules Tests**: يحتاج `FIREBASE_TOKEN` في GitHub Secrets → `Settings → Secrets → Actions`
+> - **Integration Tests**: تحتاج Firebase Emulator يعمل في CI
+>
+> الاعتماد حالياً على **Local Testing** لحين إعداد كل الـ secrets.
+
+---
+
 ## الأسواق المدعومة
 
 | السوق | العملة | طرق الدفع |
@@ -200,8 +262,17 @@ workfix/
 ### 1. المتطلبات الأساسية
 
 ```bash
-node -v   # >= 20.x
+node -v   # v24.11.0 (مطلوب بالضبط — استخدم nvm)
 pnpm -v   # >= 9.x
+```
+
+```bash
+# تثبيت Node 24.11.0 عبر nvm
+nvm install 24.11.0
+nvm use 24.11.0
+
+# Windows (PowerShell) — تعيين متغير OpenSSL قبل أي أمر Expo
+$env:NODE_OPTIONS = "--openssl-legacy-provider"
 ```
 
 ### 2. متغيرات البيئة
