@@ -94,13 +94,13 @@ const resetStore = () =>
 const makeNotif = (overrides: Partial<AppNotification> = {}): AppNotification => ({
   id:        'notif_001',
   userId:    'user_abc',
-  type:      'order_placed',
+  type:      'new_order',
   title:     { ar: 'طلب جديد', en: 'New Order' },
   body:      { ar: 'تم تقديم طلبك', en: 'Order placed' },
   isRead:    false,
   refId:     'order_123',
   refType:   'order',
-  createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 },
+  createdAt: { seconds: Date.now() / 1000, nanoseconds: 0, toDate: () => new Date() } as unknown as import('firebase/firestore').Timestamp,
   ...overrides,
 })
 

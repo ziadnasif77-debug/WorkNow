@@ -1,4 +1,5 @@
-﻿const { getDefaultConfig } = require("expo/metro-config");
+const { getDefaultConfig } = require("expo/metro-config");
+const { withNativeWind } = require("nativewind/metro");
 const path = require("path");
 
 const projectRoot = __dirname;
@@ -24,4 +25,4 @@ config.transformer = {
 config.resolver.assetExts = config.resolver.assetExts.filter(ext => ext !== "svg");
 config.resolver.sourceExts = [...config.resolver.sourceExts, "svg", "ts", "tsx"];
 
-module.exports = config;
+module.exports = withNativeWind(config, { input: "./global.css" });

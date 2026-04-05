@@ -1,8 +1,6 @@
-// tailwind.config.js
-const { nativewindPreset } = require("nativewind/tailwind/preset");
-
+// tailwind.config.js — NativeWind 4
 module.exports = {
-  presets: [nativewindPreset],
+  presets: [require("nativewind/preset")],
   content: [
     "./App.{js,jsx,ts,tsx}",
     "./src/**/*.{js,jsx,ts,tsx}",
