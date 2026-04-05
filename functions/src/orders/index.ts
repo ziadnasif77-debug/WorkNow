@@ -43,7 +43,7 @@ export const createOrder = callable(async (data, context) => {
   const order: Omit<Order, 'id'> = {
     customerId:      uid,
     customerName:    userData['displayName'] as string,
-    customerAvatarUrl: userData['avatarUrl'] as string | undefined,
+    ...(userData['avatarUrl'] !== undefined && { customerAvatarUrl: userData['avatarUrl'] as string }),
     serviceId:       input.serviceId,
     serviceName:     serviceData['title'] as import('@workfix/types').LocalizedString,
     categoryId:      input.categoryId,
@@ -54,11 +54,9 @@ export const createOrder = callable(async (data, context) => {
     location:        { latitude: input.lat, longitude: input.lng },
     address:         input.address,
     description:     input.description,
-    attachmentUrls:  input.attachmentUrls,
-    isScheduled:     input.isScheduled,
-    scheduledAt:     input.scheduledAt
-      ? new Date(input.scheduledAt) as unknown as import('@workfix/types').Timestamp
-      : undefined,
+    attachmentUrls:  input.attachmentUrls ?? [],
+    isScheduled:     input.isScheduled ?? false,
+    ...(input.scheduledAt && { scheduledAt: new Date(input.scheduledAt) as unknown as import('@workfix/types').Timestamp }),
     createdAt:       serverTimestamp() as unknown as import('@workfix/types').Timestamp,
     updatedAt:       serverTimestamp() as unknown as import('@workfix/types').Timestamp }
 
@@ -108,12 +106,12 @@ export const submitQuote = callable(async (data, context) => {
     orderId:                  input.orderId,
     providerId:               uid,
     providerName:             providerData['displayName'] as string,
-    providerAvatarUrl:        providerData['avatarUrl'] as string | undefined,
+    ...(providerData['avatarUrl'] !== undefined && { providerAvatarUrl: providerData['avatarUrl'] as string }),
     providerRating:           profile['avgRating'] as number,
     price:                    input.price,
     currency:                 'SAR',
     estimatedDurationMinutes: input.estimatedDurationMinutes,
-    note:                     input.note,
+    ...(input.note !== undefined && { note: input.note }),
     status:                   'pending',
     expiresAt:                expiresAt as unknown as import('@workfix/types').Timestamp,
     createdAt:                serverTimestamp() as unknown as import('@workfix/types').Timestamp }

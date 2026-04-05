@@ -26,7 +26,7 @@ export const searchProviders = callable(async (data, context) => {
   const input = validate(searchProvidersSchema, data)
 
   const center = { latitude: input.lat, longitude: input.lng }
-  const ranges  = getSearchRanges(center, input.radiusKm)
+  const ranges  = getSearchRanges(center, input.radiusKm ?? 10)
 
   // Run parallel queries for all geohash ranges
   const querySnapshots = await Promise.all(
@@ -52,7 +52,7 @@ export const searchProviders = callable(async (data, context) => {
       if (seen.has(doc.id)) continue
       const profile = doc.data() as ProviderProfile
       const km      = haversineKm(center, profile.location)
-      if (km > input.radiusKm) continue
+      if (km > (input.radiusKm ?? 10)) continue
       if (input.minRating && profile.avgRating < input.minRating) continue
       seen.set(doc.id, { ...profile, id: doc.id, distanceKm: km })
     }
@@ -76,14 +76,16 @@ export const searchProviders = callable(async (data, context) => {
   })
 
   // Pagination
-  const start = input.page * input.limit
-  const page  = results.slice(start, start + input.limit)
+  const pageNum = input.page ?? 0
+  const limitNum = input.limit ?? PAGE_SIZE
+  const start = pageNum * limitNum
+  const page  = results.slice(start, start + limitNum)
 
   return {
     ok:      true,
     providers: page,
     total:   results.length,
-    hasMore: start + input.limit < results.length,
+    hasMore: start + limitNum < results.length,
   }
 })
 

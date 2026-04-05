@@ -49,8 +49,9 @@ export function requireAuth(
   return {
     uid: context.auth.uid,
     role,
-    email: claims.email,
-    phone: claims.phone_number }
+    ...(claims.email !== undefined && { email: claims.email }),
+    ...(claims.phone_number !== undefined && { phone: claims.phone_number }),
+  }
 }
 
 // ── Zod validation wrapper ────────────────────────────────────────────────────

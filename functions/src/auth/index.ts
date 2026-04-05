@@ -13,7 +13,7 @@ import { encodeGeohash } from '@workfix/utils'
 const completeProfileSchema = z.object({
   displayName: z.string().min(2).max(60),
   phone: z.string().optional(),
-  preferredLang: z.enum(['ar', 'en']).default('ar'),
+  preferredLang: z.enum(['ar', 'en', 'no', 'sv']).default('ar'),
 })
 
 export const completeProfile = callable(async (data, context) => {
@@ -27,11 +27,11 @@ export const completeProfile = callable(async (data, context) => {
     // First-time profile creation
     const user: Omit<User, 'id'> = {
       displayName: input.displayName,
-      phone: input.phone,
+      ...(input.phone !== undefined && { phone: input.phone }),
       role: 'customer',       // default role; changed by setProviderType
       isVerified: false,
       isActive: true,
-      preferredLang: input.preferredLang,
+      preferredLang: input.preferredLang ?? 'ar',
       createdAt: serverTimestamp() as unknown as import('@workfix/types').Timestamp,
       updatedAt: serverTimestamp() as unknown as import('@workfix/types').Timestamp,
     }
@@ -40,7 +40,7 @@ export const completeProfile = callable(async (data, context) => {
     await userRef.update({
       displayName: input.displayName,
       ...(input.phone && { phone: input.phone }),
-      preferredLang: input.preferredLang,
+      preferredLang: input.preferredLang ?? 'ar',
       updatedAt: serverTimestamp(),
     })
   }
@@ -87,7 +87,7 @@ export const setProviderType = callable(async (data, context) => {
   // Create provider profile
   const profile: Omit<ProviderProfile, 'id'> = {
     type: input.type,
-    businessName: input.businessName,
+    ...(input.businessName !== undefined && { businessName: input.businessName }),
     location,
     geohash,
     city: input.city,

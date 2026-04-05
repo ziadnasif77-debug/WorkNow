@@ -19,7 +19,6 @@ const db  = getFirestore(app)
 async function createTestOrder(overrides: Record<string, unknown> = {}) {
   const ref = db.collection('orders').doc()
   const order = {
-    id:            ref.id,
     customerId:    'customer_001',
     customerName:  'Test Customer',
     serviceId:     'service_001',
@@ -44,7 +43,6 @@ async function createTestOrder(overrides: Record<string, unknown> = {}) {
 async function createTestQuote(orderId: string, overrides: Record<string, unknown> = {}) {
   const ref = db.collection('orders').doc(orderId).collection('quotes').doc()
   const quote = {
-    id:                      ref.id,
     orderId,
     providerId:              'provider_001',
     providerName:            'Test Provider',
@@ -102,7 +100,7 @@ describe('Orders — state machine', () => {
     const order = await createTestOrder({ status: 'closed' })
 
     // Attempt invalid transition — Security Rules should block, but we test the logic
-    const { isValidTransition } = await import('../../packages/utils/src/index')
+    const { isValidTransition } = await import('@workfix/utils')
     expect(isValidTransition('closed', 'pending')).toBe(false)
     expect(isValidTransition('closed', 'in_progress')).toBe(false)
     expect(isValidTransition('closed', 'disputed')).toBe(false)

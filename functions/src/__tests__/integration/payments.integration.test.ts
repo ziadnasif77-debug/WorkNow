@@ -198,7 +198,7 @@ describe('Fraud detection rules', () => {
     const country = 'SA'
 
     // Vipps only valid for Norway
-    const isValid = !(scandinavianOnly.includes(method) && country !== 'NO' && method === 'vipps')
+    const isValid = !(scandinavianOnly.includes(method) && (country as string) !== 'NO' && method === 'vipps')
     expect(isValid).toBe(false)
   })
 

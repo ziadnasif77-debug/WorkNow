@@ -125,7 +125,7 @@ export const banUser = callable(async (data, context) => {
     ban:    z.boolean().default(true),
   }), data)
 
-  await auth.updateUser(input.userId, { disabled: input.ban })
+  await auth.updateUser(input.userId, { disabled: input.ban ?? true })
 
   await db.collection('users').doc(input.userId).update({
     isActive:  !input.ban,

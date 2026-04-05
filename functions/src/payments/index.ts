@@ -137,7 +137,7 @@ export const initiatePayment = callable(async (data, context) => {
     ok:           true,
     paymentId:    paymentRef.id,
     tapChargeId:  String(tapCharge['id']),
-    redirectUrl:  tapCharge['transaction']?.['url'] as string | undefined,
+    redirectUrl:  (tapCharge['transaction'] as Record<string, unknown>)?.['url'] as string | undefined,
   }
 })
 
