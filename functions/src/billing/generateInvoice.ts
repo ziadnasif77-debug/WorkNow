@@ -151,91 +151,109 @@ export const generateInvoice = callable(async (data, context) => {
     workfixVersion:    '1.0.0',
   }
 
-  // ── Generate PDF ────────────────────────────────────────────────────────────
+  // ── Generate PDF + upload + persist (atomic: clean up storage on any failure) ─
   logger.info('Generating invoice PDF', { orderId, invoiceNumber })
-  const pdfBytes = await buildInvoicePdf(invoiceData)
 
-  // ── Upload to Cloud Storage ─────────────────────────────────────────────────
-  const bucket    = storage.bucket()
-  const filePath  = `invoices/${countryCode}/${new Date().getFullYear()}/${invoiceNumber}.pdf`
-  const fileRef   = bucket.file(filePath)
+  let pdfBytes: Uint8Array
+  const bucket   = storage.bucket()
+  const filePath = `invoices/${countryCode}/${new Date().getFullYear()}/${invoiceNumber}.pdf`
+  const fileRef  = bucket.file(filePath)
 
-  await fileRef.save(Buffer.from(pdfBytes), {
-    contentType:  'application/pdf',
-    metadata: {
-      contentDisposition: `inline; filename="${invoiceNumber}.pdf"`,
-      cacheControl: 'private, max-age=86400',
+  try {
+    pdfBytes = await buildInvoicePdf(invoiceData)
+  } catch (pdfErr) {
+    logger.error('PDF generation failed', { orderId, invoiceNumber, pdfErr })
+    throw new (await import('firebase-functions')).https.HttpsError(
+      'internal', 'Failed to generate invoice PDF'
+    )
+  }
+
+  try {
+    // ── Upload to Cloud Storage ───────────────────────────────────────────────
+    await fileRef.save(Buffer.from(pdfBytes), {
+      contentType:  'application/pdf',
       metadata: {
-        invoiceNumber,
-        orderId,
-        customerId:  order.customerId,
-        providerId:  order.providerId ?? '',
-        generatedAt: new Date().toISOString(),
+        contentDisposition: `inline; filename="${invoiceNumber}.pdf"`,
+        cacheControl: 'private, max-age=86400',
+        metadata: {
+          invoiceNumber,
+          orderId,
+          customerId:  order.customerId,
+          providerId:  order.providerId ?? '',
+          generatedAt: new Date().toISOString(),
+        },
       },
-    },
-  })
+    })
 
-  // ── Generate Signed URL ─────────────────────────────────────────────────────
-  const expiresAt = new Date(Date.now() + INVOICE_URL_EXPIRY_DAYS * 86_400_000)
-  const [signedUrl] = await fileRef.getSignedUrl({
-    action:  'read',
-    expires: expiresAt,
-  })
+    // ── Generate Signed URL ───────────────────────────────────────────────────
+    const expiresAt = new Date(Date.now() + INVOICE_URL_EXPIRY_DAYS * 86_400_000)
+    const [signedUrl] = await fileRef.getSignedUrl({
+      action:  'read',
+      expires: expiresAt,
+    })
 
-  // ── Store invoice record ────────────────────────────────────────────────────
-  const invoiceRef = db.collection('invoices').doc()
-  await invoiceRef.set({
-    id:            invoiceRef.id,
-    invoiceNumber,
-    orderId,
-    customerId:    order.customerId,
-    providerId:    order.providerId ?? '',
-    invoiceUrl:    signedUrl,
-    filePath,
-    fileSize:      pdfBytes.byteLength,
-    expiresAt:     expiresAt.toISOString(),
-    currency:      order.currency,
-    totalAmount,
-    vatAmount,
-    vatRate,
-    commissionAmount,
-    countryCode,
-    status:        'generated',
-    createdAt:     admin.firestore.FieldValue.serverTimestamp(),
-  })
+    // ── Store invoice record ──────────────────────────────────────────────────
+    const invoiceRef = db.collection('invoices').doc()
+    await invoiceRef.set({
+      id:            invoiceRef.id,
+      invoiceNumber,
+      orderId,
+      customerId:    order.customerId,
+      providerId:    order.providerId ?? '',
+      invoiceUrl:    signedUrl,
+      filePath,
+      fileSize:      pdfBytes.byteLength,
+      expiresAt:     expiresAt.toISOString(),
+      currency:      order.currency,
+      totalAmount,
+      vatAmount,
+      vatRate,
+      commissionAmount,
+      countryCode,
+      status:        'generated',
+      createdAt:     admin.firestore.FieldValue.serverTimestamp(),
+    })
 
-  // ── Attach URL to payment record ────────────────────────────────────────────
-  if (!paymentSnap.empty) {
-    await paymentSnap.docs[0]!.ref.update({
+    // ── Attach URL to payment record ──────────────────────────────────────────
+    if (!paymentSnap.empty) {
+      await paymentSnap.docs[0]!.ref.update({
+        invoiceUrl:    signedUrl,
+        invoiceNumber,
+        updatedAt:     admin.firestore.FieldValue.serverTimestamp(),
+      })
+    }
+
+    // ── Also attach to order ──────────────────────────────────────────────────
+    await db.collection('orders').doc(orderId).update({
       invoiceUrl:    signedUrl,
       invoiceNumber,
       updatedAt:     admin.firestore.FieldValue.serverTimestamp(),
     })
-  }
 
-  // ── Also attach to order ───────────────────────────────────────────────────
-  await db.collection('orders').doc(orderId).update({
-    invoiceUrl:    signedUrl,
-    invoiceNumber,
-    updatedAt:     admin.firestore.FieldValue.serverTimestamp(),
-  })
+    await auditLog('invoice_generated', uid, {
+      orderId, invoiceNumber, fileSize: pdfBytes.byteLength,
+      elapsed: Date.now() - t0,
+    })
 
-  await auditLog('invoice_generated', uid, {
-    orderId, invoiceNumber, fileSize: pdfBytes.byteLength,
-    elapsed: Date.now() - t0,
-  })
+    logger.info('Invoice generated', {
+      orderId, invoiceNumber,
+      fileSize: pdfBytes.byteLength,
+      elapsed: Date.now() - t0,
+    })
 
-  logger.info('Invoice generated', {
-    orderId, invoiceNumber,
-    fileSize: pdfBytes.byteLength,
-    elapsed: Date.now() - t0,
-  })
-
-  return {
-    ok:           true,
-    invoiceNumber,
-    invoiceUrl:   signedUrl,
-    expiresAt:    expiresAt.toISOString(),
-    cached:       false,
+    return {
+      ok:           true,
+      invoiceNumber,
+      invoiceUrl:   signedUrl,
+      expiresAt:    expiresAt.toISOString(),
+      cached:       false,
+    }
+  } catch (ioErr) {
+    // Clean up orphaned storage file if upload succeeded but subsequent writes failed
+    logger.error('Invoice I/O error — attempting storage cleanup', { orderId, invoiceNumber, ioErr })
+    try { await fileRef.delete() } catch { /* best-effort cleanup */ }
+    throw new (await import('firebase-functions')).https.HttpsError(
+      'internal', 'Invoice generation failed during storage or database write'
+    )
   }
 })
