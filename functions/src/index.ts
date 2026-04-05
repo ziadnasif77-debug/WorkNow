@@ -50,6 +50,7 @@ export { createSubscription, tapSubscriptionWebhook } from './subscriptions'
 export { submitReview, openDispute } from './reviews'
 export {
   onOrderStatusChanged,
+  onOrderCreated,
   onQuoteCreated,
   onPaymentCaptured,
   onMessageCreated,

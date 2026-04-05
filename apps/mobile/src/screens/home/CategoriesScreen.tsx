@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useMarketplaceStore } from '../../stores/marketplaceStore'
+import { EmptyState } from '../../components/marketplace'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
 
 export default function CategoriesScreen() {
@@ -41,6 +42,13 @@ export default function CategoriesScreen() {
           numColumns={2}
           contentContainerStyle={styles.grid}
           columnWrapperStyle={styles.row}
+          ListEmptyComponent={
+            <EmptyState
+              emoji="📂"
+              title={t('home.categories')}
+              subtitle={t('home.noProvidersNearby')}
+            />
+          }
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.cat_card}

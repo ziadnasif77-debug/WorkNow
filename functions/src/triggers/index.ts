@@ -153,6 +153,50 @@ export const onQuoteCreated = functions
     })
   })
 
+// ── onOrderCreated ────────────────────────────────────────────────────────────
+// Notify providers who offer services in the same category when a new order is posted.
+
+export const onOrderCreated = functions
+  .region('me-central1')
+  .firestore.document('orders/{orderId}')
+  .onCreate(async (snap, context) => {
+    const order   = snap.data() as Order
+    const orderId = context.params['orderId'] as string
+
+    // Only notify for orders that start in pending status
+    if (order.status !== 'pending') return
+
+    functions.logger.info('New order created — notifying nearby providers', { orderId })
+
+    // Query providers who have the matching category in their service list
+    const providersSnap = await db.collection('providerProfiles')
+      .where('categoryIds', 'array-contains', order.categoryId)
+      .where('isActive', '==', true)
+      .where('kycStatus', '==', 'approved')
+      .limit(50)
+      .get()
+
+    if (providersSnap.empty) {
+      functions.logger.info('No matching providers found for new order', { orderId, categoryId: order.categoryId })
+      return
+    }
+
+    await Promise.allSettled(
+      providersSnap.docs.map(doc =>
+        sendPushAndStore({
+          userId: doc.id,
+          title:  'طلب جديد بالقرب منك',
+          body:   `طلب خدمة جديد في فئتك. اضغط لعرض التفاصيل وإرسال عرض سعر.`,
+        }),
+      ),
+    )
+
+    functions.logger.info('Provider notifications sent for new order', {
+      orderId,
+      providerCount: providersSnap.size,
+    })
+  })
+
 // ── onPaymentCaptured ─────────────────────────────────────────────────────────
 
 export const onPaymentCaptured = functions

@@ -212,8 +212,15 @@ export const tapWebhook = functions
               status: 'captured', capturedAt: serverTimestamp(), updatedAt: serverTimestamp(),
             })
           }
-          await db.collection('orders').doc(orderId).update({
-            paymentStatus: 'captured', updatedAt: serverTimestamp(),
+          // Advance order status from 'confirmed' → 'in_progress' once payment is captured
+          const orderRef = db.collection('orders').doc(orderId)
+          const orderSnap = await orderRef.get()
+          const orderData = orderSnap.data()
+          await orderRef.update({
+            paymentStatus: 'captured',
+            // Only advance status if still 'confirmed' (guard against double-fire)
+            ...(orderData?.['status'] === 'confirmed' && { status: 'in_progress' }),
+            updatedAt: serverTimestamp(),
           })
           break
         }
