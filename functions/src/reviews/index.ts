@@ -9,6 +9,7 @@ import {
 } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
 import type { Order } from '@workfix/types'
+import * as admin from 'firebase-admin'
 
 // ── submitReview ──────────────────────────────────────────────────────────────
 
@@ -139,11 +140,45 @@ export const openDispute = callable(async (data, context) => {
     updatedAt:     serverTimestamp(),
   })
 
-  // Update order status
+  // Update order status + freeze escrow to prevent auto-release
   await db.collection('orders').doc(input.orderId).update({
-    status:    'disputed',
-    updatedAt: serverTimestamp(),
+    status:        'disputed',
+    escrowFrozen:  true,      // blocks scheduled release_escrow task
+    updatedAt:     serverTimestamp(),
   })
+
+  // Create admin review task
+  await db.collection('adminTasks').add({
+    type:       'dispute_review',
+    disputeId:  disputeRef.id,
+    orderId:    input.orderId,
+    initiatorId: uid,
+    respondentId,
+    priority:   'high',
+    status:     'pending',
+    createdAt:  serverTimestamp(),
+    updatedAt:  serverTimestamp(),
+    expiresAt:  new Date(Date.now() + 48 * 3600_000), // 48h SLA
+  })
+
+  // Notify all admins
+  const adminsSnap = await db.collection('users')
+    .where('role', 'in', ['admin', 'superadmin'])
+    .get()
+
+  await Promise.allSettled(
+    adminsSnap.docs.map(adminDoc =>
+      db.collection('users').doc(adminDoc.id).collection('notifications').add({
+        userId:    adminDoc.id,
+        title:     { ar: 'نزاع جديد يحتاج مراجعة', en: 'New dispute requires review' },
+        body:      { ar: `نزاع على الطلب ${input.orderId.slice(-6)} — يُرجى المراجعة خلال 48 ساعة`, en: `Dispute on order ${input.orderId.slice(-6)} — review within 48h` },
+        type:      'dispute_review',
+        refId:     disputeRef.id,
+        isRead:    false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      }),
+    ),
+  )
 
   return { ok: true, disputeId: disputeRef.id }
 })

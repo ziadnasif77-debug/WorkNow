@@ -37,9 +37,9 @@ jobs:
       - name: Deploy Functions (dev)
         run: firebase deploy --only functions --project dev
         env:
-          FIREBASE_TOKEN:         ${{ secrets.FIREBASE_TOKEN }}
-          MOYASAR_SECRET_KEY:     ${{ secrets.DEV_MOYASAR_SECRET_KEY }}
-          MOYASAR_WEBHOOK_SECRET: ${{ secrets.DEV_MOYASAR_WEBHOOK_SECRET }}
+          FIREBASE_TOKEN:      ${{ secrets.FIREBASE_TOKEN }}
+          TAP_SECRET_KEY:      ${{ secrets.DEV_TAP_SECRET_KEY }}
+          TAP_WEBHOOK_SECRET:  ${{ secrets.DEV_TAP_WEBHOOK_SECRET }}
 
       - name: Deploy Firestore Rules + Indexes
         run: firebase deploy --only firestore --project dev

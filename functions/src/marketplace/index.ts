@@ -4,6 +4,7 @@
 
 import { z } from 'zod'
 import { callable, requireAuth, validate, db, serverTimestamp, appError } from '../_shared/helpers'
+import { rateLimit } from '../_shared/ratelimit'
 import { getSearchRanges, haversineKm } from '../_shared/search'
 import { encodeGeohash } from '@workfix/utils'
 import { GEO_PRECISION, PAGE_SIZE } from '@workfix/config'
@@ -22,7 +23,8 @@ const searchProvidersSchema = z.object({
 })
 
 export const searchProviders = callable(async (data, context) => {
-  requireAuth(context)
+  const { uid } = requireAuth(context)
+  await rateLimit(uid, 'api')
   const input = validate(searchProvidersSchema, data)
 
   const center = { latitude: input.lat, longitude: input.lng }

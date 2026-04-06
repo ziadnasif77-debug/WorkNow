@@ -11,7 +11,9 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import * as ImagePicker from 'expo-image-picker'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { httpsCallable } from 'firebase/functions'
 import { useAuthStore } from '../../stores/authStore'
+import { firebaseFunctions } from '../../lib/firebase'
 import { Button, Input, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
 import { firebaseAuth } from '../../lib/firebase'
@@ -66,6 +68,12 @@ export default function ProviderTypeScreen() {
         const url = await getDownloadURL(fileRef)
         urls.push(url)
       }
+
+      // Submit KYC documents to backend (stores URLs + creates admin review task)
+      const uploadKyc = httpsCallable<{ documentUrls: string[] }, { ok: boolean }>(
+        firebaseFunctions, 'uploadKyc',
+      )
+      await uploadKyc({ documentUrls: urls })
 
       await setProviderType(type, businessName || undefined)
       setStep('pending')

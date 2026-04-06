@@ -9,6 +9,7 @@ import {
   onSnapshot, doc, type Unsubscribe,
 } from 'firebase/firestore'
 import { firebaseFunctions, firestore } from '../lib/firebase'
+import { mapFirebaseError } from '../lib/firebaseErrorMap'
 import type {
   Order, Quote,
   CreateOrderPayload, SubmitQuotePayload,
@@ -155,8 +156,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       const res = await fn(payload)
       return res.data.orderId
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل إنشاء الطلب'
-      set({ actionError: msg })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -172,8 +172,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       )
       await fn(payload)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل إرسال العرض'
-      set({ actionError: msg })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -191,8 +190,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       const res = await fn(payload)
       return res.data.paymentRequired ?? null
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل قبول العرض'
-      set({ actionError: msg })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -206,8 +204,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       const fn = httpsCallable(firebaseFunctions, 'confirmCompletion')
       await fn({ orderId })
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل تأكيد الإنجاز'
-      set({ actionError: msg })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -223,8 +220,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       )
       await fn(payload)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل الإلغاء'
-      set({ actionError: msg })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -240,8 +236,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       )
       await fn(payload)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل إرسال التقييم'
-      set({ actionError: msg })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -257,8 +252,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       )
       await fn(payload)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل إرسال النزاع'
-      set({ actionError: msg })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })

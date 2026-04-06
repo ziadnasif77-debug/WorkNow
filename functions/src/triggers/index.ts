@@ -147,9 +147,10 @@ export const onQuoteCreated = functions
     const order = orderDoc.data() as Order
 
     await sendPushAndStore({
-      userId: order.customerId,
-      title:  'عرض سعر جديد',
-      body:   'لديك عرض سعر جديد على طلبك. اضغط للاطلاع.',
+      userId:    order.customerId,
+      title:     'عرض سعر جديد',
+      body:      'لديك عرض سعر جديد على طلبك. اضغط للاطلاع.',
+      notifType: 'orderUpdates',
     })
   })
 
@@ -184,9 +185,10 @@ export const onOrderCreated = functions
     await Promise.allSettled(
       providersSnap.docs.map(doc =>
         sendPushAndStore({
-          userId: doc.id,
-          title:  'طلب جديد بالقرب منك',
-          body:   `طلب خدمة جديد في فئتك. اضغط لعرض التفاصيل وإرسال عرض سعر.`,
+          userId:    doc.id,
+          title:     'طلب جديد بالقرب منك',
+          body:      `طلب خدمة جديد في فئتك. اضغط لعرض التفاصيل وإرسال عرض سعر.`,
+          notifType: 'newOrder' as const,
         }),
       ),
     )
@@ -212,9 +214,10 @@ export const onPaymentCaptured = functions
     const providerId = after['providerId'] as string
 
     await sendPushAndStore({
-      userId: providerId,
-      title:  'تم استلام الدفع',
-      body:   'أتمّ العميل الدفع وهو محتجز بأمان حتى إتمام الخدمة.',
+      userId:    providerId,
+      title:     'تم استلام الدفع',
+      body:      'أتمّ العميل الدفع وهو محتجز بأمان حتى إتمام الخدمة.',
+      notifType: 'orderUpdates',
     })
 
     // Schedule auto-release via task queue (48h delay)
@@ -258,9 +261,10 @@ export const onMessageCreated = functions
 
     // Push notification for new message
     await sendPushAndStore({
-      userId: recipientId,
-      title:  msg.senderName,
-      body:   msg.text ?? 'أرسل لك مرفقاً',
+      userId:    recipientId,
+      title:     msg.senderName,
+      body:      msg.text ?? 'أرسل لك مرفقاً',
+      notifType: 'newMessage',
     })
   })
 
@@ -268,24 +272,34 @@ export const onMessageCreated = functions
 // INTERNAL HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
+type NotifType = 'newOrder' | 'newMessage' | 'orderUpdates' | 'promotions'
+
 async function sendPushAndStore({
   userId,
   title,
   body,
+  notifType = 'orderUpdates',
 }: {
   userId: string
   title: string
   body: string
+  notifType?: NotifType
 }): Promise<void> {
-  // Get FCM tokens
+  // Get user doc (FCM tokens + notification preferences)
   const userDoc = await db.collection('users').doc(userId).get()
-  const tokens = (userDoc.data()?.['fcmTokens'] as string[] | undefined) ?? []
+  const userData = userDoc.data()
+  const tokens = (userData?.['fcmTokens'] as string[] | undefined) ?? []
 
-  // Store in-app notification
+  // Respect notification preferences — default to sending if prefs not set
+  const prefs = userData?.['notificationPrefs'] as Record<string, boolean> | undefined
+  if (prefs && prefs[notifType] === false) return
+
+  // Store in-app notification (always, even when FCM is opted out)
   await db.collection('users').doc(userId).collection('notifications').add({
     userId,
     title:     { ar: title, en: title },
     body:      { ar: body, en: body },
+    type:      notifType,
     isRead:    false,
     createdAt: serverTimestamp(),
   })

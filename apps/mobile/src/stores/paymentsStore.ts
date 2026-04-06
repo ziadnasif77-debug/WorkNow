@@ -5,6 +5,7 @@
 import { create } from 'zustand'
 import { httpsCallable } from 'firebase/functions'
 import { firebaseFunctions } from '../lib/firebase'
+import { mapFirebaseError } from '../lib/firebaseErrorMap'
 import type { PaymentMethod, Currency } from '@workfix/types'
 
 interface WalletBalance {
@@ -70,8 +71,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
       })
       return res.data.redirectUrl ?? null
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل بدء عملية الدفع'
-      set({ initError: msg })
+      set({ initError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ isInitiating: false })
@@ -110,8 +110,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
       const walletRes = await walletFn({})
       set({ wallet: walletRes.data })
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل طلب السحب'
-      set({ payoutError: msg })
+      set({ payoutError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ payoutLoading: false })
@@ -131,8 +130,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
       const res = await fn({ tier, billing })
       return { redirectUrl: res.data.redirectUrl }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل إنشاء الاشتراك'
-      set({ initError: msg })
+      set({ initError: mapFirebaseError(err) })
       throw err
     }
   },

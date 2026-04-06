@@ -101,6 +101,12 @@ export interface User {
   isActive: boolean
   fcmTokens?: string[]      // multiple devices
   preferredLang: 'ar' | 'en' | 'no' | 'sv'
+  notificationPrefs?: {
+    newOrder:     boolean   // provider: new order in my category
+    newMessage:   boolean   // new chat message
+    orderUpdates: boolean   // order status changes
+    promotions:   boolean   // marketing / promos
+  }
   createdAt: Timestamp
   updatedAt: Timestamp
 }

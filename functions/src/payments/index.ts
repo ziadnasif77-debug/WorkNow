@@ -254,6 +254,7 @@ const requestPayoutSchema = z.object({
 
 export const requestPayout = callable(async (data, context) => {
   const { uid } = requireAuth(context, ['provider'])
+  await rateLimit(uid, 'payment')
   const input = validate(requestPayoutSchema, data)
 
   const completedPayments = await db.collection('payments')

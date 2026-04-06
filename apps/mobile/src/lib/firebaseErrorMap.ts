@@ -3,19 +3,19 @@
 //
 // Usage:
 //   import { mapFirebaseError } from '../lib/firebaseErrorMap'
-//   const msg = mapFirebaseError(err, t)   // returns translated string
+//   const msg = mapFirebaseError(err)   // returns translated string
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { TFunction } from 'i18next'
+import i18n from './i18n'
+
+const t = (key: string, opts?: Record<string, unknown>) =>
+  i18n.t(key, { defaultValue: i18n.t('common.error'), ...opts }) as string
 
 /**
  * Maps a Firebase HttpsError code to an i18n key in the `errors` namespace.
  * Falls back to the error message text, then a generic fallback.
  */
-export function mapFirebaseError(
-  err: unknown,
-  t: TFunction,
-): string {
+export function mapFirebaseError(err: unknown): string {
   if (!err || typeof err !== 'object') return t('common.error')
 
   const e = err as { code?: string; message?: string }
@@ -88,3 +88,4 @@ export function mapFirebaseError(
   // ── Generic fallback ───────────────────────────────────────────────────────
   return t('common.error')
 }
+

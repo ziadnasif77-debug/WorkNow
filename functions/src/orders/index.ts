@@ -76,6 +76,7 @@ const submitQuoteSchema = z.object({
 export const submitQuote = callable(async (data, context) => {
   const { uid, role } = requireAuth(context, ['provider'])
   if (role !== 'provider') appError('AUTH_002', 'Only providers can submit quotes', 'permission-denied')
+  await rateLimit(uid, 'quote')
 
   const input = validate(submitQuoteSchema, data)
 
@@ -134,6 +135,7 @@ const acceptQuoteSchema = z.object({
 
 export const acceptQuote = callable(async (data, context) => {
   const { uid } = requireAuth(context, ['customer'])
+  await rateLimit(uid, 'api')
   const input = validate(acceptQuoteSchema, data)
 
   const orderRef = db.collection('orders').doc(input.orderId)
@@ -201,6 +203,7 @@ const confirmCompletionSchema = z.object({
 
 export const confirmCompletion = callable(async (data, context) => {
   const { uid } = requireAuth(context, ['customer'])
+  await rateLimit(uid, 'api')
   const input = validate(confirmCompletionSchema, data)
 
   const orderRef = db.collection('orders').doc(input.orderId)
@@ -233,6 +236,7 @@ const cancelOrderSchema = z.object({
 
 export const cancelOrder = callable(async (data, context) => {
   const { uid, role } = requireAuth(context)
+  await rateLimit(uid, 'api')
   const input = validate(cancelOrderSchema, data)
 
   const orderRef = db.collection('orders').doc(input.orderId)

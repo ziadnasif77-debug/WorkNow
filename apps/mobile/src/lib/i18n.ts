@@ -571,6 +571,8 @@ const EXTRA_AR = {
     kycRequired: 'يرجى رفع مستند واحد على الأقل',
     minPayout: 'الحد الأدنى للسحب 10 وحدات', nameTooShort: 'الاسم قصير جداً',
     passwordTooShort: 'كلمة المرور قصيرة جداً', uploadFailed: 'فشل رفع الملف، حاول مجدداً',
+    unauthenticated: 'يجب تسجيل الدخول أولاً', permissionDenied: 'ليس لديك صلاحية لهذا الإجراء',
+    notFound: 'العنصر غير موجود', rateLimitExceeded: 'كثير من الطلبات، حاول بعد قليل',
   },
   home: {
     backHome: 'العودة للرئيسية', categories: 'الفئات', greeting: 'أهلاً {{name}}',
@@ -730,6 +732,8 @@ const EXTRA_EN = {
     minPayout: 'Minimum payout is 10 units', nameTooShort: 'Name is too short',
     passwordTooShort: 'Password is too short',
     uploadFailed: 'File upload failed, please try again',
+    unauthenticated: 'You must be signed in', permissionDenied: 'You do not have permission for this action',
+    notFound: 'Item not found', rateLimitExceeded: 'Too many requests, please try again shortly',
   },
   home: {
     backHome: 'Back to Home', quickActions: 'Quick Actions',
@@ -880,6 +884,8 @@ const EXTRA_NO = {
     minPayout: 'Minste utbetaling er 10 enheter', nameTooShort: 'Navnet er for kort',
     passwordTooShort: 'Passordet er for kort',
     uploadFailed: 'Filopplasting mislyktes, prøv igjen',
+    unauthenticated: 'Du må logge inn', permissionDenied: 'Du har ikke tillatelse til denne handlingen',
+    notFound: 'Elementet ble ikke funnet', rateLimitExceeded: 'For mange forespørsler, prøv igjen om litt',
   },
   home: {
     backHome: 'Tilbake til forsiden', quickActions: 'Hurtighandlinger',
@@ -1032,6 +1038,8 @@ const EXTRA_SV = {
     minPayout: 'Minsta utbetalning är 10 enheter', nameTooShort: 'Namnet är för kort',
     passwordTooShort: 'Lösenordet är för kort',
     uploadFailed: 'Filuppladdning misslyckades, försök igen',
+    unauthenticated: 'Du måste vara inloggad', permissionDenied: 'Du har inte behörighet för den här åtgärden',
+    notFound: 'Objektet hittades inte', rateLimitExceeded: 'För många förfrågningar, försök igen om en stund',
   },
   home: {
     backHome: 'Tillbaka till startsidan', quickActions: 'Snabbåtgärder',
