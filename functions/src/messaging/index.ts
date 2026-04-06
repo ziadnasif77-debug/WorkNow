@@ -13,6 +13,7 @@ const getOrCreateConversationSchema = z.object({
 
 export const getOrCreateConversation = callable(async (data, context) => {
   const { uid } = requireAuth(context)
+  await rateLimit(uid, 'api')
   const input = validate(getOrCreateConversationSchema, data)
 
   // Check if conversation exists for this order
@@ -110,6 +111,7 @@ const markReadSchema = z.object({
 
 export const markRead = callable(async (data, context) => {
   const { uid } = requireAuth(context)
+  await rateLimit(uid, 'api')
   const input = validate(markReadSchema, data)
 
   const convRef = db.collection('conversations').doc(input.conversationId)

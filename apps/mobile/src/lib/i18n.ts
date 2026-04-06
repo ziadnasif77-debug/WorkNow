@@ -696,6 +696,9 @@ const EXTRA_AR = {
     minRating: 'أقل تقييم', radius: 'نطاق البحث', applyFilters: 'تطبيق',
     resetFilters: 'إعادة تعيين',
   },
+  a11y: {
+    loading: 'جارٍ التحميل',
+  },
 }
 
 
@@ -848,6 +851,9 @@ const EXTRA_EN = {
     sort_distance: 'Nearest', sort_rating: 'Highest rated', sort_price: 'Price',
     minRating: 'Min rating', radius: 'Search radius', applyFilters: 'Apply',
     resetFilters: 'Reset',
+  },
+  a11y: {
+    loading: 'Loading',
   },
 }
 
@@ -1003,6 +1009,9 @@ const EXTRA_NO = {
     minRating: 'Minste vurdering', radius: 'Søkeradius', applyFilters: 'Bruk',
     resetFilters: 'Tilbakestill',
   },
+  a11y: {
+    loading: 'Laster',
+  },
 }
 
 const EXTRA_SV = {
@@ -1155,6 +1164,9 @@ const EXTRA_SV = {
     sort_distance: 'Närmast', sort_rating: 'Högst betyg', sort_price: 'Pris',
     minRating: 'Minsta betyg', radius: 'Sökradie', applyFilters: 'Tillämpa',
     resetFilters: 'Återställ',
+  },
+  a11y: {
+    loading: 'Laddar',
   },
 }
 

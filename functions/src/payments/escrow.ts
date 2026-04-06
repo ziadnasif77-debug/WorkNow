@@ -26,6 +26,10 @@ export async function releaseEscrowById(orderId: string): Promise<void> {
 
   const order = orderDoc.data() as Order
   if (!order.escrowPaymentId || order.paymentMethod === 'cash') return
+  if ((order as unknown as Record<string, unknown>)['escrowFrozen'] === true) {
+    logger.info('Escrow release blocked — order is frozen (active dispute)', { orderId })
+    return
+  }
   if (order.paymentStatus === 'captured') {
     logger.info('Escrow already captured', { orderId })
     return

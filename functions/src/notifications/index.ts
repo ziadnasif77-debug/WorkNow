@@ -4,6 +4,7 @@
 
 import { z } from 'zod'
 import { callable, requireAuth, validate, db, serverTimestamp } from '../_shared/helpers'
+import { rateLimit } from '../_shared/ratelimit'
 import * as admin from 'firebase-admin'
 
 const registerFcmTokenSchema = z.object({
@@ -13,6 +14,7 @@ const registerFcmTokenSchema = z.object({
 
 export const registerFcmToken = callable(async (data, context) => {
   const { uid } = requireAuth(context)
+  await rateLimit(uid, 'api')
   const input = validate(registerFcmTokenSchema, data)
 
   await db.collection('users').doc(uid).update({
@@ -32,6 +34,7 @@ const updateNotificationPreferencesSchema = z.object({
 
 export const updateNotificationPreferences = callable(async (data, context) => {
   const { uid } = requireAuth(context)
+  await rateLimit(uid, 'api')
   const input = validate(updateNotificationPreferencesSchema, data)
 
   await db.collection('users').doc(uid).update({

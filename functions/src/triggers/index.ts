@@ -30,7 +30,7 @@ export const onOrderStatusChanged = functions
     })
 
     // ── Send FCM to the other party ──────────────────────────────────────────
-    const notifications: Array<{ userId: string; title: string; body: string }> = []
+    const notifications: Array<{ userId: string; title: string; body: string; refId: string; refType: 'order' | 'message' | 'dispute' | 'payment' }> = []
 
     switch (after.status) {
       case 'quoted':
@@ -38,6 +38,7 @@ export const onOrderStatusChanged = functions
           userId: after.customerId,
           title:  'عرض سعر جديد',
           body:   'تلقّيت عرض سعر على طلبك. اضغط للاطلاع.',
+          refId:  orderId, refType: 'order',
         })
         break
 
@@ -47,6 +48,7 @@ export const onOrderStatusChanged = functions
             userId: after.providerId,
             title:  'تم قبول عرضك!',
             body:   `وافق العميل على عرضك وأتمّ الدفع. الطلب رقم ${orderId.slice(-6)}`,
+            refId:  orderId, refType: 'order',
           })
         }
         break
@@ -56,6 +58,7 @@ export const onOrderStatusChanged = functions
           userId: after.customerId,
           title:  'المزوّد في الطريق',
           body:   'أكّد مزوّد الخدمة وصوله وبدأ العمل.',
+          refId:  orderId, refType: 'order',
         })
         break
 
@@ -64,6 +67,7 @@ export const onOrderStatusChanged = functions
           userId: after.customerId,
           title:  'تم إنجاز الخدمة',
           body:   'أكّد المزوّد إتمام الخدمة. يرجى التحقق والموافقة.',
+          refId:  orderId, refType: 'order',
         })
         break
 
@@ -74,6 +78,7 @@ export const onOrderStatusChanged = functions
             userId: after.providerId,
             title:  'تم تحرير المبلغ',
             body:   `تم تحويل ${after.netAmount?.toFixed(2) ?? ''} إلى محفظتك.`,
+            refId:  orderId, refType: 'order',
           })
         }
         await releaseEscrowById(after.id).catch(err =>
@@ -103,12 +108,14 @@ export const onOrderStatusChanged = functions
           userId: after.customerId,
           title:  'تم إلغاء الطلب',
           body:   after.cancelReason ?? 'تم إلغاء طلبك.',
+          refId:  orderId, refType: 'order',
         })
         if (after.providerId) {
           notifications.push({
             userId: after.providerId,
             title:  'تم إلغاء الطلب',
             body:   'تم إلغاء الطلب من قِبَل أحد الأطراف.',
+            refId:  orderId, refType: 'order',
           })
         }
         break
@@ -118,12 +125,14 @@ export const onOrderStatusChanged = functions
           userId: after.customerId,
           title:  'نزاع مفتوح',
           body:   'تم فتح نزاع على طلبك. سيتواصل معك فريق الدعم.',
+          refId:  orderId, refType: 'dispute',
         })
         if (after.providerId) {
           notifications.push({
             userId: after.providerId,
             title:  'نزاع مفتوح',
             body:   'تم فتح نزاع على الطلب. سيتواصل معك فريق الدعم.',
+            refId:  orderId, refType: 'dispute',
           })
         }
         break
@@ -151,6 +160,8 @@ export const onQuoteCreated = functions
       title:     'عرض سعر جديد',
       body:      'لديك عرض سعر جديد على طلبك. اضغط للاطلاع.',
       notifType: 'orderUpdates',
+      refId:     orderId,
+      refType:   'order',
     })
   })
 
@@ -166,6 +177,12 @@ export const onOrderCreated = functions
 
     // Only notify for orders that start in pending status
     if (order.status !== 'pending') return
+
+    // Guard: categoryId must be present for the query to work
+    if (!order.categoryId) {
+      functions.logger.warn('onOrderCreated: order has no categoryId, skipping provider notifications', { orderId })
+      return
+    }
 
     functions.logger.info('New order created — notifying nearby providers', { orderId })
 
@@ -189,6 +206,8 @@ export const onOrderCreated = functions
           title:     'طلب جديد بالقرب منك',
           body:      `طلب خدمة جديد في فئتك. اضغط لعرض التفاصيل وإرسال عرض سعر.`,
           notifType: 'newOrder' as const,
+          refId:     orderId,
+          refType:   'order',
         }),
       ),
     )
@@ -218,6 +237,8 @@ export const onPaymentCaptured = functions
       title:     'تم استلام الدفع',
       body:      'أتمّ العميل الدفع وهو محتجز بأمان حتى إتمام الخدمة.',
       notifType: 'orderUpdates',
+      refId:     orderId,
+      refType:   'payment',
     })
 
     // Schedule auto-release via task queue (48h delay)
@@ -265,6 +286,8 @@ export const onMessageCreated = functions
       title:     msg.senderName,
       body:      msg.text ?? 'أرسل لك مرفقاً',
       notifType: 'newMessage',
+      refId:     convId,
+      refType:   'message',
     })
   })
 
@@ -279,11 +302,15 @@ async function sendPushAndStore({
   title,
   body,
   notifType = 'orderUpdates',
+  refId,
+  refType,
 }: {
   userId: string
   title: string
   body: string
   notifType?: NotifType
+  refId?: string
+  refType?: 'order' | 'message' | 'dispute' | 'payment'
 }): Promise<void> {
   // Get user doc (FCM tokens + notification preferences)
   const userDoc = await db.collection('users').doc(userId).get()
@@ -310,6 +337,11 @@ async function sendPushAndStore({
   const result = await messaging.sendEachForMulticast({
     tokens,
     notification: { title, body },
+    data: {
+      ...(refId    && { refId }),
+      ...(refType  && { refType }),
+      type: notifType,
+    },
     android: { priority: 'high' },
     apns: { payload: { aps: { sound: 'default' } } },
   })

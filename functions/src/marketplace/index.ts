@@ -117,6 +117,7 @@ export const getProviderProfile = callable(async (data, context) => {
 
 export const updateProfile = callable(async (data, context) => {
   const { uid } = requireAuth(context, ['provider'])
+  await rateLimit(uid, 'api')
 
   const schema = z.object({
     bio:          z.string().max(500).optional(),
