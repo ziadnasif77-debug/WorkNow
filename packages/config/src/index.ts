@@ -13,6 +13,16 @@ export interface FirebaseConfig {
   measurementId?: string
 }
 
+/** Placeholder strings written by .env.example — treated as "not configured" */
+const PLACEHOLDERS = new Set([
+  'your_api_key_here',
+  'your_project_id',
+  'your_project.firebaseapp.com',
+  'your_project.appspot.com',
+  '123456789',
+  '1:123456789:web:abcdef',
+])
+
 /**
  * Returns Firebase config from environment variables.
  * Works in: Expo (process.env.EXPO_PUBLIC_*), Node (process.env.*)
@@ -31,19 +41,26 @@ export function getFirebaseConfig(): FirebaseConfig {
     ...(measurementId !== undefined && { measurementId }),
   }
 
-  if (!config.projectId) {
-    // Warn instead of throw so the app can load without crashing every route.
-    // Firebase API calls will fail with auth/network errors (expected without config).
-    // To fix: copy .env.example → .env and fill in your Firebase project values.
+  // Detect both truly empty values AND .env.example placeholder strings
+  const isMissing = !config.projectId || PLACEHOLDERS.has(config.projectId)
+
+  if (isMissing) {
     console.warn(
-      '[WorkFix] Firebase projectId is missing. ' +
-      'Make sure apps/mobile/.env is configured correctly. See .env.example\n' +
-      'The app will load but all Firebase features will be unavailable.',
+      '[WorkFix] Firebase is not configured.\n' +
+      '  → Copy apps/mobile/.env.example to apps/mobile/.env\n' +
+      '  → Fill in your real Firebase project values\n' +
+      '  → Restart Expo with: expo start --clear',
     )
     return { ...config, projectId: '__missing__' }
   }
 
   return config
+}
+
+/** True when real Firebase credentials are present in the environment. */
+export function isFirebaseConfigured(): boolean {
+  const projectId = process.env['EXPO_PUBLIC_FIREBASE_PROJECT_ID'] ?? process.env['FIREBASE_PROJECT_ID'] ?? ''
+  return Boolean(projectId) && !PLACEHOLDERS.has(projectId)
 }
 
 /** Feature flag keys (used with Firebase Remote Config) */
