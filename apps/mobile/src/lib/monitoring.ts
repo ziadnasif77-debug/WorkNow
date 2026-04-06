@@ -3,9 +3,55 @@
 // Initialize once in app/_layout.tsx before rendering
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as Sentry from '@sentry/react-native'
-import crashlytics from '@react-native-firebase/crashlytics'
 import { Platform } from 'react-native'
+
+// @sentry/react-native is native-only — stub for Expo Go / web
+type SentryStub = {
+  init: (opts: Record<string, unknown>) => void
+  setUser: (user: { id: string } | null) => void
+  setTag: (key: string, value: string) => void
+  captureException: (err: Error, ctx?: Record<string, unknown>) => void
+  captureMessage: (msg: string, level?: string) => void
+  addBreadcrumb: (crumb: Record<string, unknown>) => void
+}
+const noopSentry: SentryStub = {
+  init:             () => undefined,
+  setUser:          () => undefined,
+  setTag:           () => undefined,
+  captureException: () => undefined,
+  captureMessage:   () => undefined,
+  addBreadcrumb:    () => undefined,
+}
+let Sentry: SentryStub = noopSentry
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  Sentry = require('@sentry/react-native') as SentryStub
+} catch {
+  // Expo Go / web — use noop stub
+}
+
+// @react-native-firebase/crashlytics is native-only — stub for Expo Go / web
+type Crashlytics = {
+  setUserId: (id: string) => Promise<void>
+  setAttribute: (name: string, value: string) => Promise<void>
+  recordError: (err: Error) => Promise<void>
+  log: (msg: string) => Promise<void>
+}
+const noopCrashlytics: Crashlytics = {
+  setUserId:    async () => undefined,
+  setAttribute: async () => undefined,
+  recordError:  async () => undefined,
+  log:          async () => undefined,
+}
+let _crashlytics: (() => Crashlytics) = () => noopCrashlytics
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const mod = require('@react-native-firebase/crashlytics') as { default: () => Crashlytics }
+  _crashlytics = mod.default
+} catch {
+  // Expo Go / web — use noop stub
+}
+const crashlytics = _crashlytics
 
 const IS_PROD = process.env['EXPO_PUBLIC_ENV'] === 'production'
 
@@ -28,10 +74,11 @@ export function initSentry(): void {
     tracesSampleRate:     IS_PROD ? 0.2 : 1.0,   // 20% traces in prod
     enableNative:         true,
     attachScreenshot:     false,  // no screenshots for privacy (GDPR)
-    beforeSend: (event) => {
+    beforeSend: (event: Record<string, unknown>) => {
       // Strip sensitive data before sending to Sentry
-      if (event.request?.data) {
-        const data = event.request.data as Record<string, unknown>
+      const req = event['request'] as Record<string, unknown> | undefined
+      if (req?.['data']) {
+        const data = req['data'] as Record<string, unknown>
         // Mask card numbers, phone numbers
         if (typeof data['phone'] === 'string') data['phone'] = '***'
         if (typeof data['password'] === 'string') data['password'] = '[REDACTED]'

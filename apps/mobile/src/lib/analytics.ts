@@ -3,7 +3,29 @@
 // All business-critical events tracked here for conversion + retention analysis
 // ─────────────────────────────────────────────────────────────────────────────
 
-import analytics from '@react-native-firebase/analytics'
+// @react-native-firebase/analytics is a native module — not available in Expo Go or web.
+// Fall back to a no-op stub so the app loads cleanly in those environments.
+type AnalyticsInstance = {
+  logEvent: (event: string, params?: Record<string, unknown>) => Promise<void>
+  logPurchase: (params: Record<string, unknown>) => Promise<void>
+  setUserProperty: (name: string, value: string) => Promise<void>
+}
+
+const noopAnalytics: AnalyticsInstance = {
+  logEvent:        async () => undefined,
+  logPurchase:     async () => undefined,
+  setUserProperty: async () => undefined,
+}
+
+let _analytics: (() => AnalyticsInstance) = () => noopAnalytics
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const mod = require('@react-native-firebase/analytics') as { default: () => AnalyticsInstance }
+  _analytics = mod.default
+} catch {
+  // Expo Go / web — use noop stub
+}
+const analytics = _analytics
 
 const IS_PROD = process.env['EXPO_PUBLIC_ENV'] === 'production'
 

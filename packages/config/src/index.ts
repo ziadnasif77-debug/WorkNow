@@ -32,10 +32,15 @@ export function getFirebaseConfig(): FirebaseConfig {
   }
 
   if (!config.projectId) {
-    throw new Error(
+    // Warn instead of throw so the app can load without crashing every route.
+    // Firebase API calls will fail with auth/network errors (expected without config).
+    // To fix: copy .env.example → .env and fill in your Firebase project values.
+    console.warn(
       '[WorkFix] Firebase projectId is missing. ' +
-      'Make sure .env is configured correctly. See .env.example',
+      'Make sure apps/mobile/.env is configured correctly. See .env.example\n' +
+      'The app will load but all Firebase features will be unavailable.',
     )
+    return { ...config, projectId: '__missing__' }
   }
 
   return config

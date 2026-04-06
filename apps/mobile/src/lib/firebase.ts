@@ -29,9 +29,16 @@ import { getFirebaseConfig } from '@workfix/config'
 const firebaseConfig = getFirebaseConfig()
 
 // ── App singleton ──────────────────────────────────────────────────────────────
-const app = getApps().length === 0
-  ? initializeApp(firebaseConfig)
-  : getApp()
+// Guard: if projectId is the stub value, skip real init to avoid SDK errors.
+const _configOk = firebaseConfig.projectId !== '__missing__'
+const app = (() => {
+  if (!_configOk) {
+    // Return a stub app — Firebase API calls will be no-ops / throw locally,
+    // but the module graph loads cleanly so all routes can render.
+    return getApps().length === 0 ? initializeApp({ ...firebaseConfig }) : getApp()
+  }
+  return getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
+})()
 
 // ── Auth singleton (hot-reload safe) ──────────────────────────────────────────
 // initializeAuth throws "already initialized" on hot-reload — guard with getAuth
