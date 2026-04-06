@@ -156,7 +156,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       const res = await fn(payload)
       return res.data.orderId
     } catch (err) {
-      set({ actionError: mapFirebaseError(err) })
+      set({ actionError: mapFirebaseError(err, 'فشل إنشاء الطلب') })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -220,7 +220,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       )
       await fn(payload)
     } catch (err) {
-      set({ actionError: mapFirebaseError(err) })
+      set({ actionError: mapFirebaseError(err, 'فشل الإلغاء') })
       throw err
     } finally {
       set({ actionLoading: false })

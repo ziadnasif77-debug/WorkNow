@@ -71,7 +71,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
       })
       return res.data.redirectUrl ?? null
     } catch (err) {
-      set({ initError: mapFirebaseError(err) })
+      set({ initError: mapFirebaseError(err, 'فشل بدء عملية الدفع') })
       throw err
     } finally {
       set({ isInitiating: false })

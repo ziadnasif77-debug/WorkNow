@@ -12,11 +12,20 @@ const t = (key: string, opts?: Record<string, unknown>) =>
   i18n.t(key, { defaultValue: i18n.t('common.error'), ...opts }) as string
 
 /**
- * Maps a Firebase HttpsError code to an i18n key in the `errors` namespace.
- * Falls back to the error message text, then a generic fallback.
+ * Maps a Firebase HttpsError to a display string.
+ *
+ * Priority:
+ *   1. Known Firebase/Functions error CODE → translated i18n string
+ *   2. Error has a non-empty message → return the raw message as-is
+ *   3. No message → return `fallback` (if provided) or generic Arabic error
+ *
+ * @param err      The caught error (any type)
+ * @param fallback Arabic string shown when the error carries no message
  */
-export function mapFirebaseError(err: unknown): string {
-  if (!err || typeof err !== 'object') return t('common.error')
+export function mapFirebaseError(err: unknown, fallback?: string): string {
+  const generic = fallback ?? t('common.error')
+
+  if (!err || typeof err !== 'object') return generic
 
   const e = err as { code?: string; message?: string }
 
@@ -24,68 +33,29 @@ export function mapFirebaseError(err: unknown): string {
   switch (e.code) {
     case 'functions/unauthenticated':
     case 'auth/not-authenticated':
-      return t('errors.unauthenticated', { defaultValue: t('common.error') })
+      return t('errors.unauthenticated')
 
     case 'functions/permission-denied':
-      return t('errors.permissionDenied', { defaultValue: t('common.error') })
+      return t('errors.permissionDenied')
 
     case 'functions/not-found':
-      return t('errors.notFound', { defaultValue: t('common.error') })
+      return t('errors.notFound')
 
     case 'functions/resource-exhausted':
-      return t('errors.rateLimitExceeded', { defaultValue: t('common.error') })
-
-    case 'functions/failed-precondition':
-      // May carry a user-facing message — try to match known patterns first
-      break
+      return t('errors.rateLimitExceeded')
 
     case 'functions/invalid-argument':
-      return t('errors.invalidAmount', { defaultValue: t('common.error') })
+      return t('errors.invalidAmount')
 
     case 'functions/internal':
       return t('common.error')
   }
 
-  // ── Map by error message string (backend error codes like ORD_001) ─────────
+  // ── Pass through raw message when present ─────────────────────────────────
   const msg = e.message ?? ''
+  if (msg) return msg
 
-  if (msg.includes('PAY_') || msg.includes('Insufficient balance'))
-    return t('errors.insufficientBalance')
-
-  if (msg.includes('invalid amount') || msg.includes('Invalid amount'))
-    return t('errors.invalidAmount')
-
-  if (msg.includes('invalid price') || msg.includes('Invalid price'))
-    return t('errors.invalidPrice')
-
-  if (msg.includes('Rate limit') || msg.includes('Retry after'))
-    return t('errors.rateLimitExceeded', { defaultValue: t('common.error') })
-
-  if (msg.includes('KYC') || msg.includes('kyc'))
-    return t('errors.kycRequired')
-
-  if (msg.includes('minimum payout') || msg.includes('Minimum payout'))
-    return t('errors.minPayout')
-
-  if (msg.includes('upload') || msg.includes('Upload'))
-    return t('errors.uploadFailed')
-
-  if (msg.includes('password') || msg.includes('Password'))
-    return t('errors.passwordTooShort')
-
-  if (msg.includes('phone') || msg.includes('Phone'))
-    return t('errors.invalidPhone')
-
-  if (msg.includes('email') || msg.includes('Email'))
-    return t('errors.invalidEmail')
-
-  if (msg.includes('duration') || msg.includes('Duration'))
-    return t('errors.invalidDuration')
-
-  if (msg.includes('name') && msg.includes('short'))
-    return t('errors.nameTooShort')
-
-  // ── Generic fallback ───────────────────────────────────────────────────────
-  return t('common.error')
+  // ── No message — use caller-supplied fallback or generic ──────────────────
+  return generic
 }
 
