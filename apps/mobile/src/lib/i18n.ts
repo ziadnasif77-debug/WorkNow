@@ -15,10 +15,26 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { I18nManager } from 'react-native'
 import * as Updates from 'expo-updates'
-import { MMKV } from 'react-native-mmkv'
+import { Platform } from 'react-native'
 import type { SupportedLocale } from '@workfix/types'
 
-const storage = new MMKV({ id: 'i18n' })
+// MMKV is a native module — not available in Expo Go or web.
+// Fall back to a simple in-memory + AsyncStorage-free stub so the app
+// can still load in those environments.
+let storage: { getString: (k: string) => string | undefined; set: (k: string, v: string) => void }
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { MMKV } = require('react-native-mmkv') as typeof import('react-native-mmkv')
+  storage = new MMKV({ id: 'i18n' })
+} catch {
+  // Expo Go / web fallback — in-memory only (lang resets on reload, acceptable)
+  const _mem: Record<string, string> = {}
+  storage = {
+    getString: (k: string) => _mem[k],
+    set:       (k: string, v: string) => { _mem[k] = v },
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TRANSLATION KEYS TYPE (prevents typos at compile time)
@@ -1221,10 +1237,15 @@ export async function changeLanguage(lang: SupportedLocale): Promise<void> {
 
   if (goingRTL !== nowRTL) {
     // Direction flip: must forceRTL + full reload so native layout engine re-applies.
-    // Updates.reloadAsync() does NOT return — the app restarts immediately.
+    // On web, RTL is handled by CSS — no native reload needed.
     I18nManager.allowRTL(true)
     I18nManager.forceRTL(goingRTL)
-    await Updates.reloadAsync()
+    if (Platform.OS !== 'web') {
+      // Updates.reloadAsync() does NOT return — the app restarts immediately.
+      await Updates.reloadAsync()
+    } else {
+      await i18n.changeLanguage(lang)
+    }
   } else {
     // Same direction (EN ↔ NO ↔ SV): instant, zero-reload swap
     await i18n.changeLanguage(lang)

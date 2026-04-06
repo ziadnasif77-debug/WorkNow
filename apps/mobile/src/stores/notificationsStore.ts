@@ -20,15 +20,18 @@ import type { AppNotification } from '@workfix/types'
 // ── Expo Notifications global handler config ──────────────────────────────────
 import type { NotificationBehavior } from 'expo-notifications'
 
-ExpoNotifications.setNotificationHandler({
-  handleNotification: async (): Promise<NotificationBehavior> => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge:  true,
-    shouldShowBanner: true,
-    shouldShowList:   true,
-  }),
-})
+// setNotificationHandler is a no-op on web — guard to avoid Invariant Violation
+if (Platform.OS !== 'web') {
+  ExpoNotifications.setNotificationHandler({
+    handleNotification: async (): Promise<NotificationBehavior> => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge:  true,
+      shouldShowBanner: true,
+      shouldShowList:   true,
+    }),
+  })
+}
 
 interface NotificationsState {
   notifications:    AppNotification[]
