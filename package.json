@@ -32,6 +32,12 @@
     "functions"
   ],
   "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [],
+      "allowedVersions": {
+        "@react-native-async-storage/async-storage": "2"
+      }
+    },
     "overrides": {
       "handlebars": ">=4.7.9",
       "undici": ">=6.24.0",
