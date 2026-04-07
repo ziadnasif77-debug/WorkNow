@@ -1,44 +1,44 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Firebase client SDK — initialized once, exported as singletons
+//
+// Cold start : initializeApp + initializeAuth (registers auth component)
+// Hot reload : getApp + getAuth            (reuses already-registered auth)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { initializeApp, getApps, getApp } from 'firebase/app'
-import { getAuth }                         from 'firebase/auth'
+import { initializeApp, getApps, getApp }              from 'firebase/app'
+import { initializeAuth, getAuth, getReactNativePersistence } from 'firebase/auth'
+import AsyncStorage                                          from '@react-native-async-storage/async-storage'
 import {
   initializeFirestore, getFirestore,
   persistentLocalCache, CACHE_SIZE_UNLIMITED,
-}                                          from 'firebase/firestore'
-import { getStorage }                      from 'firebase/storage'
-import { getFunctions }                    from 'firebase/functions'
-import { getFirebaseConfig }               from '@workfix/config'
+}                                                       from 'firebase/firestore'
+import { getStorage }                                   from 'firebase/storage'
+import { getFunctions }                                 from 'firebase/functions'
+import { getFirebaseConfig }                            from '@workfix/config'
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
-const firebaseConfig = getFirebaseConfig()
-
-const app = getApps().length === 0
-  ? initializeApp(firebaseConfig)
+const isNewApp = getApps().length === 0
+const app      = isNewApp
+  ? initializeApp(getFirebaseConfig())
   : getApp()
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-// getAuth auto-initializes with inMemoryPersistence in React Native / Expo Go.
-// For production (dev build), replace with initializeAuth + getReactNativePersistence.
+// initializeAuth (with AsyncStorage persistence) must be called once on cold
+// start. On hot reload the auth instance is already registered — getAuth() is
+// the correct call in that case.
 
-export const firebaseAuth = getAuth(app)
+export const firebaseAuth = isNewApp
+  ? initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) })
+  : getAuth(app)
 
 // ── Firestore ─────────────────────────────────────────────────────────────────
 
-function initFirestore() {
-  try {
-    return initializeFirestore(app, {
+export const firestore = isNewApp
+  ? initializeFirestore(app, {
       localCache: persistentLocalCache({ cacheSizeBytes: CACHE_SIZE_UNLIMITED }),
     })
-  } catch {
-    return getFirestore(app)
-  }
-}
-
-export const firestore = initFirestore()
+  : getFirestore(app)
 
 // ── Storage & Functions ───────────────────────────────────────────────────────
 
