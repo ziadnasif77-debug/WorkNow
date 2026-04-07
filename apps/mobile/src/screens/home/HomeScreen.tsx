@@ -15,7 +15,7 @@ import { useMarketplaceStore } from '../../stores/marketplaceStore'
 import { useLocation } from '../../hooks/useLocation'
 import { ProviderCard, CategoryChip, EmptyState } from '../../components/marketplace'
 import { Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 
 import { useNotificationsStore } from '../../stores/notificationsStore'
 
@@ -269,7 +269,7 @@ function SkeletonCard() {
 
 const skeletonStyles = StyleSheet.create({
   card:       { width: 150, height: 160, borderRadius: Radius.lg, backgroundColor: Colors.gray100, padding: Spacing.md, gap: Spacing.sm, alignItems: 'center' },
-  avatar:     { width: 72, height: 72, borderRadius: 36, backgroundColor: Colors.gray200 },
+  avatar:     { width: AvatarSize.xl, height: AvatarSize.xl, borderRadius: Radius.full, backgroundColor: Colors.gray200 },
   line_long:  { width: 100, height: 12, borderRadius: 6, backgroundColor: Colors.gray200 },
   line_short: { width: 70, height: 10, borderRadius: 5, backgroundColor: Colors.gray200 },
 })
@@ -281,19 +281,19 @@ const styles = StyleSheet.create({
   },
   greeting:          { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   location_row:      { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  location_icon:     { fontSize: 13 },
+  location_icon:     { fontSize: IconSize.sm },
   location_text:     { fontSize: FontSize.sm, color: Colors.gray500 },
-  notification_btn:  { width: 42, height: 42, borderRadius: 21, backgroundColor: Colors.gray100, alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  notification_icon: { fontSize: 20 },
+  notification_btn:  { width: 42, height: 42, borderRadius: Radius.full, backgroundColor: Colors.gray100, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  notification_icon: { fontSize: IconSize.md },
   notif_badge: {
     position: 'absolute', top: 4, right: 4,
-    minWidth: 16, height: 16, borderRadius: 8,
+    minWidth: 16, height: 16, borderRadius: Radius.full,
     backgroundColor: Colors.error,
     alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 3,
     borderWidth: 1.5, borderColor: Colors.background,
   },
-  notif_badge_text: { color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold },
+  notif_badge_text: { color: Colors.white, fontSize: IconSize.xs, fontWeight: FontWeight.bold },
 
   search_container: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, backgroundColor: Colors.background },
   search_box: {
@@ -302,9 +302,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border,
     paddingHorizontal: Spacing.md, height: 48,
   },
-  search_icon:  { fontSize: 16 },
+  search_icon:  { fontSize: IconSize.sm },
   search_input: { flex: 1, fontSize: FontSize.md, color: Colors.black },
-  search_clear: { fontSize: 14, color: Colors.gray400, padding: 4 },
+  search_clear: { fontSize: IconSize.sm, color: Colors.gray400, padding: 4 },
 
   section:        { marginTop: Spacing.lg },
   section_header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: Spacing.lg, marginBottom: Spacing.md },
@@ -322,6 +322,6 @@ const styles = StyleSheet.create({
     padding: Spacing.md, alignItems: 'center', gap: Spacing.sm,
     borderWidth: 1, borderColor: Colors.border,
   },
-  quick_emoji: { fontSize: 28 },
+  quick_emoji: { fontSize: IconSize.xl },
   quick_label: { fontSize: FontSize.sm, color: Colors.gray700, fontWeight: FontWeight.medium, textAlign: 'center' },
 })

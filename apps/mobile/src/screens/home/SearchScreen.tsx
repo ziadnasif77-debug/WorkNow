@@ -14,7 +14,7 @@ import { Analytics } from '../../lib/analytics'
 import { useLocation } from '../../hooks/useLocation'
 import { ProviderCard, CategoryChip, EmptyState } from '../../components/marketplace'
 import { Button } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 type SortBy = 'distance' | 'rating' | 'price'
 
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   back_btn:  { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon: { fontSize: 20, color: Colors.primary },
+  back_icon: { fontSize: IconSize.md, color: Colors.primary },
   search_wrap: {
     flex: 1, height: 42,
     backgroundColor: Colors.gray100, borderRadius: Radius.md,
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray100, alignItems: 'center', justifyContent: 'center',
   },
   filter_btn_active: { backgroundColor: Colors.primaryLight },
-  filter_icon:       { fontSize: 18 },
+  filter_icon:       { fontSize: IconSize.md },
 
   cats_bar:    { maxHeight: 52, backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border },
   cats_scroll: { paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, gap: Spacing.sm },

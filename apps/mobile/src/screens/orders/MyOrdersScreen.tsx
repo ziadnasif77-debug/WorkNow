@@ -14,7 +14,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { StatusBadge } from '../../components/orders'
 import { EmptyState } from '../../components/marketplace'
 import { Button } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
 import type { Order, OrderStatus } from '@workfix/types'
 

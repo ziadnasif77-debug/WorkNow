@@ -10,7 +10,8 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useNotificationsStore } from '../../stores/notificationsStore'
 import { EmptyState } from '../../components/marketplace'
-import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Colors, Spacing, FontSize, FontWeight, IconSize, Radius } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { AppNotification, NotificationType } from '@workfix/types'
 
@@ -58,18 +59,14 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.back_icon}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>{t('notifications.title')}</Text>
-        {unreadCount > 0 && (
+      <ScreenHeader
+        title={t('notifications.title')}
+        rightEl={unreadCount > 0 ? (
           <TouchableOpacity onPress={markAllRead} style={styles.mark_all}>
             <Text style={styles.mark_all_text}>{t('notifications.markAllRead')}</Text>
           </TouchableOpacity>
-        )}
-      </View>
+        ) : undefined}
+      />
 
       {isLoading ? (
         <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
@@ -145,13 +142,6 @@ function NotificationRow({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
 
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  back:          { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon:     { fontSize: 22, color: Colors.black },
-  title:         { flex: 1, fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   mark_all:      { paddingHorizontal: Spacing.sm },
   mark_all_text: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.medium },
 
@@ -165,13 +155,13 @@ const styles = StyleSheet.create({
 
   unread_dot: {
     position: 'absolute', top: Spacing.md, start: 6,
-    width: 8, height: 8, borderRadius: 4,
+    width: 8, height: 8, borderRadius: Radius.full,
     backgroundColor: Colors.primary },
 
   icon_wrap: {
-    width: 46, height: 46, borderRadius: 23,
+    width: 46, height: 46, borderRadius: Radius.full,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  icon: { fontSize: 22 },
+  icon: { fontSize: IconSize.md },
 
   content:            { flex: 1, gap: 3 },
   notif_title:        { fontSize: FontSize.md, color: Colors.black, fontWeight: FontWeight.medium },
@@ -179,4 +169,4 @@ const styles = StyleSheet.create({
   notif_body:         { fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 18 },
   notif_time:         { fontSize: FontSize.xs, color: Colors.gray400 },
 
-  chevron: { fontSize: 22, color: Colors.gray300 } })
+  chevron: { fontSize: IconSize.md, color: Colors.gray300 } })

@@ -19,7 +19,8 @@ import { useIsOnline } from '../../hooks/useNetworkState'
 import { useLocation } from '../../hooks/useLocation'
 import { Analytics } from '../../lib/analytics'
 import { Button, Input, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 import { firebaseAuth } from '../../lib/firebase'
 import { formatDate } from '@workfix/utils'
 
@@ -115,14 +116,11 @@ export default function CreateOrderScreen() {
 
   return (
     <Screen scroll avoidKeyboard padded={false}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => step > 1 ? setStep(s => (s - 1) as Step) : router.back()} style={styles.back}>
-          <Text style={styles.back_icon}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>{t('orders.newOrder')}</Text>
-        <Text style={styles.step_indicator}>{step}/3</Text>
-      </View>
+      <ScreenHeader
+        title={t('orders.newOrder')}
+        onBack={() => step > 1 ? setStep(s => (s - 1) as Step) : router.back()}
+        rightEl={<Text style={styles.step_indicator}>{step}/3</Text>}
+      />
 
       {/* Progress bar */}
       <View style={styles.progress_track}>
@@ -328,12 +326,6 @@ export default function CreateOrderScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.sm },
-  back:           { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon:      { fontSize: 22, color: Colors.black },
-  title:          { flex: 1, fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
   step_indicator: { fontSize: FontSize.sm, color: Colors.gray400, fontWeight: FontWeight.medium },
 
   progress_track: { height: 4, backgroundColor: Colors.gray100, marginHorizontal: Spacing.lg, borderRadius: 2, marginBottom: Spacing.md },
@@ -356,7 +348,7 @@ const styles = StyleSheet.create({
   photo_img:   { width: '100%', height: '100%' },
   photo_remove: {
     position: 'absolute', top: 4, right: 4,
-    width: 20, height: 20, borderRadius: 10,
+    width: 20, height: 20, borderRadius: Radius.full,
     backgroundColor: Colors.error,
     alignItems: 'center', justifyContent: 'center' },
   photo_remove_text: { color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold },
@@ -364,17 +356,17 @@ const styles = StyleSheet.create({
     width: 90, height: 90, borderRadius: Radius.md,
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
     alignItems: 'center', justifyContent: 'center', gap: 4 },
-  photo_add_icon:  { fontSize: 24 },
+  photo_add_icon:  { fontSize: IconSize.lg },
   photo_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },
 
   location_detected: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     backgroundColor: Colors.primaryLight, borderRadius: Radius.md, padding: Spacing.md },
-  location_icon:    { fontSize: 20 },
+  location_icon:    { fontSize: IconSize.md },
   location_info:    { flex: 1 },
   location_city:    { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.primary },
   location_coords:  { fontSize: FontSize.xs, color: Colors.gray500 },
-  location_refresh: { fontSize: 20 },
+  location_refresh: { fontSize: IconSize.md },
 
   schedule_toggle: { flexDirection: 'row', gap: Spacing.md },
   schedule_option: {
@@ -382,7 +374,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: Colors.border,
     backgroundColor: Colors.white, alignItems: 'center', gap: 4 },
   schedule_option_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  schedule_emoji:  { fontSize: 24 },
+  schedule_emoji:  { fontSize: IconSize.lg },
   schedule_label:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.gray700 },
   schedule_label_active: { color: Colors.primary },
   schedule_desc:   { fontSize: FontSize.xs, color: Colors.gray400, textAlign: 'center' },
@@ -391,9 +383,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     backgroundColor: Colors.white, borderRadius: Radius.md,
     borderWidth: 1, borderColor: Colors.border, padding: Spacing.md },
-  date_picker_icon:  { fontSize: 20 },
+  date_picker_icon:  { fontSize: IconSize.md },
   date_picker_text:  { flex: 1, fontSize: FontSize.md, color: Colors.black },
-  date_picker_arrow: { fontSize: 20, color: Colors.gray400 },
+  date_picker_arrow: { fontSize: IconSize.md, color: Colors.gray400 },
 
   summary_card: {
     backgroundColor: Colors.gray50, borderRadius: Radius.lg,

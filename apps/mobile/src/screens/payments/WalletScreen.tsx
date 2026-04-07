@@ -13,7 +13,7 @@ import { usePaymentsStore } from '../../stores/paymentsStore'
 import { useAuth } from '../../hooks/useAuth'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatPrice } from '@workfix/utils'
 
 export default function WalletScreen() {
@@ -188,13 +188,6 @@ export default function WalletScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  title:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
 
   balance_hero: {
@@ -211,7 +204,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md, alignItems: 'center', gap: 4,
     borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
   },
-  secondary_emoji:  { fontSize: 24 },
+  secondary_emoji:  { fontSize: IconSize.lg },
   secondary_label:  { fontSize: FontSize.xs, color: Colors.gray500 },
   secondary_amount: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
 
@@ -230,11 +223,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white, borderRadius: Radius.lg,
     padding: Spacing.md, borderWidth: 1, borderColor: Colors.border,
   },
-  bank_emoji: { fontSize: 28 },
+  bank_emoji: { fontSize: IconSize.xl },
   bank_info:  { flex: 1 },
   bank_title: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   bank_desc:  { fontSize: FontSize.sm, color: Colors.gray500 },
-  bank_arrow: { fontSize: 22, color: Colors.gray400 },
+  bank_arrow: { fontSize: IconSize.md, color: Colors.gray400 },
 
   modal_overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modal_sheet: {

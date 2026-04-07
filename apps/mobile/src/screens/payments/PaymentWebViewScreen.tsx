@@ -11,7 +11,7 @@ import {
 import { WebView, type WebViewNavigation } from 'react-native-webview'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, IconSize } from '../../constants/theme'
 
 // Tap Payments redirects back to our callback URL after payment
 const SUCCESS_INDICATORS = ['tap_id=', 'status=CAPTURED', 'status=AUTHORIZED']
@@ -174,11 +174,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   close_btn:     { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  close_icon:    { fontSize: 18, color: Colors.gray600 },
+  close_icon:    { fontSize: IconSize.md, color: Colors.gray600 },
   header_center: { flex: 1, alignItems: 'center', gap: 2 },
   header_title:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   secure_badge:  { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  secure_icon:   { fontSize: 11 },
+  secure_icon:   { fontSize: IconSize.xs },
   secure_text:   { fontSize: FontSize.xs, color: Colors.gray400 },
   header_spacer: { width: 36 },
 
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   loading_text: { fontSize: FontSize.md, color: Colors.gray500 },
 
   error_screen:   { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.md, padding: Spacing.xl },
-  error_emoji:    { fontSize: 52 },
+  error_emoji:    { fontSize: IconSize.xxl },
   error_text:     { fontSize: FontSize.lg, color: Colors.gray600, textAlign: 'center' },
   error_btn:      { backgroundColor: Colors.primary, borderRadius: 10, paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md },
   error_btn_text: { color: Colors.white, fontWeight: FontWeight.bold, fontSize: FontSize.md },

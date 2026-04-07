@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { useMessagingStore } from '../../stores/messagingStore'
 import { useAuth } from '../../hooks/useAuth'
 import { EmptyState } from '../../components/marketplace'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Conversation } from '@workfix/types'
 
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderBottomWidth: 1, borderBottomColor: Colors.border },
   conv_avatar: {
-    width: 50, height: 50, borderRadius: 25,
+    width: AvatarSize.md, height: AvatarSize.md, borderRadius: Radius.full,
     backgroundColor: Colors.gray100,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: Colors.border },
@@ -147,4 +147,4 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary, borderRadius: Radius.full,
     minWidth: 20, height: 20, alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 5 },
-  unread_text: { color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold } })
+  unread_text: { color: Colors.white, fontSize: IconSize.xs, fontWeight: FontWeight.bold } })

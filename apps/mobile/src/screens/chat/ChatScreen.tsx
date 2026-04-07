@@ -14,7 +14,8 @@ import { useTranslation } from 'react-i18next'
 import { useMessagingStore } from '../../stores/messagingStore'
 import { useAuth } from '../../hooks/useAuth'
 import { useImageUpload } from '../../hooks/useImageUpload'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Message } from '@workfix/types'
 
@@ -146,21 +147,17 @@ export default function ChatScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
     >
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.back_icon}>←</Text>
-        </TouchableOpacity>
-        <View style={styles.header_info}>
-          <Text style={styles.header_title}>{t('chat.title')}</Text>
-          <Text style={styles.header_order}>#{orderId?.slice(-6).toUpperCase()}</Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => router.push({ pathname: '/orders/[id]', params: { id: orderId } })}
-          style={styles.order_btn}
-        >
-          <Text style={styles.order_btn_icon}>📋</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title={`${t('chat.title')} #${orderId?.slice(-6).toUpperCase() ?? ''}`}
+        rightEl={
+          <TouchableOpacity
+            onPress={() => router.push({ pathname: '/orders/[id]', params: { id: orderId } })}
+            style={styles.order_btn}
+          >
+            <Text style={styles.order_btn_icon}>📋</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {/* ── Messages ───────────────────────────────────────────────────── */}
       {messagesLoading ? (
@@ -386,24 +383,13 @@ const styles = StyleSheet.create({
   loader:    { marginTop: Spacing.xxl },
 
   // Header
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  back:         { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon:    { fontSize: 22, color: Colors.black },
-  header_info:  { flex: 1 },
-  header_title: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
-  header_order: { fontSize: FontSize.xs, color: Colors.gray400 },
   order_btn:    { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  order_btn_icon: { fontSize: 20 },
+  order_btn_icon: { fontSize: IconSize.md },
 
   // Messages
   messages_content: { padding: Spacing.md, gap: 2, paddingBottom: Spacing.lg },
   empty_chat:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.xxl, gap: Spacing.md },
-  empty_emoji: { fontSize: 48 },
+  empty_emoji: { fontSize: IconSize.xxl },
   empty_text:  { fontSize: FontSize.md, color: Colors.gray400, textAlign: 'center' },
 
   // Date separator
@@ -417,11 +403,11 @@ const styles = StyleSheet.create({
   bubble_avatar:        { width: 28 },
   bubble_avatar_hidden: { width: 28 },
   avatar_circle: {
-    width: 28, height: 28, borderRadius: 14,
+    width: AvatarSize.xs, height: AvatarSize.xs, borderRadius: Radius.full,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatar_letter: { fontSize: 12, fontWeight: FontWeight.bold, color: Colors.primary },
+  avatar_letter: { fontSize: IconSize.xs, fontWeight: FontWeight.bold, color: Colors.primary },
 
   bubble_wrap:      { maxWidth: '75%', gap: 3 },
   bubble_wrap_mine: {},
@@ -465,7 +451,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.errorLight, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm,
   },
   send_error_text:    { flex: 1, fontSize: FontSize.sm, color: Colors.error },
-  send_error_dismiss: { fontSize: 16, color: Colors.error },
+  send_error_dismiss: { fontSize: IconSize.sm, color: Colors.error },
 
   // Input bar
   input_bar: {
@@ -475,11 +461,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: Colors.border,
   },
   attach_btn: {
-    width: 40, height: 40, borderRadius: 20,
+    width: 40, height: 40, borderRadius: Radius.full,
     backgroundColor: Colors.gray100,
     alignItems: 'center', justifyContent: 'center',
   },
-  attach_icon: { fontSize: 18 },
+  attach_icon: { fontSize: IconSize.md },
   text_input: {
     flex: 1, minHeight: 40, maxHeight: 120,
     backgroundColor: Colors.gray100, borderRadius: Radius.xl,
@@ -487,12 +473,12 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md, color: Colors.black,
   },
   send_btn: {
-    width: 40, height: 40, borderRadius: 20,
+    width: 40, height: 40, borderRadius: Radius.full,
     backgroundColor: Colors.primary,
     alignItems: 'center', justifyContent: 'center',
   },
   send_btn_disabled: { backgroundColor: Colors.gray200 },
-  send_icon:         { fontSize: 16, color: Colors.white },
+  send_icon:         { fontSize: IconSize.sm, color: Colors.white },
 
   // Error state
   error_text: { fontSize: FontSize.md, color: Colors.error, textAlign: 'center' },

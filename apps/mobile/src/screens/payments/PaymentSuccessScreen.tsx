@@ -8,7 +8,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Analytics } from '../../lib/analytics'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 export default function PaymentSuccessScreen() {
   const { t }       = useTranslation()
@@ -91,11 +91,11 @@ const styles = StyleSheet.create({
   },
   icon_wrap: { marginBottom: Spacing.xl },
   icon_circle: {
-    width: 96, height: 96, borderRadius: 48,
+    width: 96, height: 96, borderRadius: Radius.full,
     backgroundColor: Colors.success,
     alignItems: 'center', justifyContent: 'center',
   },
-  icon: { fontSize: 48, color: Colors.white, fontWeight: FontWeight.bold },
+  icon: { fontSize: IconSize.xxl, color: Colors.white, fontWeight: FontWeight.bold },
 
   content: { width: '100%', alignItems: 'center', gap: Spacing.md },
   title:    { fontSize: FontSize.xxxl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   escrow_steps: { gap: Spacing.md },
   escrow_step:  { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.md },
   escrow_num: {
-    width: 24, height: 24, borderRadius: 12,
+    width: 24, height: 24, borderRadius: Radius.full,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },

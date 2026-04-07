@@ -11,7 +11,8 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useMarketplaceStore } from '../../stores/marketplaceStore'
 import { EmptyState } from '../../components/marketplace'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 
 export default function CategoriesScreen() {
   const { t, i18n } = useTranslation()
@@ -23,12 +24,7 @@ export default function CategoriesScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.back_icon}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>{t('home.categories')}</Text>
-      </View>
+      <ScreenHeader title={t('home.categories')} />
 
       {categoriesLoading ? (
         <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
@@ -70,14 +66,6 @@ export default function CategoriesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  back:      { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon: { fontSize: 22, color: Colors.black },
-  title:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   grid:  { padding: Spacing.md, gap: Spacing.md },
   row:   { gap: Spacing.md },
   cat_card: {
@@ -86,7 +74,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
     minHeight: 120,
   },
-  cat_icon:  { fontSize: 36 },
+  cat_icon:  { fontSize: IconSize.xl },
   cat_name:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
   cat_count: { fontSize: FontSize.xs, color: Colors.gray400 },
 })
