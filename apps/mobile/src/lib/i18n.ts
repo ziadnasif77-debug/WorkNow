@@ -11,6 +11,10 @@
 // Switching between en/no/sv is instant — no reload needed (all LTR).
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Polyfill Intl.PluralRules — required by i18next in Hermes / Expo Go environments
+// that don't ship a full Intl API. Must be imported before i18next is initialized.
+import 'intl-pluralrules'
+
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { I18nManager } from 'react-native'
