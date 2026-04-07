@@ -67,6 +67,15 @@ export const setProviderType = callable(async (data, context) => {
     appError('VAL_002', 'businessName is required for company accounts')
   }
 
+  // Guard: only customers (role = 'customer') may upgrade to provider.
+  // Allowing an existing provider to call this would reset kycStatus → 'pending',
+  // letting a suspended/rejected provider bypass admin enforcement.
+  const userSnap = await db.collection('users').doc(uid).get()
+  const currentRole = userSnap.data()?.['role'] as string | undefined
+  if (currentRole === 'provider') {
+    appError('AUTH_003', 'Account is already a provider. Use your existing provider profile.', 'permission-denied')
+  }
+
   const location = { latitude: input.lat, longitude: input.lng }
   const geohash = encodeGeohash(location)
 

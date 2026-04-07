@@ -42,10 +42,16 @@ export function parseTapWebhook(
   req: functions.https.Request,
   webhookSecret: string,
 ): { verified: boolean; body: Record<string, unknown> } {
-  const rawBody = JSON.stringify(req.body)
+  // Firebase Functions populates req.rawBody (Buffer) before JSON parsing.
+  // Using JSON.stringify(req.body) would produce a different string than the
+  // original request body (key ordering, whitespace, unicode escaping) and
+  // would make HMAC verification fail on every legitimate webhook.
+  const rawBodyStr: string =
+    (req as unknown as { rawBody?: Buffer }).rawBody?.toString('utf8') ??
+    JSON.stringify(req.body)
   const hashDigest = req.headers['hashdigest'] as string | undefined
 
-  const verified = verifyTapWebhook(rawBody, hashDigest, webhookSecret)
+  const verified = verifyTapWebhook(rawBodyStr, hashDigest, webhookSecret)
 
   if (!verified) {
     functions.logger.warn('Invalid Tap webhook signature', {

@@ -76,6 +76,13 @@ export async function refundEscrowById(orderId: string, reason: string): Promise
     logger.info('Escrow already refunded', { orderId })
     return
   }
+  // Refuse to refund unless the escrow is actually held by Tap.
+  // Attempting a refund on an 'initiated' or 'captured' charge risks
+  // double-charging the customer if the original payment later succeeds.
+  if (order.paymentStatus !== 'held') {
+    logger.warn('Refund skipped — paymentStatus is not held', { orderId, paymentStatus: order.paymentStatus })
+    return
+  }
 
   const minorMultiplier = ['KWD', 'BHD'].includes(order.currency ?? '') ? 1000 : 100
   const amountMinor = Math.round((order.finalPrice ?? 0) * minorMultiplier)

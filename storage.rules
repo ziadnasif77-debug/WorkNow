@@ -52,9 +52,16 @@ service firebase.storage {
     }
 
     // ── messages/{convId}/* ───────────────────────────────────────────────────
+    // Only the two parties in the conversation may read or upload files.
+    // isAuth() alone would let any logged-in user read/write any chat file.
     match /messages/{convId}/{fileName} {
-      allow read:  if isAuth();
-      allow write: if isAuth()
+      function isConvMember() {
+        let conv = firestore.get(/databases/(default)/documents/conversations/$(convId)).data;
+        return uid() == conv.customerId || uid() == conv.providerId;
+      }
+      allow read:   if isAuth() && (isAdmin() || isConvMember());
+      allow write:  if isAuth()
+        && isConvMember()
         && isDocument()
         && maxSizeMB(20);
       allow delete: if isAdmin();

@@ -204,23 +204,33 @@ export const tapWebhook = functions
           const orderId = event.metadata?.order_id
           if (!orderId) break
 
-          const pq = await db.collection('payments')
-            .where('moyasarId', '==', event.id).limit(1).get()
+          // Run inside a transaction so a duplicate webhook or concurrent
+          // refund cannot interleave between the read and the write (TOCTOU).
+          await db.runTransaction(async tx => {
+            const orderRef  = db.collection('orders').doc(orderId)
+            const orderSnap = await tx.get(orderRef)
+            const orderData = orderSnap.data()
 
-          if (!pq.empty) {
-            await pq.docs[0]!.ref.update({
-              status: 'captured', capturedAt: serverTimestamp(), updatedAt: serverTimestamp(),
+            // Idempotency guard — already captured, nothing to do
+            if (orderData?.['paymentStatus'] === 'captured') return
+
+            const pq = await db.collection('payments')
+              .where('moyasarId', '==', event.id).limit(1).get()
+
+            if (!pq.empty) {
+              tx.update(pq.docs[0]!.ref, {
+                status:      'captured',
+                capturedAt:  serverTimestamp(),
+                updatedAt:   serverTimestamp(),
+              })
+            }
+
+            tx.update(orderRef, {
+              paymentStatus: 'captured',
+              // Only advance to in_progress if still in confirmed state
+              ...(orderData?.['status'] === 'confirmed' && { status: 'in_progress' }),
+              updatedAt: serverTimestamp(),
             })
-          }
-          // Advance order status from 'confirmed' → 'in_progress' once payment is captured
-          const orderRef = db.collection('orders').doc(orderId)
-          const orderSnap = await orderRef.get()
-          const orderData = orderSnap.data()
-          await orderRef.update({
-            paymentStatus: 'captured',
-            // Only advance status if still 'confirmed' (guard against double-fire)
-            ...(orderData?.['status'] === 'confirmed' && { status: 'in_progress' }),
-            updatedAt: serverTimestamp(),
           })
           break
         }

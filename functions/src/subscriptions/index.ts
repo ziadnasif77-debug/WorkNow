@@ -94,7 +94,26 @@ export const tapSubscriptionWebhook = functions
   .https.onRequest(async (req, res) => {
     if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return }
 
-    const event = req.body as {
+    // ── Verify HMAC-SHA256 signature ────────────────────────────────────────────
+    // Same secret used for payment webhook — stored in Firebase Functions config.
+    // Without this, any attacker can forge a webhook and upgrade any user for free.
+    const webhookSecret = process.env['TAP_WEBHOOK_SECRET']
+    if (!webhookSecret) {
+      functions.logger.error('TAP_WEBHOOK_SECRET not configured')
+      res.status(500).send('Server misconfigured')
+      return
+    }
+
+    const { parseTapWebhook } = await import('../_shared/webhooks')
+    const { verified, body } = parseTapWebhook(req, webhookSecret)
+
+    if (!verified) {
+      functions.logger.warn('Invalid Tap subscription webhook signature', { ip: req.ip })
+      res.status(401).json({ error: 'Invalid signature' })
+      return
+    }
+
+    const event = body as {
       status: string
       metadata?: { provider_id?: string; tier?: string }
       id: string
@@ -111,9 +130,11 @@ export const tapSubscriptionWebhook = functions
         const endDate = new Date()
         endDate.setMonth(endDate.getMonth() + 1)
 
-        // Update subscription
+        // Verify the subscription document belongs to this provider before updating.
+        // Prevents an attacker from reusing another provider's tapSubscriptionId.
         const subQuery = await db.collection('subscriptions')
           .where('tapSubscriptionId', '==', event.id)
+          .where('providerId', '==', uid)          // ← ownership check
           .limit(1).get()
 
         if (!subQuery.empty) {
@@ -121,6 +142,8 @@ export const tapSubscriptionWebhook = functions
             status: 'active',
             endAt:  endDate,
             updatedAt: serverTimestamp() })
+        } else {
+          functions.logger.warn('Subscription webhook: no matching sub for provider', { uid, tapId: event.id })
         }
 
         // Update provider profile + claims
@@ -129,7 +152,15 @@ export const tapSubscriptionWebhook = functions
           updatedAt: serverTimestamp() })
 
         const { auth: adminAuth } = await import('firebase-admin')
-        const existingClaims = (await adminAuth().getUser(uid)).customClaims ?? {}
+        // getUser throws if uid is invalid — wrap separately for clear error
+        let existingClaims: Record<string, unknown> = {}
+        try {
+          existingClaims = (await adminAuth().getUser(uid)).customClaims ?? {}
+        } catch (userErr) {
+          functions.logger.error('Subscription webhook: getUser failed', { uid, err: userErr })
+          res.status(200).json({ received: true })   // still ack to Tap
+          return
+        }
         await adminAuth().setCustomUserClaims(uid, { ...existingClaims, subscriptionTier: tier })
       }
     }
