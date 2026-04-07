@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import { useAuth } from '../../hooks/useAuth'
 import { changeLanguage } from '../../lib/i18n'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import type { SupportedLocale } from '@workfix/types'
 
 const LANGUAGES: Array<{ code: SupportedLocale; label: string; flag: string }> = [
@@ -195,9 +195,9 @@ function MenuRow({
 
 const menuStyles = StyleSheet.create({
   row:   { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingHorizontal: Spacing.md, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  emoji: { fontSize: 20, width: 28, textAlign: 'center' },
+  emoji: { fontSize: IconSize.md, width: 28, textAlign: 'center' },
   label: { flex: 1, fontSize: FontSize.md, color: Colors.black },
-  arrow: { fontSize: 22, color: Colors.gray300 } })
+  arrow: { fontSize: IconSize.md, color: Colors.gray300 } })
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 
@@ -209,18 +209,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white, marginBottom: Spacing.md,
     borderBottomWidth: 1, borderBottomColor: Colors.border },
   avatar_wrap:        { position: 'relative', marginBottom: Spacing.md },
-  avatar:             { width: 88, height: 88, borderRadius: 44 },
+  avatar:             { width: AvatarSize.xxl, height: AvatarSize.xxl, borderRadius: Radius.full },
   avatar_placeholder: {
-    width: 88, height: 88, borderRadius: 44,
+    width: AvatarSize.xxl, height: AvatarSize.xxl, borderRadius: Radius.full,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center', justifyContent: 'center' },
   avatar_initials: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.primary },
   edit_avatar: {
     position: 'absolute', bottom: 0, right: 0,
-    width: 28, height: 28, borderRadius: 14,
+    width: AvatarSize.xs, height: AvatarSize.xs, borderRadius: Radius.full,
     backgroundColor: Colors.white, borderWidth: 1.5, borderColor: Colors.border,
     alignItems: 'center', justifyContent: 'center' },
-  edit_avatar_icon: { fontSize: 13 },
+  edit_avatar_icon: { fontSize: IconSize.sm },
   display_name:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   email:            { fontSize: FontSize.sm, color: Colors.gray400, marginTop: 4 },
   role_chip: {
@@ -235,10 +235,10 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full, borderWidth: 1.5, borderColor: Colors.border,
     backgroundColor: Colors.white },
   lang_chip_active:  { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  lang_flag:         { fontSize: 18 },
+  lang_flag:         { fontSize: IconSize.md },
   lang_label:        { fontSize: FontSize.sm, color: Colors.gray700, fontWeight: FontWeight.medium },
   lang_label_active: { color: Colors.primary, fontWeight: FontWeight.bold },
-  lang_check:        { fontSize: 13, color: Colors.primary, fontWeight: FontWeight.bold },
+  lang_check:        { fontSize: IconSize.sm, color: Colors.primary, fontWeight: FontWeight.bold },
   lang_hint:         { fontSize: FontSize.xs, color: Colors.gray400, paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm },
 
   signout_btn: {
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.lg, marginTop: Spacing.sm,
     backgroundColor: Colors.errorLight, borderRadius: Radius.lg,
     padding: Spacing.md, borderWidth: 1, borderColor: Colors.error + '40' },
-  signout_icon:  { fontSize: 20 },
+  signout_icon:  { fontSize: IconSize.md },
   signout_label: { fontSize: FontSize.md, color: Colors.error, fontWeight: FontWeight.bold },
 
   version: { textAlign: 'center', fontSize: FontSize.xs, color: Colors.gray300, marginTop: Spacing.lg } })

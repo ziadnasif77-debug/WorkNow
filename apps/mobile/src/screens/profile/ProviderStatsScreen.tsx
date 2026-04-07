@@ -12,7 +12,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore'
 import { firestore, firebaseAuth } from '../../lib/firebase'
 import { formatPrice } from '@workfix/utils'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 
 interface Stats {
   totalOrders:     number
@@ -133,19 +133,13 @@ const cardStyles = StyleSheet.create({
     padding: Spacing.md, alignItems: 'center', gap: 4,
     borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
   },
-  emoji: { fontSize: 24 },
+  emoji: { fontSize: IconSize.lg },
   value: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },
   label: { fontSize: FontSize.xs, color: Colors.gray500 },
 })
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   content: { padding: Spacing.md, gap: Spacing.md },
   section_label: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.gray600, paddingTop: Spacing.sm },
   cards_row: { flexDirection: 'row', gap: Spacing.md },

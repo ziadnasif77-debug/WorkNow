@@ -93,12 +93,6 @@ export default function MyServicesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   list:  { padding: Spacing.md, gap: Spacing.md },
   service_card: {
     backgroundColor: Colors.white, borderRadius: Radius.lg,
@@ -110,7 +104,7 @@ const styles = StyleSheet.create({
   service_desc: { fontSize: FontSize.sm, color: Colors.gray500 },
   service_price: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.primary },
   active_badge: {
-    backgroundColor: Colors.successLight, borderRadius: 99,
+    backgroundColor: Colors.successLight, borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm, paddingVertical: 3,
   },
   inactive_badge: { backgroundColor: Colors.gray100 },

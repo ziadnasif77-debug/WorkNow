@@ -13,8 +13,9 @@ import { useTranslation }           from 'react-i18next'
 import { httpsCallable }            from 'firebase/functions'
 import { firebaseFunctions }        from '../../lib/firebase'
 import { useAuth }                  from '../../hooks/useAuth'
+import { ScreenHeader }             from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize,
-         FontWeight, Radius, Shadow } from '../../constants/theme'
+         FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 
 // ── Cloud Function callables ──────────────────────────────────────────────────
 
@@ -129,18 +130,7 @@ export default function PrivacyScreen() {
   return (
     <View style={styles.container}>
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <View style={styles.header} accessibilityRole="header">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.back}
-          accessibilityRole="button"
-          accessibilityLabel={t('a11y.backButton')}
-          hitSlop={{ top:8,bottom:8,left:8,right:8 }}
-        >
-          <Text style={styles.back_icon} aria-hidden>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>{t('privacy.screenTitle')}</Text>
-      </View>
+      <ScreenHeader title={t('privacy.screenTitle')} />
 
       <ScrollView
         contentContainerStyle={styles.content}
@@ -453,20 +443,12 @@ const DELETION_REASONS = [
 
 const styles = StyleSheet.create({
   container:    { flex: 1, backgroundColor: Colors.background },
-  header:       {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  back:         { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon:    { fontSize: 22, color: Colors.black },
-  title:        { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   content:      { padding: Spacing.lg, gap: Spacing.lg, paddingBottom: 40 },
   intro_card:   {
     flexDirection: 'row', gap: Spacing.md, alignItems: 'flex-start',
     backgroundColor: Colors.primaryLight, borderRadius: Radius.lg, padding: Spacing.md,
   },
-  intro_icon:   { fontSize: 28, marginTop: 2 },
+  intro_icon:   { fontSize: IconSize.xl, marginTop: 2 },
   intro_body:   { flex: 1, gap: 4 },
   intro_title:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.primary },
   intro_text:   { fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },
@@ -481,7 +463,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', gap: Spacing.sm, alignItems: 'flex-start',
     backgroundColor: '#FEF3C7', borderRadius: Radius.sm, padding: Spacing.sm, marginBottom: Spacing.sm,
   },
-  warning_icon: { fontSize: 16 },
+  warning_icon: { fontSize: IconSize.sm },
   warning_text: { flex: 1, fontSize: FontSize.sm, color: '#92400E', lineHeight: 20 },
   retention_note:{ fontSize: FontSize.xs, color: Colors.gray400, lineHeight: 18, marginTop: Spacing.sm },
   legal_note:   {
@@ -525,7 +507,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.white,
   },
   reason_btn_selected: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  reason_icon:  { fontSize: 20 },
+  reason_icon:  { fontSize: IconSize.md },
   reason_label: { flex: 1, fontSize: FontSize.md, color: Colors.black },
   reason_label_selected:{ color: Colors.primary, fontWeight: FontWeight.bold },
   confirm_phrase:{
@@ -549,7 +531,7 @@ const sectionStyles = StyleSheet.create({
   },
   danger_card:  { borderColor: '#FCA5A5' },
   header:       { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  icon:         { fontSize: 24 },
+  icon:         { fontSize: IconSize.lg },
   title:        { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
   danger_title: { color: Colors.error },
   desc:         { fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },
@@ -571,5 +553,5 @@ const linkStyles = StyleSheet.create({
     paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   label: { fontSize: FontSize.md, color: Colors.black },
-  arrow: { fontSize: 22, color: Colors.gray300 },
+  arrow: { fontSize: IconSize.md, color: Colors.gray300 },
 })

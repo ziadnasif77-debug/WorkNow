@@ -91,12 +91,5 @@ export default function ChangePasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  back: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   content: { padding: Spacing.lg, gap: Spacing.sm },
 })
