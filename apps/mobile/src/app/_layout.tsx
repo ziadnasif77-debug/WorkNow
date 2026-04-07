@@ -17,6 +17,19 @@ import { Colors }           from '../constants/theme'
 import { OfflineBanner }    from '../components/OfflineBanner'
 import '../lib/i18n'
 
+// ── Onboarding persistence (same MMKV pattern as OnboardingScreen) ────────────
+let _onboardingStorage: { getBoolean: (k: string) => boolean | undefined }
+try {
+  const { MMKV } = require('react-native-mmkv') as typeof import('react-native-mmkv')
+  const _mmkv = new MMKV({ id: 'app' })
+  _onboardingStorage = { getBoolean: (k) => _mmkv.getBoolean(k) }
+} catch {
+  _onboardingStorage = { getBoolean: () => undefined }
+}
+function hasSeenOnboarding(): boolean {
+  return _onboardingStorage.getBoolean('onboarding_done') === true
+}
+
 // Initialize monitoring + feature flags at module load (before first render)
 initSentry()
 void initFeatureFlags()
@@ -57,13 +70,24 @@ function AuthenticatedLayout() {
   // Route guard — runs after auth state is known
   useEffect(() => {
     if (!isInitialized) return
-    const inAuthGroup = segments[0] === 'auth'
+    const seg0 = segments[0]
 
     if (!firebaseUser) {
-      if (!inAuthGroup) router.replace('/auth/login')
+      // First-ever launch → show onboarding once
+      if (seg0 !== 'onboarding' && seg0 !== 'auth') {
+        if (!hasSeenOnboarding()) {
+          router.replace('/onboarding')
+        } else {
+          router.replace('/auth/login')
+        }
+      }
     } else {
-      if (inAuthGroup) {
-        router.replace(role === 'provider' ? '/(tabs)/provider' : '/(tabs)')
+      if (seg0 === 'auth' || seg0 === 'onboarding') {
+        if (role === 'admin' || role === 'superadmin') {
+          router.replace('/(admin)')
+        } else {
+          router.replace(role === 'provider' ? '/(tabs)/provider' : '/(tabs)')
+        }
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -85,6 +109,7 @@ function AuthenticatedLayout() {
           <OfflineBanner />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)"     options={{ headerShown: false }} />
+            <Stack.Screen name="(admin)"    options={{ headerShown: false }} />
             <Stack.Screen name="auth"       options={{ headerShown: false }} />
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           </Stack>
