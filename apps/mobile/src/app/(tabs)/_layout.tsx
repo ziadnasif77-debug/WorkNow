@@ -87,6 +87,11 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
         }}
       />
+      {/* Provider dashboard — hidden from customer tab bar, accessible via router.replace('/(tabs)/provider') */}
+      <Tabs.Screen
+        name="provider"
+        options={{ href: null }}
+      />
     </Tabs>
   )
 }

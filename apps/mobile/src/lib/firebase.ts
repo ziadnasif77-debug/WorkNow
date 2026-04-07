@@ -33,12 +33,21 @@ export const firebaseAuth = isNewApp
   : getAuth(app)
 
 // ── Firestore ─────────────────────────────────────────────────────────────────
+// persistentLocalCache requires native SQLite — not available in Expo Go.
+// Fall back to default (memory) cache so the module never throws.
 
-export const firestore = isNewApp
-  ? initializeFirestore(app, {
+function getOrInitFirestore() {
+  if (!isNewApp) return getFirestore(app)
+  try {
+    return initializeFirestore(app, {
       localCache: persistentLocalCache({ cacheSizeBytes: CACHE_SIZE_UNLIMITED }),
     })
-  : getFirestore(app)
+  } catch {
+    return initializeFirestore(app, {})
+  }
+}
+
+export const firestore = getOrInitFirestore()
 
 // ── Storage & Functions ───────────────────────────────────────────────────────
 
