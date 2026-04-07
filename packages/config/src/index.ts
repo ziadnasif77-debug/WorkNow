@@ -1,6 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // @workfix/config — Firebase configuration
-// Reads from environment variables — never hardcode keys here
+//
+// Priority order:
+//   1. EXPO_PUBLIC_* / FIREBASE_* environment variables  (CI, local .env)
+//   2. Hardcoded fallback for workfix-557e0              (Expo Go without .env)
+//
+// Firebase web credentials are public-facing (embedded in every web bundle)
+// and are safe to ship in source code. Security is enforced by Firestore Rules
+// and Firebase Auth — not by keeping the API key secret.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface FirebaseConfig {
@@ -24,43 +31,50 @@ const PLACEHOLDERS = new Set([
 ])
 
 /**
- * Returns Firebase config from environment variables.
- * Works in: Expo (process.env.EXPO_PUBLIC_*), Node (process.env.*)
+ * Hardcoded fallback for workfix-557e0.
+ * Used when EXPO_PUBLIC_* vars are absent (e.g. Expo Go before `--clear`).
  */
-export function getFirebaseConfig(): FirebaseConfig {
-  const measurementId =
-    process.env['EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID'] ?? process.env['FIREBASE_MEASUREMENT_ID']
-
-  const config: FirebaseConfig = {
-    apiKey:            process.env['EXPO_PUBLIC_FIREBASE_API_KEY'] ?? process.env['FIREBASE_API_KEY'] ?? '',
-    authDomain:        process.env['EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN'] ?? process.env['FIREBASE_AUTH_DOMAIN'] ?? '',
-    projectId:         process.env['EXPO_PUBLIC_FIREBASE_PROJECT_ID'] ?? process.env['FIREBASE_PROJECT_ID'] ?? '',
-    storageBucket:     process.env['EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET'] ?? process.env['FIREBASE_STORAGE_BUCKET'] ?? '',
-    messagingSenderId: process.env['EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'] ?? process.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
-    appId:             process.env['EXPO_PUBLIC_FIREBASE_APP_ID'] ?? process.env['FIREBASE_APP_ID'] ?? '',
-    ...(measurementId !== undefined && { measurementId }),
-  }
-
-  // Detect both truly empty values AND .env.example placeholder strings
-  const isMissing = !config.projectId || PLACEHOLDERS.has(config.projectId)
-
-  if (isMissing) {
-    console.warn(
-      '[WorkFix] Firebase is not configured.\n' +
-      '  → Copy apps/mobile/.env.example to apps/mobile/.env\n' +
-      '  → Fill in your real Firebase project values\n' +
-      '  → Restart Expo with: expo start --clear',
-    )
-    return { ...config, projectId: '__missing__' }
-  }
-
-  return config
+const FALLBACK_CONFIG: FirebaseConfig = {
+  apiKey:            'AIzaSyDOMk1zDMiGFZ5msM9OQK9q9BQertTGPOI',
+  authDomain:        'workfix-557e0.firebaseapp.com',
+  projectId:         'workfix-557e0',
+  storageBucket:     'workfix-557e0.firebasestorage.app',
+  messagingSenderId: '583344787316',
+  appId:             '1:583344787316:web:eed052be0143a142fea621',
+  measurementId:     'G-723L9SEVEL',
 }
 
-/** True when real Firebase credentials are present in the environment. */
+/**
+ * Returns Firebase config.
+ * Reads env vars first; falls back to the hardcoded project config.
+ */
+export function getFirebaseConfig(): FirebaseConfig {
+  const envProjectId =
+    process.env['EXPO_PUBLIC_FIREBASE_PROJECT_ID'] ?? process.env['FIREBASE_PROJECT_ID'] ?? ''
+
+  // If env vars are present and not placeholders, use them
+  if (envProjectId && !PLACEHOLDERS.has(envProjectId)) {
+    const measurementId =
+      process.env['EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID'] ?? process.env['FIREBASE_MEASUREMENT_ID']
+    return {
+      apiKey:            process.env['EXPO_PUBLIC_FIREBASE_API_KEY'] ?? process.env['FIREBASE_API_KEY'] ?? FALLBACK_CONFIG.apiKey,
+      authDomain:        process.env['EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN'] ?? process.env['FIREBASE_AUTH_DOMAIN'] ?? FALLBACK_CONFIG.authDomain,
+      projectId:         envProjectId,
+      storageBucket:     process.env['EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET'] ?? process.env['FIREBASE_STORAGE_BUCKET'] ?? FALLBACK_CONFIG.storageBucket,
+      messagingSenderId: process.env['EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'] ?? process.env['FIREBASE_MESSAGING_SENDER_ID'] ?? FALLBACK_CONFIG.messagingSenderId,
+      appId:             process.env['EXPO_PUBLIC_FIREBASE_APP_ID'] ?? process.env['FIREBASE_APP_ID'] ?? FALLBACK_CONFIG.appId,
+      ...(measurementId !== undefined && !PLACEHOLDERS.has(measurementId) && { measurementId }),
+    }
+  }
+
+  // Fall back to hardcoded config so the app boots in Expo Go without .env
+  console.info('[WorkFix] Using built-in Firebase config (workfix-557e0)')
+  return FALLBACK_CONFIG
+}
+
+/** Always true — the fallback config ensures Firebase is always available. */
 export function isFirebaseConfigured(): boolean {
-  const projectId = process.env['EXPO_PUBLIC_FIREBASE_PROJECT_ID'] ?? process.env['FIREBASE_PROJECT_ID'] ?? ''
-  return Boolean(projectId) && !PLACEHOLDERS.has(projectId)
+  return true
 }
 
 /** Feature flag keys (used with Firebase Remote Config) */
