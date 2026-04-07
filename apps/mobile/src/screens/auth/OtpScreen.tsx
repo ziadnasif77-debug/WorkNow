@@ -7,8 +7,9 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
+import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, OtpInput, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, IconSize } from '../../constants/theme'
 
 const RESEND_SECONDS = 60
 
@@ -65,13 +66,9 @@ export default function OtpScreen() {
   }
 
   return (
-    <Screen avoidKeyboard>
+    <Screen avoidKeyboard padded={false}>
+      <ScreenHeader title={t('auth.otp')} />
       <View style={styles.container}>
-        {/* Back */}
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.back_text}>← {t('common.back')}</Text>
-        </TouchableOpacity>
-
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.emoji}>📱</Text>
@@ -118,11 +115,9 @@ export default function OtpScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: Spacing.lg },
-  back:      { paddingTop: Spacing.lg, paddingBottom: Spacing.md },
-  back_text: { color: Colors.primary, fontSize: FontSize.md },
 
   header: { alignItems: 'center', paddingVertical: Spacing.xl, gap: Spacing.sm },
-  emoji:  { fontSize: 56 },
+  emoji:  { fontSize: IconSize.xxxl },
   title:  { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
   subtitle: { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center', lineHeight: 22 },
 

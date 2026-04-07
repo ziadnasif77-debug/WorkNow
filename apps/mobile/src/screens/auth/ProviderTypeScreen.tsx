@@ -14,8 +14,9 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { httpsCallable } from 'firebase/functions'
 import { useAuthStore } from '../../stores/authStore'
 import { firebaseFunctions } from '../../lib/firebase'
+import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { firebaseAuth } from '../../lib/firebase'
 import type { ProviderType } from '@workfix/types'
 
@@ -88,9 +89,9 @@ export default function ProviderTypeScreen() {
 
   if (step === 'type') {
     return (
-      <Screen scroll>
+      <Screen scroll padded={false}>
+        <ScreenHeader title={t('auth.providerTypeTitle')} />
         <View style={styles.header}>
-          <Text style={styles.title}>{t('auth.providerTypeTitle')}</Text>
           <Text style={styles.subtitle}>{t('auth.providerTypeSubtitle')}</Text>
         </View>
 

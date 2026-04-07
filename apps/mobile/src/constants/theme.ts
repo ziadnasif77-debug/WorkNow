@@ -65,6 +65,28 @@ export const FontSize = {
   xxxl: 30,
 } as const
 
+// Icon / emoji sizes — use these instead of hardcoding fontSize for icons
+export const IconSize = {
+  xs:    12,
+  sm:    16,
+  md:    20,
+  lg:    24,
+  xl:    32,
+  xxl:   48,
+  xxxl:  64,
+  hero:  80,
+} as const
+
+// Avatar dimensions (diameter) — borderRadius should always be Radius.full
+export const AvatarSize = {
+  xs:  28,
+  sm:  36,
+  md:  44,
+  lg:  56,
+  xl:  80,
+  xxl: 96,
+} as const
+
 export const FontWeight = {
   regular: '400' as const,
   medium:  '500' as const,

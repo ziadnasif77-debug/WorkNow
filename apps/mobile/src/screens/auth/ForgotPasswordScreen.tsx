@@ -8,8 +8,9 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { firebaseAuth } from '../../lib/firebase'
+import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, IconSize } from '../../constants/theme'
 import { isValidEmail } from '@workfix/utils'
 
 export default function ForgotPasswordScreen() {
@@ -40,10 +41,8 @@ export default function ForgotPasswordScreen() {
   }
 
   return (
-    <Screen avoidKeyboard>
-      <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-        <Text style={styles.back_text}>← {t('common.back')}</Text>
-      </TouchableOpacity>
+    <Screen avoidKeyboard padded={false}>
+      <ScreenHeader title={t('auth.forgotPassword')} />
 
       {sent ? (
         <View style={styles.success_container}>
@@ -87,8 +86,6 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  back:      { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
-  back_text: { fontSize: FontSize.md, color: Colors.primary },
   form: { padding: Spacing.lg, gap: Spacing.md, paddingTop: Spacing.xl },
   title: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
   subtitle: { fontSize: FontSize.md, color: Colors.gray500, lineHeight: 22 },
@@ -96,7 +93,7 @@ const styles = StyleSheet.create({
     flex: 1, alignItems: 'center', justifyContent: 'center',
     padding: Spacing.xl, gap: Spacing.lg,
   },
-  success_emoji: { fontSize: 64 },
+  success_emoji: { fontSize: IconSize.xxxl },
   success_title: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
   success_body:  { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center', lineHeight: 24 },
 })

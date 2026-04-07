@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import { Analytics } from '../../lib/analytics'
 import { Button, Input, Divider, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 import { isValidEmail, isValidPhone } from '@workfix/utils'
 
 type Tab = 'email' | 'phone'
@@ -149,7 +149,7 @@ export default function LoginScreen() {
               Alert.alert('قريباً', 'تسجيل الدخول بـ Google قيد التطوير')
             }}
           variant="outline"
-          icon={<Text style={{ fontSize: 16 }}>G</Text>}
+          icon={<Text style={{ fontSize: IconSize.sm }}>G</Text>}
         />
       </View>
 

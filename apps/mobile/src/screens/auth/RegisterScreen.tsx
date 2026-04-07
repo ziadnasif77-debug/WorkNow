@@ -10,6 +10,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { Analytics } from '../../lib/analytics'
 import { Button, Input, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+
 import { isValidEmail } from '@workfix/utils'
 
 type Step = 'credentials' | 'role'
@@ -177,12 +178,12 @@ const styles = StyleSheet.create({
   role_desc:  { flex: 1, fontSize: FontSize.md, color: Colors.gray700, fontWeight: FontWeight.medium },
   role_desc_active: { color: Colors.primary },
   radio: {
-    width: 22, height: 22, borderRadius: 11,
+    width: 22, height: 22, borderRadius: Radius.full,
     borderWidth: 2, borderColor: Colors.gray300,
     alignItems: 'center', justifyContent: 'center',
   },
   radio_active: { borderColor: Colors.primary },
-  radio_inner:  { width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.primary },
+  radio_inner:  { width: 10, height: 10, borderRadius: Radius.full, backgroundColor: Colors.primary },
 
   error_box: {
     backgroundColor: Colors.errorLight, borderRadius: Radius.sm,
