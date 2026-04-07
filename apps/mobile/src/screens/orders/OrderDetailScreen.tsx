@@ -16,7 +16,8 @@ import { useAuth } from '../../hooks/useAuth'
 import { Analytics } from '../../lib/analytics'
 import { StatusBadge, StatusTimeline, QuoteCard } from '../../components/orders'
 import { Button } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
 
 export default function OrderDetailScreen() {
@@ -132,13 +133,10 @@ export default function OrderDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* ── Header ───────────────────────────────────────────────────── */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-            <Text style={styles.back_icon}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.order_id}>#{o.id.slice(-6).toUpperCase()}</Text>
-          <StatusBadge status={o.status} />
-        </View>
+        <ScreenHeader
+          title={`#${o.id.slice(-6).toUpperCase()}`}
+          rightEl={<StatusBadge status={o.status} />}
+        />
 
         {/* ── Timeline ─────────────────────────────────────────────────── */}
         <View style={styles.section}>
@@ -241,7 +239,7 @@ export default function OrderDetailScreen() {
         {canChat && (
           <TouchableOpacity
             style={styles.chat_btn}
-            onPress={() => router.push({ pathname: '/chat/[orderId]', params: { id: o.id } })}
+            onPress={() => router.push({ pathname: '/chat/[id]', params: { id: o.id } })}
           >
             <Text style={styles.chat_icon}>💬</Text>
           </TouchableOpacity>
@@ -303,14 +301,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   loading:   { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.sm,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  back:     { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon: { fontSize: 22, color: Colors.black },
-  order_id:  { flex: 1, fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
 
   section: {
     backgroundColor: Colors.white, margin: Spacing.md,
@@ -321,13 +311,13 @@ const styles = StyleSheet.create({
   info_rows:     { gap: 0 },
 
   payment_banner: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  payment_emoji:  { fontSize: 28 },
+  payment_emoji:  { fontSize: IconSize.xl },
   payment_label:  { fontSize: FontSize.md, fontWeight: FontWeight.medium, color: Colors.black },
   payment_amount: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.primary },
 
   quotes_list:  { gap: Spacing.md },
   waiting_box:  { alignItems: 'center', paddingVertical: Spacing.xl, gap: Spacing.sm },
-  waiting_emoji: { fontSize: 40 },
+  waiting_emoji: { fontSize: IconSize.xl },
   waiting_text:  { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center' },
 
   action_bar: {
@@ -343,5 +333,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray100, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: Colors.border,
   },
-  chat_icon: { fontSize: 22 },
+  chat_icon: { fontSize: IconSize.md },
 })
