@@ -13,7 +13,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { StatusBadge } from '../../components/orders'
 import { EmptyState } from '../../components/marketplace'
 import { Button, Input } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Order } from '@workfix/types'
 

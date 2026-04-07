@@ -13,7 +13,8 @@ import { useMarketplaceStore } from '../../stores/marketplaceStore'
 import { Analytics } from '../../lib/analytics'
 import { StarRating } from '../../components/marketplace'
 import { Button } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Review } from '@workfix/types'
 
@@ -43,13 +44,11 @@ export default function ProviderProfileScreen() {
 
   return (
     <View style={styles.container}>
+      <ScreenHeader title={p.displayName ?? t('provider.provider')} />
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* ── Hero banner ────────────────────────────────────────────────── */}
         <View style={styles.hero}>
-          <TouchableOpacity style={styles.back_btn} onPress={() => router.back()}>
-            <Text style={styles.back_icon}>←</Text>
-          </TouchableOpacity>
 
           <View style={styles.avatar_section}>
             {p.avatarUrl ? (
@@ -186,7 +185,7 @@ function ReviewCard({ review }: { review: Review }) {
 const reviewStyles = StyleSheet.create({
   card:    { paddingVertical: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border },
   header:  { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: 6 },
-  avatar:  { width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
+  avatar:  { width: AvatarSize.sm, height: AvatarSize.sm, borderRadius: Radius.full, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
   avatar_letter: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.primary },
   meta:    { flex: 1 },
   name:    { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.black },
@@ -200,19 +199,18 @@ const styles = StyleSheet.create({
 
   hero: {
     backgroundColor: Colors.white,
+    paddingTop: Spacing.lg,
     paddingBottom: Spacing.xl,
     alignItems: 'center',
     borderBottomLeftRadius: Radius.xl,
     borderBottomRightRadius: Radius.xl,
     ...Shadow.md,
   },
-  back_btn:  { alignSelf: 'flex-start', padding: Spacing.lg },
-  back_icon: { fontSize: 22, color: Colors.black },
 
   avatar_section: { position: 'relative', marginBottom: Spacing.md },
-  avatar: { width: 96, height: 96, borderRadius: 48, borderWidth: 3, borderColor: Colors.white, ...Shadow.md },
+  avatar: { width: AvatarSize.xxl, height: AvatarSize.xxl, borderRadius: Radius.full, borderWidth: 3, borderColor: Colors.white, ...Shadow.md },
   avatar_placeholder: { backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  avatar_letter: { fontSize: 36, fontWeight: FontWeight.bold, color: Colors.primary },
+  avatar_letter: { fontSize: IconSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },
 
   verified_badge: {
     position: 'absolute', bottom: -8, alignSelf: 'center',
@@ -254,5 +252,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray100, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: Colors.border,
   },
-  chat_icon: { fontSize: 22 },
+  chat_icon: { fontSize: IconSize.md },
 })

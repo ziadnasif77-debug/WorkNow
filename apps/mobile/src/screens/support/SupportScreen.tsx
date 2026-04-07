@@ -9,6 +9,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native'
 import { WebView } from 'react-native-webview'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import { useIsOnline } from '../../hooks/useNetworkState'
 
@@ -29,12 +30,7 @@ export default function SupportScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.back_icon}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>{t(config.title_key)}</Text>
-      </View>
+      <ScreenHeader title={t(config.title_key)} />
 
       {!isConnected && (
         <View style={styles.offline_banner}>
@@ -65,14 +61,6 @@ export default function SupportScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  back:      { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon: { fontSize: 22, color: Colors.black },
-  title:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   webview:   { flex: 1 },
   offline_banner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

@@ -13,7 +13,8 @@ import { useTranslation } from 'react-i18next'
 import { Analytics } from '../../lib/analytics'
 import { useOrdersStore } from '../../stores/ordersStore'
 import { Button, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 const REVIEW_TAGS = [
   { key: 'professional',  ar: 'محترف',      en: 'Professional' },
@@ -74,10 +75,10 @@ export default function ReviewScreen() {
 
   return (
     <Screen scroll padded={false}>
+      <ScreenHeader title={t('reviews.title')} />
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>{t('reviews.title')}</Text>
           <Text style={styles.subtitle}>
             {t('reviews.subtitle', { name: providerName ?? t('provider.provider') })}
           </Text>
@@ -177,14 +178,13 @@ export default function ReviewScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: Spacing.lg, gap: Spacing.xl },
 
-  header:   { alignItems: 'center', gap: Spacing.sm, paddingTop: Spacing.lg },
-  title:    { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
+  header:   { alignItems: 'center', gap: Spacing.sm, paddingTop: Spacing.sm },
   subtitle: { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center' },
 
   stars_section: { alignItems: 'center', gap: Spacing.md },
   stars_row:     { flexDirection: 'row', gap: Spacing.sm },
   star_btn:      { padding: 4 },
-  star:          { fontSize: 44, color: Colors.gray200 },
+  star:          { fontSize: IconSize.xxl, color: Colors.gray200 },
   star_filled:   { color: '#F59E0B' },
   rating_label:  { fontSize: FontSize.lg, color: Colors.gray500, fontWeight: FontWeight.medium },
 

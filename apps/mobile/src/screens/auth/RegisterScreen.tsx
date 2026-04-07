@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import { Analytics } from '../../lib/analytics'
 import { Button, Input, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 import { isValidEmail } from '@workfix/utils'
 
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   title:  { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
 
   steps: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.xl, gap: 0 },
-  step_dot: { width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.gray200 },
+  step_dot: { width: 12, height: 12, borderRadius: Radius.full, backgroundColor: Colors.gray200 },
   step_dot_active: { backgroundColor: Colors.primary },
   step_line: { width: 48, height: 2, backgroundColor: Colors.gray200 },
 
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   role_card_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  role_emoji: { fontSize: 28 },
+  role_emoji: { fontSize: IconSize.xl },
   role_desc:  { flex: 1, fontSize: FontSize.md, color: Colors.gray700, fontWeight: FontWeight.medium },
   role_desc_active: { color: Colors.primary },
   radio: {

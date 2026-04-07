@@ -16,7 +16,7 @@ import { useOrdersStore } from '../../stores/ordersStore'
 import { firebaseFunctions, firebaseAuth } from '../../lib/firebase'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 const DISPUTE_REASONS = [
   { key: 'not_completed',    ar: 'لم تُنجز الخدمة',        en: 'Service not completed' },
@@ -182,20 +182,13 @@ export default function DisputeScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  title:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-
   content: { padding: Spacing.lg, gap: Spacing.lg },
 
   warning_box: {
     flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.md,
     backgroundColor: Colors.warningLight, borderRadius: Radius.md, padding: Spacing.md,
   },
-  warning_emoji: { fontSize: 22 },
+  warning_emoji: { fontSize: IconSize.md },
   warning_text:  { flex: 1, fontSize: FontSize.sm, color: Colors.warning, lineHeight: 20 },
 
   section_label: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
@@ -210,12 +203,12 @@ const styles = StyleSheet.create({
   },
   reason_row_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
   radio: {
-    width: 20, height: 20, borderRadius: 10,
+    width: 20, height: 20, borderRadius: Radius.full,
     borderWidth: 2, borderColor: Colors.gray300,
     alignItems: 'center', justifyContent: 'center',
   },
   radio_active:      { borderColor: Colors.primary },
-  radio_inner:       { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
+  radio_inner:       { width: 8, height: 8, borderRadius: Radius.full, backgroundColor: Colors.primary },
   reason_label:      { flex: 1, fontSize: FontSize.md, color: Colors.gray700 },
   reason_label_active: { color: Colors.primary, fontWeight: FontWeight.medium },
 
@@ -226,7 +219,7 @@ const styles = StyleSheet.create({
   evidence_img:   { width: '100%', height: '100%' },
   evidence_remove: {
     position: 'absolute', top: 4, right: 4,
-    width: 20, height: 20, borderRadius: 10,
+    width: 20, height: 20, borderRadius: Radius.full,
     backgroundColor: Colors.error, alignItems: 'center', justifyContent: 'center',
   },
   evidence_remove_text: { color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold },
@@ -235,7 +228,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
     alignItems: 'center', justifyContent: 'center', gap: 4,
   },
-  evidence_add_icon:  { fontSize: 24 },
+  evidence_add_icon:  { fontSize: IconSize.lg },
   evidence_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },
 
   submit_btn: {},

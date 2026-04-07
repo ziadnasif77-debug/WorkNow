@@ -12,7 +12,8 @@ import { useTranslation } from 'react-i18next'
 import { Analytics } from '../../lib/analytics'
 import { usePaymentsStore } from '../../stores/paymentsStore'
 import { Button, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import type { SubscriptionTier } from '@workfix/types'
 
 interface Plan {
@@ -101,12 +102,7 @@ export default function SubscriptionsScreen() {
 
   return (
     <Screen scroll padded={false}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.back_icon}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>{t('subscriptions.title')}</Text>
-      </View>
+      <ScreenHeader title={t('subscriptions.title')} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
@@ -210,15 +206,6 @@ export default function SubscriptionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  back:      { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon: { fontSize: 22, color: Colors.black },
-  title:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-
   content: { padding: Spacing.lg, gap: Spacing.md },
 
   billing_toggle: {
@@ -246,16 +233,16 @@ const styles = StyleSheet.create({
   popular_text: { color: Colors.white, fontSize: FontSize.xs, fontWeight: FontWeight.bold },
 
   plan_header:    { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  plan_emoji:     { fontSize: 28 },
+  plan_emoji:     { fontSize: IconSize.xl },
   plan_name_wrap: { flex: 1 },
   plan_name:      { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
   plan_price:     { fontSize: FontSize.sm, color: Colors.gray500, marginTop: 2 },
   plan_radio: {
-    width: 22, height: 22, borderRadius: 11,
+    width: 22, height: 22, borderRadius: Radius.full,
     borderWidth: 2, borderColor: Colors.gray300,
     alignItems: 'center', justifyContent: 'center',
   },
-  plan_radio_inner: { width: 10, height: 10, borderRadius: 5 },
+  plan_radio_inner: { width: 10, height: 10, borderRadius: Radius.full },
   yearly_note:    { fontSize: FontSize.xs, color: Colors.gray400 },
 
   features_list:  { gap: 8 },

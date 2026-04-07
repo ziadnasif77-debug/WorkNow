@@ -233,19 +233,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white, ...Shadow.sm,
   },
   type_card_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  type_emoji: { fontSize: 32 },
+  type_emoji: { fontSize: IconSize.xl },
   type_text:  { flex: 1 },
   type_label: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
   type_label_active: { color: Colors.primary },
   type_desc:  { fontSize: FontSize.sm, color: Colors.gray500, marginTop: 2 },
 
   radio: {
-    width: 22, height: 22, borderRadius: 11,
+    width: 22, height: 22, borderRadius: Radius.full,
     borderWidth: 2, borderColor: Colors.gray300,
     alignItems: 'center', justifyContent: 'center',
   },
   radio_active: { borderColor: Colors.primary },
-  radio_inner:  { width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.primary },
+  radio_inner:  { width: 10, height: 10, borderRadius: Radius.full, backgroundColor: Colors.primary },
 
   business_input: { marginBottom: Spacing.md },
   btn: { marginTop: Spacing.sm },
@@ -258,17 +258,17 @@ const styles = StyleSheet.create({
   doc_img:   { width: '100%', height: '100%' },
   doc_remove: {
     position: 'absolute', top: 4, right: 4,
-    width: 22, height: 22, borderRadius: 11,
+    width: 22, height: 22, borderRadius: Radius.full,
     backgroundColor: Colors.error,
     alignItems: 'center', justifyContent: 'center',
   },
-  doc_remove_text: { color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold },
+  doc_remove_text: { color: Colors.white, fontSize: IconSize.xs, fontWeight: FontWeight.bold },
   doc_add: {
     width: 100, height: 120, borderRadius: Radius.md,
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
     alignItems: 'center', justifyContent: 'center', gap: 4,
   },
-  doc_add_icon:  { fontSize: 28, color: Colors.gray400 },
+  doc_add_icon:  { fontSize: IconSize.xl, color: Colors.gray400 },
   doc_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },
 
   kyc_hints: { gap: 6, marginBottom: Spacing.lg },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   error_text: { color: Colors.error, fontSize: FontSize.sm },
 
   pending_container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.xl },
-  pending_emoji: { fontSize: 72, marginBottom: Spacing.lg },
+  pending_emoji: { fontSize: IconSize.xxxl, marginBottom: Spacing.lg },
   pending_title: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center', marginBottom: Spacing.md },
   pending_body:  { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center', lineHeight: 24 },
 })
