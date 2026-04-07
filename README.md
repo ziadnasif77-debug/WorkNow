@@ -19,14 +19,12 @@
 ## المتطلبات
 
 ```
-Node.js   v24.11.0  ← مطلوب بالضبط (استخدم nvm install 24.11.0)
+Node.js   >= 20.0.0  (مُوصى به: 20 LTS — Cloud Functions تتطلب Node 20)
 pnpm      >= 9.0.0
 Expo CLI  >= 10.0.0 (npm i -g expo-cli)
 EAS CLI   >= 10.0.0 (npm i -g eas-cli)
 Firebase CLI >= 13.0.0 (npm i -g firebase-tools)
 ```
-
-> **تحذير Node 24 + OpenSSL**: يجب تعيين `NODE_OPTIONS=--openssl-legacy-provider` قبل أي أمر Metro/Expo لأن Node 24 يستخدم OpenSSL 3 الذي يكسر بعض crypto algorithms المستخدمة داخلياً.
 
 ## تثبيت وتشغيل
 
