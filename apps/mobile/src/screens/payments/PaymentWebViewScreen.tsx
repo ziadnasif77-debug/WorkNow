@@ -11,6 +11,7 @@ import {
 import { WebView, type WebViewNavigation } from 'react-native-webview'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Colors, Spacing, FontSize, FontWeight, IconSize } from '../../constants/theme'
 
 // Tap Payments redirects back to our callback URL after payment
@@ -20,6 +21,7 @@ const FAILURE_INDICATORS = ['status=CANCELLED', 'status=DECLINED', 'status=FAILE
 export default function PaymentWebViewScreen() {
   const { t }    = useTranslation()
   const router   = useRouter()
+  const insets   = useSafeAreaInsets()
   const { url, orderId } = useLocalSearchParams<{ url: string; orderId: string }>()
 
   const [isLoading,  setIsLoading]  = useState(true)
@@ -92,7 +94,7 @@ export default function PaymentWebViewScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
         <TouchableOpacity
           onPress={() => Alert.alert(
             t('payment.cancelTitle'),

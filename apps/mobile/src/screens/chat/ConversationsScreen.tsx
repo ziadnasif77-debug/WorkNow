@@ -8,6 +8,7 @@ import {
   TouchableOpacity, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMessagingStore } from '../../stores/messagingStore'
 import { useAuth } from '../../hooks/useAuth'
 import { EmptyState } from '../../components/marketplace'
@@ -18,6 +19,7 @@ import type { Conversation } from '@workfix/types'
 export default function ConversationsScreen() {
   const { t }    = useTranslation()
   const router   = useRouter()
+  const insets   = useSafeAreaInsets()
   const { user } = useAuth()
   const { conversations, convsLoading, subscribeConversations, unsubscribeAll } = useMessagingStore()
 
@@ -28,7 +30,7 @@ export default function ConversationsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
         <Text style={styles.title}>{t('tabs.messages')}</Text>
       </View>
 
