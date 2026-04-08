@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMarketplaceStore } from '../../stores/marketplaceStore'
 import { Analytics } from '../../lib/analytics'
 import { useLocation } from '../../hooks/useLocation'
@@ -21,6 +22,7 @@ type SortBy = 'distance' | 'rating' | 'price'
 export default function SearchScreen() {
   const { t }   = useTranslation()
   const router  = useRouter()
+  const insets  = useSafeAreaInsets()
   const params  = useLocalSearchParams<{ cat?: string; q?: string }>()
   const location = useLocation()
   const {
@@ -61,7 +63,7 @@ export default function SearchScreen() {
   return (
     <View style={styles.container}>
       {/* ── Top bar ─────────────────────────────────────────────────────── */}
-      <View style={styles.topbar}>
+      <View style={[styles.topbar, { paddingTop: insets.top + Spacing.sm }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.back_btn}>
           <Text style={styles.back_icon}>←</Text>
         </TouchableOpacity>

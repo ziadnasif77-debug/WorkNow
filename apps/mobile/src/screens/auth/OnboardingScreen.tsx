@@ -8,6 +8,7 @@ import {
   TouchableOpacity, Animated } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import { Button } from '../../components/ui'
 
@@ -48,9 +49,10 @@ const SLIDES: Slide[] = [
 ]
 
 export default function OnboardingScreen() {
-  const { t } = useTranslation()
-  const router = useRouter()
-  const flatRef = useRef<FlatList>(null)
+  const { t }     = useTranslation()
+  const router    = useRouter()
+  const insets    = useSafeAreaInsets()
+  const flatRef   = useRef<FlatList>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
   function finish() {
@@ -70,7 +72,7 @@ export default function OnboardingScreen() {
   const isLast = activeIndex === SLIDES.length - 1
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <FlatList
         ref={flatRef}
         data={SLIDES}

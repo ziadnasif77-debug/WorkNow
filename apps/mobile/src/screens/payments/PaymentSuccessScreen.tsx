@@ -7,12 +7,14 @@ import { View, Text, StyleSheet, Animated } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Analytics } from '../../lib/analytics'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 export default function PaymentSuccessScreen() {
   const { t }       = useTranslation()
   const router      = useRouter()
+  const insets      = useSafeAreaInsets()
   const { orderId } = useLocalSearchParams<{ orderId: string }>()
 
   // Fire payment complete event once
@@ -36,7 +38,7 @@ export default function PaymentSuccessScreen() {
   }, [])
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Success icon */}
       <Animated.View style={[styles.icon_wrap, { transform: [{ scale: scaleAnim }] }]}>
         <View style={styles.icon_circle}>

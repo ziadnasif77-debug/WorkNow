@@ -8,6 +8,7 @@ import {
   Modal, TextInput, ActivityIndicator, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOrdersStore } from '../../stores/ordersStore'
 import { useAuth } from '../../hooks/useAuth'
 import { StatusBadge } from '../../components/orders'
@@ -20,6 +21,7 @@ import type { Order } from '@workfix/types'
 export default function ProviderDashboardScreen() {
   const { t }    = useTranslation()
   const router   = useRouter()
+  const insets   = useSafeAreaInsets()
   const { user } = useAuth()
   const {
     incomingOrders, incomingLoading,
@@ -78,7 +80,7 @@ export default function ProviderDashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
         <Text style={styles.title}>{t('provider.dashboard')}</Text>
         <View style={styles.stats_pill}>
           <Text style={styles.stats_text}>{active.length} {t('provider.newRequests')}</Text>
