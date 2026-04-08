@@ -228,6 +228,42 @@ export const confirmCompletion = callable(async (data, context) => {
   return { ok: true }
 })
 
+// ── markOrderComplete ─────────────────────────────────────────────────────────
+// Provider marks "I have finished the work" → in_progress → completed
+// Customer then calls confirmCompletion() → completed → closed
+
+const markOrderCompleteSchema = z.object({
+  orderId: z.string().min(1),
+})
+
+export const markOrderComplete = callable(async (data, context) => {
+  const { uid, role } = requireAuth(context, ['provider'])
+  if (role !== 'provider') appError('AUTH_002', 'Only providers can mark orders complete', 'permission-denied')
+  await rateLimit(uid, 'api')
+
+  const input = validate(markOrderCompleteSchema, data)
+
+  const orderRef = db.collection('orders').doc(input.orderId)
+  const orderDoc = await orderRef.get()
+  if (!orderDoc.exists) appError('ORD_001', 'Order not found', 'not-found')
+
+  const order = orderDoc.data() as Order
+  if (order.providerId !== uid) {
+    appError('AUTH_002', 'You are not the provider for this order', 'permission-denied')
+  }
+  if (!isValidTransition(order.status, 'completed')) {
+    appError('ORD_002', `Cannot mark complete from status '${order.status}'`)
+  }
+
+  await orderRef.update({
+    status:      'completed',
+    completedAt: serverTimestamp(),
+    updatedAt:   serverTimestamp(),
+  })
+
+  return { ok: true }
+})
+
 // ── cancelOrder ───────────────────────────────────────────────────────────────
 
 const cancelOrderSchema = z.object({

@@ -18,6 +18,7 @@ const completeProfileSchema = z.object({
 
 export const completeProfile = callable(async (data, context) => {
   const { uid } = requireAuth(context)
+  await rateLimit(uid, 'api')
   const input = validate(completeProfileSchema, data)
 
   const userRef = db.collection('users').doc(uid)
@@ -61,6 +62,7 @@ const setProviderTypeSchema = z.object({
 
 export const setProviderType = callable(async (data, context) => {
   const { uid } = requireAuth(context)
+  await rateLimit(uid, 'kyc')
   const input = validate(setProviderTypeSchema, data)
 
   if (input.type === 'company' && !input.businessName) {

@@ -112,7 +112,8 @@ service cloud.firestore {
           (get(/databases/$(database)/documents/conversations/$(convId)).data.customerId == request.auth.uid ||
            get(/databases/$(database)/documents/conversations/$(convId)).data.providerId == request.auth.uid) &&
           request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['isRead','readAt']);
+            .hasOnly(['isRead','readAt']) &&
+          request.resource.data.isRead == true;
         allow delete: if false;
       }
     }
@@ -178,39 +179,54 @@ service cloud.firestore {
     match /scheduledReleases/{docId} {
       allow read, write: if false; // Functions only
     }
-  }
-
 
     // ── invoices — billing records ────────────────────────────────────────────────
     // Customer or provider of the order can read their own invoices
     // Write only via CF admin SDK
     match /invoices/{invoiceId} {
-      allow read: if isAuth() && (
+      allow read: if isAdmin() || (isAuth() && (
         resource.data.customerId == request.auth.uid ||
         resource.data.providerId == request.auth.uid
-      ) || isAdmin();
+      ));
       allow write: if false;
     }
 
     // ── invoiceCounters — sequential invoice numbering ────────────────────────────
-    // Read-only for clients (counters only written by CF)
     match /invoiceCounters/{counterId} {
       allow read:  if isAdmin();
       allow write: if false;
     }
 
     // ── dataExports — GDPR data portability ───────────────────────────────────────
-    // Users can read their own export records; writes via CF only
     match /dataExports/{exportId} {
       allow read: if isAuth() && resource.data.uid == request.auth.uid;
-      allow write: if false;  // CF admin SDK only
+      allow write: if false;
     }
 
     // ── deletionRequests — GDPR right to erasure ──────────────────────────────────
-    // Users can read their own deletion request; writes via CF only
     match /deletionRequests/{uid} {
       allow read: if isOwner(uid);
-      allow write: if false;  // CF admin SDK only
+      allow write: if false;
+    }
+
+    // ── System collections — Admin SDK only, no client access ─────────────────────
+    match /_auditLogs/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /_rateLimits/{docId} {
+      allow read, write: if false;
+    }
+
+    match /_taskQueue/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── fraudAlerts — admin read only, written by triggers ────────────────────────
+    match /fraudAlerts/{alertId} {
+      allow read:  if isAdmin();
+      allow write: if false;
     }
 
   }

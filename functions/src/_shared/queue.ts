@@ -6,7 +6,7 @@
 
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
-import { db } from './helpers'
+import { db, serverTimestamp } from './helpers'
 import { logger } from './monitoring'
 
 export type TaskType =
@@ -125,8 +125,8 @@ async function executeTask(task: Task): Promise<void> {
 
     case 'process_payout': {
       const { providerId, amount } = task.payload as { providerId: string; amount: number }
-      logger.payment('auto_payout', { providerId, amount })
-      // Payout logic would go here
+      const { processPayout } = await import('../payments/payout')
+      await processPayout(providerId, amount)
       break
     }
 
@@ -274,7 +274,7 @@ export async function expireOldDataExports(): Promise<void> {
 
   const batch = db.batch()
   expired.docs.forEach(doc => {
-    batch.update(doc.ref, { status: 'expired', updatedAt: db.collection('_').doc().id })
+    batch.update(doc.ref, { status: 'expired', updatedAt: serverTimestamp() })
   })
   await batch.commit()
   logger.info('Expired data export records', { count: expired.size })
