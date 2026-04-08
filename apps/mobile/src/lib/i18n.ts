@@ -1234,10 +1234,11 @@ const EXTRA_SV = {
 
 const savedLang = (storage.getString('lang') ?? 'ar') as SupportedLocale
 
-// allowRTL(true) once — tells RN that RTL is supported.
-// forceRTL is only changed inside changeLanguage() when direction flips.
-// This avoids unnecessary layout recalculations on every module load.
+// Always sync RTL with the persisted language on every module load.
+// This ensures RTL is correctly applied even if the native state didn't
+// survive an Expo Go reload or a cold start after a direction switch.
 I18nManager.allowRTL(true)
+I18nManager.forceRTL(isRtlLocale(savedLang))
 
 // Deep merge: combine base translations with EXTRA_ namespaces
 // Uses spread per-namespace to avoid shallow-overwrite problem
@@ -1275,13 +1276,14 @@ void i18n.use(initReactI18next).init({
  * - en  ↔  no  ↔  sv → instant, no reload needed (all LTR)
  */
 export async function changeLanguage(lang: SupportedLocale): Promise<void> {
-  const goingRTL = isRtlLocale(lang)
-  const nowRTL   = I18nManager.isRTL   // read live device state (survives reload)
+  const currentLang = (storage.getString('lang') ?? 'ar') as SupportedLocale
+  const goingRTL    = isRtlLocale(lang)
+  const wasRTL      = isRtlLocale(currentLang)  // compare language-based RTL, not native state
 
   // Persist first — survives the upcoming reload if direction flips
   storage.set('lang', lang)
 
-  if (goingRTL !== nowRTL) {
+  if (goingRTL !== wasRTL) {
     // Direction flip: must forceRTL + full reload so native layout engine re-applies.
     // On web, RTL is handled by CSS — no native reload needed.
     I18nManager.allowRTL(true)
@@ -1293,7 +1295,7 @@ export async function changeLanguage(lang: SupportedLocale): Promise<void> {
       await i18n.changeLanguage(lang)
     }
   } else {
-    // Same direction (EN ↔ NO ↔ SV): instant, zero-reload swap
+    // Same direction (EN ↔ NO ↔ SV, or AR ↔ AR): instant, zero-reload swap
     await i18n.changeLanguage(lang)
   }
 }
