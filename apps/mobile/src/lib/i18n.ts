@@ -70,8 +70,14 @@ interface Translations {
     scheduleNow: string; scheduleLater: string; status: string
     quoteReceived: string; acceptQuote: string; rejectQuote: string
     confirmDone: string; raiseDispute: string; noOrders: string
+    markComplete: string; markCompleteDesc: string; rejectQuoteConfirm: string
     downloadInvoice: string; downloadInvoiceHint: string
     invoiceReady: string; invoiceReadyDesc: string; invoiceError: string
+  }
+  stats: {
+    thisMonth: string; allTime: string; orders: string; earnings: string
+    completed: string; cancelled: string; rating: string; reviews: string
+    totalEarnings: string; afterCommission: string
   }
   payment: {
     title: string; total: string; method: string; card: string
@@ -158,6 +164,8 @@ const ar: Translations = {
     status: 'الحالة', quoteReceived: 'تلقّيت عرض سعر',
     acceptQuote: 'قبول العرض', rejectQuote: 'رفض',
     confirmDone: 'تأكيد الإنجاز', raiseDispute: 'رفع نزاع',
+    markComplete: 'أنهيت العمل', markCompleteDesc: 'هل أتممت تنفيذ الخدمة؟ سيُخطَر العميل للتأكيد.',
+    rejectQuoteConfirm: 'إلغاء الطلب وردّ جميع العروض؟',
     noOrders: 'لا توجد طلبات حتى الآن',
     downloadInvoice: 'تحميل الفاتورة',
     downloadInvoiceHint: 'يفتح الفاتورة بصيغة PDF في المتصفح',
@@ -221,6 +229,13 @@ const ar: Translations = {
     policiesTitle: 'السياسات والقانونية', contactDPO: 'التواصل مع مسؤول حماية البيانات',
     legalNote: 'WorkFix ملتزم بـ GDPR ونظام PDPL السعودي.',
   },
+  stats: {
+    thisMonth: 'هذا الشهر', allTime: 'إجمالي',
+    orders: 'الطلبات', earnings: 'الأرباح',
+    completed: 'مكتملة', cancelled: 'ملغاة',
+    rating: 'التقييم', reviews: 'تقييمات',
+    totalEarnings: 'إجمالي الأرباح', afterCommission: 'بعد خصم عمولة المنصة (12%)',
+  },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -263,6 +278,8 @@ const en: Translations = {
     status: 'Status', quoteReceived: 'Quote Received',
     acceptQuote: 'Accept Quote', rejectQuote: 'Reject',
     confirmDone: 'Confirm Completion', raiseDispute: 'Raise Dispute',
+    markComplete: 'Mark as Complete', markCompleteDesc: 'Have you finished the work? The customer will be notified to confirm.',
+    rejectQuoteConfirm: 'Cancel the order and reject all quotes?',
     noOrders: 'No orders yet',
     downloadInvoice: 'Download Invoice',
     downloadInvoiceHint: 'Opens the PDF invoice in your browser',
@@ -326,6 +343,13 @@ const en: Translations = {
     policiesTitle: 'Policies & Legal', contactDPO: 'Contact Data Protection Officer',
     legalNote: 'WorkFix complies with GDPR, Saudi PDPL, and applicable data protection laws.',
   },
+  stats: {
+    thisMonth: 'This Month', allTime: 'All Time',
+    orders: 'Orders', earnings: 'Earnings',
+    completed: 'Completed', cancelled: 'Cancelled',
+    rating: 'Rating', reviews: 'Reviews',
+    totalEarnings: 'Total Earnings', afterCommission: 'After platform commission (12%)',
+  },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -368,6 +392,8 @@ const no: Translations = {
     status: 'Status', quoteReceived: 'Tilbud mottatt',
     acceptQuote: 'Godta tilbud', rejectQuote: 'Avslå',
     confirmDone: 'Bekreft fullføring', raiseDispute: 'Åpne tvist',
+    markComplete: 'Marker som fullført', markCompleteDesc: 'Har du fullført arbeidet? Kunden vil bli varslet for bekreftelse.',
+    rejectQuoteConfirm: 'Avbryt bestillingen og avslå alle tilbud?',
     noOrders: 'Ingen bestillinger ennå',
     downloadInvoice: 'Last ned faktura',
     downloadInvoiceHint: 'Åpner PDF-fakturaen i nettleseren',
@@ -431,6 +457,13 @@ const no: Translations = {
     policiesTitle: 'Retningslinjer', contactDPO: 'Kontakt personvernansvarlig',
     legalNote: 'WorkFix overholder GDPR og norsk personvernlovgivning.',
   },
+  stats: {
+    thisMonth: 'Denne måneden', allTime: 'Totalt',
+    orders: 'Bestillinger', earnings: 'Inntekter',
+    completed: 'Fullført', cancelled: 'Kansellert',
+    rating: 'Vurdering', reviews: 'Anmeldelser',
+    totalEarnings: 'Totale inntekter', afterCommission: 'Etter plattformprovisjon (12%)',
+  },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -473,6 +506,8 @@ const sv: Translations = {
     status: 'Status', quoteReceived: 'Offert mottagen',
     acceptQuote: 'Godkänn offert', rejectQuote: 'Avvisa',
     confirmDone: 'Bekräfta slutförande', raiseDispute: 'Öppna tvist',
+    markComplete: 'Markera som slutfört', markCompleteDesc: 'Har du slutfört arbetet? Kunden meddelas för bekräftelse.',
+    rejectQuoteConfirm: 'Avbryt beställningen och avvisa alla offerter?',
     noOrders: 'Inga beställningar ännu',
     downloadInvoice: 'Ladda ner faktura',
     downloadInvoiceHint: 'Öppnar PDF-fakturan i webbläsaren',
@@ -535,6 +570,13 @@ const sv: Translations = {
     gracePeriodNote: 'Du kan avbryta inom 30 dagar genom att logga in.',
     policiesTitle: 'Policyer', contactDPO: 'Kontakta dataskyddsombud',
     legalNote: 'WorkFix följer GDPR och svenska dataskyddslagar.',
+  },
+  stats: {
+    thisMonth: 'Denna månad', allTime: 'Totalt',
+    orders: 'Beställningar', earnings: 'Intäkter',
+    completed: 'Slutförda', cancelled: 'Avbrutna',
+    rating: 'Betyg', reviews: 'Recensioner',
+    totalEarnings: 'Totala intäkter', afterCommission: 'Efter plattformsprovisjon (12%)',
   },
 }
 

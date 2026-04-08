@@ -2,9 +2,9 @@
 // Login Screen — Email or Phone, Google sign-in
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
-  View, Text, StyleSheet, TouchableOpacity, Image, Alert,
+  View, Text, StyleSheet, TouchableOpacity, Image, Alert, Platform,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -14,12 +14,29 @@ import { Button, Input, Divider, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 import { isValidEmail, isValidPhone } from '@workfix/utils'
 
+// expo-firebase-recaptcha provides a native-compatible ApplicationVerifier.
+// It renders an invisible modal that handles reCAPTCHA for iOS/Android.
+// Import lazily so the app doesn't crash if the package is missing in Expo Go.
+let FirebaseRecaptchaVerifierModal: React.ComponentType<{
+  ref: React.Ref<unknown>
+  firebaseConfig: Record<string, unknown>
+  attemptInvisibleVerification?: boolean
+}> | null = null
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  FirebaseRecaptchaVerifierModal = (require('expo-firebase-recaptcha') as {
+    FirebaseRecaptchaVerifierModal: typeof FirebaseRecaptchaVerifierModal
+  }).FirebaseRecaptchaVerifierModal
+} catch { /* package not installed — phone OTP will warn gracefully */ }
+
 type Tab = 'email' | 'phone'
 
 export default function LoginScreen() {
   const { t } = useTranslation()
   const router = useRouter()
-  const { signInEmail, sendPhoneOtp, isLoading, error, clearError } = useAuthStore()
+  const { signInEmail, sendPhoneOtp, setRecaptchaVerifier, isLoading, error, clearError } = useAuthStore()
+
+  const recaptchaRef = useRef<unknown>(null)
 
   const [tab,      setTab]      = useState<Tab>('phone')
   const [email,    setEmail]    = useState('')
@@ -48,6 +65,16 @@ export default function LoginScreen() {
         await signInEmail(email.trim(), password)
         Analytics.login('email')
       } else {
+        // Inject the reCAPTCHA verifier before calling sendPhoneOtp
+        if (recaptchaRef.current) {
+          setRecaptchaVerifier(recaptchaRef.current)
+        } else if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          // Web fallback — RecaptchaVerifier created inline
+          const { RecaptchaVerifier } = await import('firebase/auth')
+          const { firebaseAuth } = await import('../../lib/firebase')
+          const webVerifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' })
+          setRecaptchaVerifier(webVerifier)
+        }
         await sendPhoneOtp(phone.trim())
         Analytics.signUpStart('phone')
         router.push({ pathname: '/auth/otp', params: { phone: phone.trim() } })
@@ -59,6 +86,18 @@ export default function LoginScreen() {
 
   return (
     <Screen scroll avoidKeyboard>
+      {/* reCAPTCHA modal — renders invisibly on native, no-op on web */}
+      {FirebaseRecaptchaVerifierModal && (
+        <FirebaseRecaptchaVerifierModal
+          ref={recaptchaRef}
+          firebaseConfig={
+            (require('../../lib/firebase') as { firebaseApp: { options: Record<string, unknown> } })
+              .firebaseApp.options
+          }
+          attemptInvisibleVerification
+        />
+      )}
+
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.logo}>WorkFix</Text>

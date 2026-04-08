@@ -39,6 +39,7 @@ interface MessagingState {
   // Internal subscriptions
   _unsubConvs:         Unsubscribe | null
   _unsubMessages:      Unsubscribe | null
+  _unsubConvDoc:       Unsubscribe | null   // separate listener for typing/unread on conv doc
   _typingTimer:        ReturnType<typeof setTimeout> | null
 
   // Actions
@@ -64,6 +65,7 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
   sendError:        null,
   _unsubConvs:      null,
   _unsubMessages:   null,
+  _unsubConvDoc:    null,
   _typingTimer:     null,
 
   // ── subscribeConversations ─────────────────────────────────────────────────
@@ -125,49 +127,53 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
 
   // ── subscribeMessages ─────────────────────────────────────────────────────
   subscribeMessages: (convId, myUid) => {
+    // Clean up any previous listeners (messages + conv doc)
     get()._unsubMessages?.()
+    get()._unsubConvDoc?.()
     set({ messagesLoading: true, messages: [], activeConvId: convId })
 
+    // ── 1. Messages listener ──────────────────────────────────────────────────
     const q = query(
       collection(firestore, 'conversations', convId, 'messages'),
       orderBy('sentAt', 'asc'),
       limit(MESSAGES_PAGE),
     )
-
-    const unsub = onSnapshot(q, snap => {
+    const unsubMessages = onSnapshot(q, snap => {
       const msgs = snap.docs.map(d => ({ ...d.data(), id: d.id } as Message))
       set({ messages: msgs, messagesLoading: false })
-
-      // Track typing from the conversation doc
-      const convRef = doc(firestore, 'conversations', convId)
-      onSnapshot(convRef, convSnap => {
-        if (!convSnap.exists()) return
-        const data      = convSnap.data() as Conversation
-        // TTL-based typing: derive isTyping from typingExpiresAt timestamps
-        const expiresMap: Record<string, number> = data.typingExpiresAt ?? {}
-        const now = Date.now()
-        const typing: Record<string, boolean> = {}
-        for (const [uid, expiresAt] of Object.entries(expiresMap)) {
-          typing[uid] = expiresAt > now
-        }
-        // Legacy: also merge old boolean typingStatus if present (migration)
-        const legacyTyping: Record<string, boolean> = data.typingStatus ?? {}
-        for (const [uid, val] of Object.entries(legacyTyping)) {
-          if (!(uid in typing)) typing[uid] = val  // only if not already set by TTL
-        }
-        const unread    = data.unreadCount  ?? {}
-        // Remove own typing from display
-        const othersTyping = Object.fromEntries(
-          Object.entries(typing).filter(([uid]) => uid !== myUid),
-        )
-        set({
-          typingUsers: othersTyping,
-          unreadCount: unread,
-        })
-      })
     }, () => set({ messagesLoading: false }))
 
-    set({ _unsubMessages: unsub })
+    // ── 2. Conversation doc listener (typing + unread) — kept separate ────────
+    // Previously this was nested inside the messages onSnapshot, creating a new
+    // listener on every message update → memory leak. Now it runs independently.
+    const convRef = doc(firestore, 'conversations', convId)
+    const unsubConvDoc = onSnapshot(convRef, convSnap => {
+      if (!convSnap.exists()) return
+      const data = convSnap.data() as Conversation
+
+      // TTL-based typing: derive isTyping from typingExpiresAt timestamps
+      const expiresMap: Record<string, number> = data.typingExpiresAt ?? {}
+      const now = Date.now()
+      const typing: Record<string, boolean> = {}
+      for (const [uid, expiresAt] of Object.entries(expiresMap)) {
+        typing[uid] = expiresAt > now
+      }
+      // Legacy: merge old boolean typingStatus if present (migration period)
+      const legacyTyping: Record<string, boolean> = data.typingStatus ?? {}
+      for (const [uid, val] of Object.entries(legacyTyping)) {
+        if (!(uid in typing)) typing[uid] = val
+      }
+      // Remove own typing from display
+      const othersTyping = Object.fromEntries(
+        Object.entries(typing).filter(([uid]) => uid !== myUid),
+      )
+      set({
+        typingUsers: othersTyping,
+        unreadCount: data.unreadCount ?? {},
+      })
+    })
+
+    set({ _unsubMessages: unsubMessages, _unsubConvDoc: unsubConvDoc })
 
     // Auto mark-read when opening
     void get().markRead(convId)
@@ -248,10 +254,11 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
   unsubscribeAll: () => {
     get()._unsubConvs?.()
     get()._unsubMessages?.()
+    get()._unsubConvDoc?.()
     const t = get()._typingTimer
     if (t) clearTimeout(t)
     set({
-      _unsubConvs: null, _unsubMessages: null, _typingTimer: null,
+      _unsubConvs: null, _unsubMessages: null, _unsubConvDoc: null, _typingTimer: null,
       activeConvId: null, messages: [], typingUsers: {},
     })
   },
