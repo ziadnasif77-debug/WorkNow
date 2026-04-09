@@ -30,12 +30,17 @@ interface AuthState {
   error:           string | null
 
   // Phone OTP flow
-  confirmationResult: ConfirmationResult | null
+  confirmationResult:   ConfirmationResult | null
+  // reCAPTCHA verifier — injected by the screen before calling sendPhoneOtp.
+  // On native (iOS/Android) this must be an ApplicationVerifier-compatible object
+  // (e.g. from expo-firebase-recaptcha). On web it's window.recaptchaVerifier.
+  recaptchaVerifier:    unknown | null
 
   // Actions
   initialize:           () => () => void   // returns unsubscribe
   signInEmail:          (email: string, password: string) => Promise<void>
   signUpEmail:          (email: string, password: string) => Promise<void>
+  setRecaptchaVerifier: (verifier: unknown) => void
   sendPhoneOtp:         (phone: string) => Promise<void>
   confirmPhoneOtp:      (otp: string) => Promise<void>
   completeProfile:      (payload: CompleteProfilePayload) => Promise<void>
@@ -53,6 +58,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isInitialized:      false,
   error:              null,
   confirmationResult: null,
+  recaptchaVerifier:  null,
+
+  // ── setRecaptchaVerifier ──────────────────────────────────────────────────
+  setRecaptchaVerifier: (verifier) => set({ recaptchaVerifier: verifier }),
 
   // ── initialize ─────────────────────────────────────────────────────────────
   initialize: () => {
@@ -102,12 +111,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   // ── Phone OTP ──────────────────────────────────────────────────────────────
+  // The calling screen must first call setRecaptchaVerifier(verifier) with a
+  // platform-appropriate ApplicationVerifier:
+  //   • iOS/Android: use FirebaseRecaptchaVerifierModal from expo-firebase-recaptcha
+  //   • Web:         window.recaptchaVerifier (RecaptchaVerifier instance)
   sendPhoneOtp: async phone => {
+    const verifier = get().recaptchaVerifier
+    if (!verifier) {
+      set({ error: 'يرجى إتمام التحقق بـ reCAPTCHA أولاً.' })
+      throw new Error('RecaptchaVerifier not set — call setRecaptchaVerifier() from the screen first')
+    }
     set({ isLoading: true, error: null })
     try {
-      // NOTE: requires reCAPTCHA verifier — set up in the component using
-      // expo-firebase-recaptcha or a WebView-based verifier
-      const confirmation = await signInWithPhoneNumber(firebaseAuth, phone, (window as unknown as { recaptchaVerifier: never })['recaptchaVerifier'])
+      const confirmation = await signInWithPhoneNumber(
+        firebaseAuth,
+        phone,
+        verifier as Parameters<typeof signInWithPhoneNumber>[2],
+      )
       set({ confirmationResult: confirmation })
     } catch (err) {
       set({ error: getErrorMessage(err) })

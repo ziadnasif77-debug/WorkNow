@@ -27,7 +27,8 @@ export default function OrderDetailScreen() {
   const { isCustomer, isProvider, user } = useAuth()
   const {
     activeOrder, activeQuotes, orderLoading, actionLoading,
-    loadOrderDetail, acceptQuote, confirmCompletion, cancelOrder, clearError,
+    loadOrderDetail, acceptQuote, confirmCompletion, cancelOrder,
+    markComplete, clearError,
   } = useOrdersStore()
 
   const [showCancelModal, setShowCancelModal] = useState(false)
@@ -46,11 +47,12 @@ export default function OrderDetailScreen() {
     )
   }
 
-  const o       = activeOrder
-  const canChat = ['confirmed', 'in_progress', 'completed'].includes(o.status)
-  const canCancel = ['pending', 'quoted'].includes(o.status)
-  const canConfirm = o.status === 'completed' && isCustomer
-  const canDispute = o.status === 'completed' && isCustomer
+  const o             = activeOrder
+  const canChat       = ['confirmed', 'in_progress', 'completed'].includes(o.status)
+  const canCancel     = ['pending', 'quoted'].includes(o.status)
+  const canConfirm    = o.status === 'completed' && isCustomer
+  const canDispute    = o.status === 'completed' && isCustomer
+  const canMarkDone   = o.status === 'in_progress' && isProvider && o.providerId === user?.uid
 
   // ── Actions ───────────────────────────────────────────────────────────────
   async function handleAcceptQuote(quoteId: string) {
@@ -67,14 +69,27 @@ export default function OrderDetailScreen() {
     } catch { /* error shown below */ }
   }
 
-  async function handleRejectQuote(quoteId: string) {
+  async function handleRejectQuote(_quoteId: string) {
+    // Quotes are rejected server-side atomically when the customer accepts another quote.
+    // For explicit "I don't want any of these" we cancel the whole order.
     Alert.alert(t('orders.rejectQuote'), t('orders.rejectQuoteConfirm'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('orders.rejectQuote'), style: 'destructive',
+        onPress: () => setShowCancelModal(true),
+      },
+    ])
+  }
+
+  async function handleMarkComplete() {
+    Alert.alert(t('orders.markComplete'), t('orders.markCompleteDesc'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('orders.markComplete'), style: 'default',
         onPress: async () => {
-          // Rejection is handled server-side when another quote is accepted
-          // For explicit rejection, we call cancelOrder with a note
+          try {
+            await markComplete(o.id)
+          } catch { /* error shown via actionError */ }
         },
       },
     ])
@@ -243,6 +258,15 @@ export default function OrderDetailScreen() {
           >
             <Text style={styles.chat_icon}>💬</Text>
           </TouchableOpacity>
+        )}
+
+        {canMarkDone && (
+          <Button
+            label={t('orders.markComplete')}
+            onPress={handleMarkComplete}
+            isLoading={actionLoading}
+            style={styles.main_action}
+          />
         )}
 
         {canConfirm && (

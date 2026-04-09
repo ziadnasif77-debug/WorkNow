@@ -18,6 +18,7 @@ export {
   createOrder,
   submitQuote,
   acceptQuote,
+  markOrderComplete,
   confirmCompletion,
   cancelOrder,
 } from './orders'

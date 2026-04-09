@@ -52,6 +52,7 @@ interface OrdersState {
   cancelOrder:             (payload: CancelOrderPayload) => Promise<void>
   submitReview:            (payload: { orderId: string; targetId: string; targetType: 'provider' | 'customer'; rating: number; comment?: string; tags?: string[] }) => Promise<void>
   openDispute:             (payload: { orderId: string; reason: string; description: string; evidenceUrls?: string[] }) => Promise<void>
+  markComplete:            (orderId: string)     => Promise<void>
   clearError:              ()                    => void
 }
 
@@ -253,6 +254,22 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       await fn(payload)
     } catch (err) {
       set({ actionError: mapFirebaseError(err) })
+      throw err
+    } finally {
+      set({ actionLoading: false })
+    }
+  },
+
+  // ── markComplete (provider: in_progress → completed) ─────────────────────
+  markComplete: async orderId => {
+    set({ actionLoading: true, actionError: null })
+    try {
+      const fn = httpsCallable<{ orderId: string }, { ok: boolean }>(
+        firebaseFunctions, 'markOrderComplete',
+      )
+      await fn({ orderId })
+    } catch (err) {
+      set({ actionError: mapFirebaseError(err, 'فشل تحديث الطلب') })
       throw err
     } finally {
       set({ actionLoading: false })

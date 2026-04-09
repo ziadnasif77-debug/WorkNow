@@ -1,11 +1,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // ScreenHeader — shared header used by detail/form screens
 // Eliminates the identical header StyleSheet duplicated in 18+ screens
+// Uses useSafeAreaInsets to push content below the device status bar on all
+// iOS notch/Dynamic-Island and Android devices automatically.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Colors, Spacing, FontSize, FontWeight } from '../constants/theme'
 
 interface ScreenHeaderProps {
@@ -15,10 +18,11 @@ interface ScreenHeaderProps {
 }
 
 export function ScreenHeader({ title, onBack, rightEl }: ScreenHeaderProps) {
-  const router = useRouter()
+  const router  = useRouter()
+  const insets  = useSafeAreaInsets()
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
       <TouchableOpacity onPress={onBack ?? (() => router.back())} style={styles.back} accessibilityLabel="رجوع" accessibilityRole="button">
         <Text style={styles.back_icon}>←</Text>
       </TouchableOpacity>
@@ -31,7 +35,7 @@ export function ScreenHeader({ title, onBack, rightEl }: ScreenHeaderProps) {
 export const headerStyles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
+    paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md,
     backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   back:      { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },

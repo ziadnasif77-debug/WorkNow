@@ -8,6 +8,7 @@ import {
   TouchableOpacity, Alert, Switch, Image } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuthStore } from '../../stores/authStore'
 import { useAuth } from '../../hooks/useAuth'
 import { changeLanguage } from '../../lib/i18n'
@@ -24,6 +25,7 @@ const LANGUAGES: Array<{ code: SupportedLocale; label: string; flag: string }> =
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation()
   const router      = useRouter()
+  const insets      = useSafeAreaInsets()
   const { firebaseUser } = useAuthStore()
   const { role, isProvider, signOut } = useAuth()
 
@@ -70,7 +72,7 @@ export default function ProfileScreen() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
       {/* ── Avatar + name ─────────────────────────────────────────────── */}
-      <View style={styles.hero}>
+      <View style={[styles.hero, { paddingTop: insets.top + Spacing.xl }]}>
         <View style={styles.avatar_wrap}>
           {firebaseUser?.photoURL ? (
             <Image source={{ uri: firebaseUser.photoURL }} style={styles.avatar} />
