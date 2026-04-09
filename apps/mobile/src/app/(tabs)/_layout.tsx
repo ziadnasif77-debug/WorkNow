@@ -72,6 +72,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="jobs"
+        options={{
+          title: t('tabs.jobs'),
+          tabBarIcon: ({ focused }) => <TabIcon emoji="💼" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="messages"
         options={{
           title: t('tabs.messages'),

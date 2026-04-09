@@ -92,6 +92,29 @@ interface Translations {
     offlineBanner: string; onlineBanner: string; loadingLocal: string
     loadError: string; openBrowser: string; lastUpdated: string
   }
+  jobs: {
+    title: string; myJobs: string; myApplications: string
+    createJob: string; editJob: string; jobDetails: string
+    applyNow: string; applied: string; applyTitle: string
+    applySubtitle: string; fullName: string; email: string; phone: string
+    coverNote: string; coverNotePlaceholder: string
+    uploadCV: string; cvUploaded: string; cvTypes: string
+    submitApplication: string; applicationSent: string; applicationSentDesc: string
+    noJobs: string; noJobsDesc: string; noApplications: string
+    jobType: string; fullTime: string; partTime: string
+    freelance: string; internship: string
+    salary: string; location: string; requirements: string
+    deadline: string; applyViaWebsite: string
+    openPositions: string; applications: string
+    status_open: string; status_closed: string; status_paused: string
+    app_pending: string; app_viewed: string; app_shortlisted: string; app_rejected: string
+    closeJob: string; reopenJob: string; viewApplications: string
+    titleLabel: string; titlePlaceholder: string
+    descriptionLabel: string; descriptionPlaceholder: string
+    websiteLabel: string; websitePlaceholder: string
+    salaryRange: string; salaryMin: string; salaryMax: string
+    publishJob: string; jobPublished: string; myServices: string
+  }
   privacy: {
     screenTitle: string; introTitle: string; introText: string
     exportTitle: string; exportDesc: string; exportHint: string
@@ -190,6 +213,34 @@ const ar: Translations = {
     offlineBanner: 'عرض نسخة محفوظة — بلا اتصال',
     onlineBanner: 'جارٍ التحميل من workfix.app…', loadingLocal: 'جارٍ تحميل المحتوى المحلي…',
     loadError: 'تعذّر تحميل الصفحة', openBrowser: 'فتح في المتصفح', lastUpdated: 'آخر تحديث للمحتوى المحفوظ',
+  },
+  jobs: {
+    title: 'الوظائف', myJobs: 'وظائفي', myApplications: 'طلباتي',
+    createJob: 'نشر وظيفة', editJob: 'تعديل الوظيفة', jobDetails: 'تفاصيل الوظيفة',
+    applyNow: 'قدّم الآن', applied: 'قدّمت مسبقاً', applyTitle: 'تقديم على وظيفة',
+    applySubtitle: 'أكمل المعلومات أدناه وسيتواصل معك صاحب العمل',
+    fullName: 'الاسم الكامل', email: 'البريد الإلكتروني', phone: 'رقم الجوال',
+    coverNote: 'رسالة تعريفية', coverNotePlaceholder: 'اكتب نبذة عن نفسك وسبب تقديمك...',
+    uploadCV: 'رفع السيرة الذاتية', cvUploaded: 'تم رفع السيرة الذاتية ✓',
+    cvTypes: 'PDF، Word (DOC/DOCX)',
+    submitApplication: 'إرسال الطلب', applicationSent: 'تم إرسال طلبك',
+    applicationSentDesc: 'سيراجع صاحب العمل طلبك ويتواصل معك قريباً',
+    noJobs: 'لا وظائف حالياً', noJobsDesc: 'تحقق لاحقاً للاطلاع على الوظائف المتاحة',
+    noApplications: 'لم تقدّم على أي وظيفة بعد',
+    jobType: 'نوع الوظيفة', fullTime: 'دوام كامل', partTime: 'دوام جزئي',
+    freelance: 'عمل حر', internship: 'تدريب',
+    salary: 'الراتب', location: 'الموقع', requirements: 'المتطلبات',
+    deadline: 'آخر موعد للتقديم', applyViaWebsite: 'التقديم عبر الموقع',
+    openPositions: 'وظائف متاحة', applications: 'طلب',
+    status_open: 'مفتوح', status_closed: 'مغلق', status_paused: 'متوقف مؤقتاً',
+    app_pending: 'قيد المراجعة', app_viewed: 'تمت المشاهدة',
+    app_shortlisted: 'مختار', app_rejected: 'مرفوض',
+    closeJob: 'إغلاق الوظيفة', reopenJob: 'إعادة فتح', viewApplications: 'عرض الطلبات',
+    titleLabel: 'المسمى الوظيفي', titlePlaceholder: 'مثال: مطور تطبيقات موبايل',
+    descriptionLabel: 'وصف الوظيفة', descriptionPlaceholder: 'صف الوظيفة والمهام المطلوبة...',
+    websiteLabel: 'رابط التقديم الخارجي', websitePlaceholder: 'https://example.com/apply',
+    salaryRange: 'نطاق الراتب', salaryMin: 'من', salaryMax: 'إلى',
+    publishJob: 'نشر الوظيفة', jobPublished: 'تم نشر الوظيفة', myServices: 'خدماتي',
   },
   privacy: {
     screenTitle: 'الخصوصية وبياناتي', introTitle: 'حقوقك معنا',
@@ -296,6 +347,34 @@ const en: Translations = {
     onlineBanner: 'Loading from workfix.app…', loadingLocal: 'Loading local content…',
     loadError: 'Failed to load the page', openBrowser: 'Open in Browser', lastUpdated: 'Last update of saved content',
   },
+  jobs: {
+    title: 'Jobs', myJobs: 'My Jobs', myApplications: 'My Applications',
+    createJob: 'Post a Job', editJob: 'Edit Job', jobDetails: 'Job Details',
+    applyNow: 'Apply Now', applied: 'Already Applied', applyTitle: 'Apply for Job',
+    applySubtitle: 'Fill in your details and the employer will contact you',
+    fullName: 'Full Name', email: 'Email', phone: 'Phone Number',
+    coverNote: 'Cover Note', coverNotePlaceholder: 'Tell us about yourself and why you\'re applying...',
+    uploadCV: 'Upload CV', cvUploaded: 'CV Uploaded ✓',
+    cvTypes: 'PDF, Word (DOC/DOCX)',
+    submitApplication: 'Submit Application', applicationSent: 'Application Sent',
+    applicationSentDesc: 'The employer will review your application and contact you soon',
+    noJobs: 'No jobs available', noJobsDesc: 'Check back later for new job postings',
+    noApplications: 'You haven\'t applied for any jobs yet',
+    jobType: 'Job Type', fullTime: 'Full Time', partTime: 'Part Time',
+    freelance: 'Freelance', internship: 'Internship',
+    salary: 'Salary', location: 'Location', requirements: 'Requirements',
+    deadline: 'Application Deadline', applyViaWebsite: 'Apply via Website',
+    openPositions: 'Open Positions', applications: 'application(s)',
+    status_open: 'Open', status_closed: 'Closed', status_paused: 'Paused',
+    app_pending: 'Pending', app_viewed: 'Viewed',
+    app_shortlisted: 'Shortlisted', app_rejected: 'Rejected',
+    closeJob: 'Close Job', reopenJob: 'Reopen', viewApplications: 'View Applications',
+    titleLabel: 'Job Title', titlePlaceholder: 'e.g. Mobile App Developer',
+    descriptionLabel: 'Job Description', descriptionPlaceholder: 'Describe the role and responsibilities...',
+    websiteLabel: 'External Application URL', websitePlaceholder: 'https://example.com/apply',
+    salaryRange: 'Salary Range', salaryMin: 'Min', salaryMax: 'Max',
+    publishJob: 'Publish Job', jobPublished: 'Job Published', myServices: 'My Services',
+  },
   privacy: {
     screenTitle: 'Privacy & My Data', introTitle: 'Your Rights',
     introText: 'Under GDPR (Art.17 & 20) and Saudi PDPL, you have the right to download your data or request account deletion.',
@@ -400,6 +479,34 @@ const no: Translations = {
     offlineBanner: 'Viser lagret versjon — frakoblet',
     onlineBanner: 'Laster fra workfix.app…', loadingLocal: 'Laster lokalt innhold…',
     loadError: 'Klarte ikke å laste siden', openBrowser: 'Åpne i nettleser', lastUpdated: 'Sist oppdatert lokalt innhold',
+  },
+  jobs: {
+    title: 'Jobber', myJobs: 'Mine jobber', myApplications: 'Mine søknader',
+    createJob: 'Legg ut jobb', editJob: 'Rediger jobb', jobDetails: 'Jobbdetaljer',
+    applyNow: 'Søk nå', applied: 'Allerede søkt', applyTitle: 'Søk på jobb',
+    applySubtitle: 'Fyll inn informasjonen din så tar arbeidsgiveren kontakt',
+    fullName: 'Fullt navn', email: 'E-post', phone: 'Telefonnummer',
+    coverNote: 'Søknadsbrev', coverNotePlaceholder: 'Fortell om deg selv og hvorfor du søker...',
+    uploadCV: 'Last opp CV', cvUploaded: 'CV lastet opp ✓',
+    cvTypes: 'PDF, Word (DOC/DOCX)',
+    submitApplication: 'Send søknad', applicationSent: 'Søknad sendt',
+    applicationSentDesc: 'Arbeidsgiveren vil gjennomgå søknaden din og kontakte deg snart',
+    noJobs: 'Ingen jobber tilgjengelig', noJobsDesc: 'Sjekk tilbake senere for nye jobbutlysninger',
+    noApplications: 'Du har ikke søkt på noen jobber ennå',
+    jobType: 'Jobbtype', fullTime: 'Fulltid', partTime: 'Deltid',
+    freelance: 'Frilans', internship: 'Praktikant',
+    salary: 'Lønn', location: 'Sted', requirements: 'Krav',
+    deadline: 'Søknadsfrist', applyViaWebsite: 'Søk via nettsted',
+    openPositions: 'Ledige stillinger', applications: 'søknad(er)',
+    status_open: 'Åpen', status_closed: 'Lukket', status_paused: 'Satt på pause',
+    app_pending: 'Venter', app_viewed: 'Sett',
+    app_shortlisted: 'Shortlistet', app_rejected: 'Avslått',
+    closeJob: 'Lukk jobb', reopenJob: 'Gjenåpne', viewApplications: 'Se søknader',
+    titleLabel: 'Jobbtittel', titlePlaceholder: 'f.eks. Mobilapputvikler',
+    descriptionLabel: 'Jobbeskrivelse', descriptionPlaceholder: 'Beskriv rollen og ansvarsområder...',
+    websiteLabel: 'Ekstern søknads-URL', websitePlaceholder: 'https://eksempel.no/søk',
+    salaryRange: 'Lønnsintervall', salaryMin: 'Min', salaryMax: 'Maks',
+    publishJob: 'Publiser jobb', jobPublished: 'Jobb publisert', myServices: 'Mine tjenester',
   },
   privacy: {
     screenTitle: 'Personvern og mine data', introTitle: 'Dine rettigheter',
@@ -506,6 +613,34 @@ const sv: Translations = {
     onlineBanner: 'Laddar från workfix.app…', loadingLocal: 'Laddar lokalt innehåll…',
     loadError: 'Det gick inte att ladda sidan', openBrowser: 'Öppna i webbläsare', lastUpdated: 'Senast uppdaterat lokalt innehåll',
   },
+  jobs: {
+    title: 'Jobb', myJobs: 'Mina jobb', myApplications: 'Mina ansökningar',
+    createJob: 'Publicera jobb', editJob: 'Redigera jobb', jobDetails: 'Jobbdetaljer',
+    applyNow: 'Ansök nu', applied: 'Redan ansökt', applyTitle: 'Ansök om jobb',
+    applySubtitle: 'Fyll i dina uppgifter och arbetsgivaren kontaktar dig',
+    fullName: 'Fullständigt namn', email: 'E-post', phone: 'Telefonnummer',
+    coverNote: 'Personligt brev', coverNotePlaceholder: 'Berätta om dig själv och varför du söker...',
+    uploadCV: 'Ladda upp CV', cvUploaded: 'CV uppladdad ✓',
+    cvTypes: 'PDF, Word (DOC/DOCX)',
+    submitApplication: 'Skicka ansökan', applicationSent: 'Ansökan skickad',
+    applicationSentDesc: 'Arbetsgivaren kommer att granska din ansökan och kontakta dig snart',
+    noJobs: 'Inga lediga tjänster', noJobsDesc: 'Kolla tillbaka senare för nya jobbannonser',
+    noApplications: 'Du har inte ansökt om några jobb ännu',
+    jobType: 'Jobbtyp', fullTime: 'Heltid', partTime: 'Deltid',
+    freelance: 'Frilans', internship: 'Praktik',
+    salary: 'Lön', location: 'Plats', requirements: 'Krav',
+    deadline: 'Ansökningsdeadline', applyViaWebsite: 'Ansök via webbplats',
+    openPositions: 'Lediga tjänster', applications: 'ansökan/ansökningar',
+    status_open: 'Öppen', status_closed: 'Stängd', status_paused: 'Pausad',
+    app_pending: 'Väntar', app_viewed: 'Sedd',
+    app_shortlisted: 'Utvald', app_rejected: 'Nekad',
+    closeJob: 'Stäng jobb', reopenJob: 'Öppna igen', viewApplications: 'Visa ansökningar',
+    titleLabel: 'Jobbtitel', titlePlaceholder: 't.ex. Mobilappsutvecklare',
+    descriptionLabel: 'Jobbbeskrivning', descriptionPlaceholder: 'Beskriv rollen och ansvarsområden...',
+    websiteLabel: 'Extern ansöknings-URL', websitePlaceholder: 'https://example.se/ansok',
+    salaryRange: 'Löneintervall', salaryMin: 'Min', salaryMax: 'Max',
+    publishJob: 'Publicera jobb', jobPublished: 'Jobb publicerat', myServices: 'Mina tjänster',
+  },
   privacy: {
     screenTitle: 'Integritet och mina data', introTitle: 'Dina rättigheter',
     introText: 'Enligt GDPR har du rätt att ladda ner dina data eller begära radering.',
@@ -556,7 +691,7 @@ export function isRtlLocale(lang: SupportedLocale): boolean {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EXTRA_AR = {
-  tabs: { home: 'الرئيسية', orders: 'طلباتي', messages: 'الرسائل', profile: 'حسابي' },
+  tabs: { home: 'الرئيسية', orders: 'طلباتي', jobs: 'الوظائف', messages: 'الرسائل', profile: 'حسابي' },
   auth: {
     addDocument: 'إضافة مستند', businessNamePlaceholder: 'اسم شركتك أو مؤسستك',
     company: 'شركة', companyDesc: 'شركة أو مؤسسة تضم فريقاً من المزوّدين',
@@ -723,7 +858,7 @@ const EXTRA_AR = {
 
 
 const EXTRA_EN = {
-  tabs:          { home: 'Home', orders: 'Orders', messages: 'Messages', profile: 'Profile' },
+  tabs:          { home: 'Home', orders: 'Orders', jobs: 'Jobs', messages: 'Messages', profile: 'Profile' },
   auth: {
     addDocument: 'Add Document', businessNamePlaceholder: 'Your company or organization name',
     companyDesc: 'A company or organization with a team of providers',
@@ -878,7 +1013,7 @@ const EXTRA_EN = {
 }
 
 const EXTRA_NO = {
-  tabs:          { home: 'Hjem', orders: 'Bestillinger', messages: 'Meldinger', profile: 'Profil' },
+  tabs:          { home: 'Hjem', orders: 'Bestillinger', jobs: 'Jobber', messages: 'Meldinger', profile: 'Profil' },
   auth: {
     addDocument: 'Legg til dokument', businessNamePlaceholder: 'Firmaets eller organisasjonens navn',
     companyDesc: 'Et firma eller en organisasjon med et team av leverandører',
@@ -1035,7 +1170,7 @@ const EXTRA_NO = {
 }
 
 const EXTRA_SV = {
-  tabs:          { home: 'Hem', orders: 'Beställningar', messages: 'Meddelanden', profile: 'Profil' },
+  tabs:          { home: 'Hem', orders: 'Beställningar', jobs: 'Jobb', messages: 'Meddelanden', profile: 'Profil' },
   auth: {
     addDocument: 'Lägg till dokument', businessNamePlaceholder: 'Ditt företags eller organisations namn',
     companyDesc: 'Ett företag eller en organisation med ett team av leverantörer',

@@ -346,6 +346,51 @@ export interface Subscription {
   updatedAt: Timestamp
 }
 
+// ── /jobs/{jobId} ─────────────────────────────────────────────────────────────
+export type JobStatus = 'open' | 'closed' | 'paused'
+
+export interface Job {
+  id: string
+  providerId: string
+  providerName: string
+  providerAvatarUrl?: string
+  title: string
+  description: string           // max 2000 chars
+  categoryId?: string
+  location: string              // city / area text
+  jobType: 'full_time' | 'part_time' | 'freelance' | 'internship'
+  salaryMin?: number
+  salaryMax?: number
+  currency?: Currency
+  requirements?: string         // skills / qualifications
+  applicationDeadline?: Timestamp
+  websiteUrl?: string           // optional external application URL
+  status: JobStatus
+  applicationsCount: number
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
+// ── /jobApplications/{appId} ──────────────────────────────────────────────────
+export type ApplicationStatus = 'pending' | 'viewed' | 'shortlisted' | 'rejected'
+
+export interface JobApplication {
+  id: string
+  jobId: string
+  jobTitle: string              // denormalized
+  providerId: string            // job owner
+  applicantId: string
+  applicantName: string
+  applicantEmail: string
+  applicantPhone: string
+  coverNote?: string            // max 1000 chars
+  cvUrl?: string                // Firebase Storage URL
+  cvFileName?: string           // original file name
+  status: ApplicationStatus
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // LOCALE & COUNTRY CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
