@@ -69,5 +69,14 @@ export {
   cancelAccountDeletion,
 } from './user'
 
+// ── Jobs ──────────────────────────────────────────────────────────────────────
+export {
+  createJob,
+  applyToJob,
+  getJobApplications,
+  updateJobStatus,
+  listJobs,
+} from './jobs'
+
 // ── Scheduled Jobs (Queue processor + Daily cleanup) ──────────────────────────
 export { processTaskQueue, dailyCleanup, hourlyCleanup } from './_shared/queue'
