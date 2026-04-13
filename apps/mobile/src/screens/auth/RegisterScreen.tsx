@@ -154,7 +154,7 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', paddingTop: Spacing.xxl, paddingBottom: Spacing.lg, gap: 6 },
+  header: { alignItems: 'center', paddingTop: Spacing.xxl, paddingBottom: Spacing.lg, gap: Spacing.xs },
   logo:   { fontSize: 28, fontWeight: FontWeight.bold, color: Colors.primary },
   title:  { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
 

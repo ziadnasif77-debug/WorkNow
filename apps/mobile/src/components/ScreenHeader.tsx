@@ -9,7 +9,7 @@ import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Colors, Spacing, FontSize, FontWeight } from '../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, IconSize } from '../constants/theme'
 
 interface ScreenHeaderProps {
   title:       string
@@ -39,7 +39,7 @@ export const headerStyles = StyleSheet.create({
     backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   back:      { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  back_icon: { fontSize: 22, color: Colors.black },
+  back_icon: { fontSize: IconSize.lg, color: Colors.black },
   title:     { flex: 1, fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   right:     { minWidth: 36 },
 })

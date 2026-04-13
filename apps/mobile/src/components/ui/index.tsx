@@ -7,7 +7,7 @@ import {
   View, Text, TextInput, TouchableOpacity, ActivityIndicator,
   StyleSheet, type ViewStyle, type TextStyle, type TextInputProps,
 } from 'react-native'
-import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '../../constants/theme'
+import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow, IconSize } from '../../constants/theme'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BUTTON
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btn_inner: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  btn_icon:  { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
+  btn_icon:  { width: IconSize.md, height: IconSize.md, alignItems: 'center', justifyContent: 'center' },
   btn_full:  { width: '100%' },
 
   btn_primary:  { backgroundColor: Colors.primary, ...Shadow.sm },
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   btn_label_lg:       { fontSize: FontSize.lg },
 
   // Input
-  input_container: { gap: 6, marginBottom: Spacing.md },
+  input_container: { gap: Spacing.xs, marginBottom: Spacing.md },
   input_label:     { fontSize: FontSize.sm, fontWeight: FontWeight.medium, color: Colors.gray700 },
   input_wrap: {
     flexDirection: 'row',
@@ -313,8 +313,8 @@ const styles = StyleSheet.create({
   input_with_right: { paddingEnd: 0 },
   input_icon_left:  { paddingStart: Spacing.md, paddingEnd: Spacing.sm },
   input_icon_right: { paddingEnd: Spacing.md, paddingStart: Spacing.sm },
-  input_error: { fontSize: FontSize.xs, color: Colors.error, marginTop: 2 },
-  input_hint:  { fontSize: FontSize.xs, color: Colors.gray500, marginTop: 2 },
+  input_error: { fontSize: FontSize.xs, color: Colors.error, marginTop: Spacing.xxs },
+  input_hint:  { fontSize: FontSize.xs, color: Colors.gray500, marginTop: Spacing.xxs },
 
   // Card
   card: {

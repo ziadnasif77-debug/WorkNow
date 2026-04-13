@@ -204,7 +204,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', paddingTop: Spacing.xxl, paddingBottom: Spacing.xl, gap: 6 },
+  header: { alignItems: 'center', paddingTop: Spacing.xxl, paddingBottom: Spacing.xl, gap: Spacing.xs },
   logo:   { fontSize: 28, fontWeight: FontWeight.bold, color: Colors.primary, letterSpacing: -0.5 },
   title:  { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
   subtitle: { fontSize: FontSize.md, color: Colors.gray500 },
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.gray100,
     borderRadius: Radius.md,
-    padding: 4,
+    padding: Spacing.xs,
     marginBottom: Spacing.lg,
   },
   tab: { flex: 1, paddingVertical: Spacing.sm, alignItems: 'center', borderRadius: Radius.sm },

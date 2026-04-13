@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   photo_add: {
     width: 90, height: 90, borderRadius: Radius.md,
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
-    alignItems: 'center', justifyContent: 'center', gap: 4 },
+    alignItems: 'center', justifyContent: 'center', gap: Spacing.xs },
   photo_add_icon:  { fontSize: IconSize.lg },
   photo_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },
 

@@ -270,8 +270,8 @@ function SkeletonCard() {
 const skeletonStyles = StyleSheet.create({
   card:       { width: 150, height: 160, borderRadius: Radius.lg, backgroundColor: Colors.gray100, padding: Spacing.md, gap: Spacing.sm, alignItems: 'center' },
   avatar:     { width: AvatarSize.xl, height: AvatarSize.xl, borderRadius: Radius.full, backgroundColor: Colors.gray200 },
-  line_long:  { width: 100, height: 12, borderRadius: 6, backgroundColor: Colors.gray200 },
-  line_short: { width: 70, height: 10, borderRadius: 5, backgroundColor: Colors.gray200 },
+  line_long:  { width: 100, height: 12, borderRadius: Radius.sm, backgroundColor: Colors.gray200 },
+  line_short: { width: 70, height: 10, borderRadius: Radius.sm, backgroundColor: Colors.gray200 },
 })
 
 const styles = StyleSheet.create({
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
   },
   greeting:          { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-  location_row:      { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  location_row:      { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginTop: Spacing.xs },
   location_icon:     { fontSize: IconSize.sm },
   location_text:     { fontSize: FontSize.sm, color: Colors.gray500 },
   notification_btn:  { width: 42, height: 42, borderRadius: Radius.full, backgroundColor: Colors.gray100, alignItems: 'center', justifyContent: 'center', position: 'relative' },

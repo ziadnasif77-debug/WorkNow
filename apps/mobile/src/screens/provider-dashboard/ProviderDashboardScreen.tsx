@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg, paddingBottom: Spacing.xxl, gap: Spacing.md },
   modal_handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.gray200, alignSelf: 'center', marginBottom: Spacing.sm },
   modal_title:  { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-  order_preview: { backgroundColor: Colors.gray50, borderRadius: Radius.md, padding: Spacing.md, gap: 4 },
+  order_preview: { backgroundColor: Colors.gray50, borderRadius: Radius.md, padding: Spacing.md, gap: Spacing.xs },
   order_preview_id:   { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray600 },
   order_preview_desc: { fontSize: FontSize.md, color: Colors.black },
   order_preview_addr: { fontSize: FontSize.sm, color: Colors.gray500 },

@@ -221,7 +221,7 @@ export default function ProviderTypeScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { paddingTop: Spacing.xl, paddingBottom: Spacing.lg, gap: 8 },
+  header: { paddingTop: Spacing.xl, paddingBottom: Spacing.lg, gap: Spacing.sm },
   title:   { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
   subtitle: { fontSize: FontSize.md, color: Colors.gray500, lineHeight: 22 },
 
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   type_text:  { flex: 1 },
   type_label: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
   type_label_active: { color: Colors.primary },
-  type_desc:  { fontSize: FontSize.sm, color: Colors.gray500, marginTop: 2 },
+  type_desc:  { fontSize: FontSize.sm, color: Colors.gray500, marginTop: Spacing.xxs },
 
   radio: {
     width: 22, height: 22, borderRadius: Radius.full,
@@ -266,13 +266,13 @@ const styles = StyleSheet.create({
   doc_add: {
     width: 100, height: 120, borderRadius: Radius.md,
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
-    alignItems: 'center', justifyContent: 'center', gap: 4,
+    alignItems: 'center', justifyContent: 'center', gap: Spacing.xs,
   },
   doc_add_icon:  { fontSize: IconSize.xl, color: Colors.gray400 },
   doc_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },
 
-  kyc_hints: { gap: 6, marginBottom: Spacing.lg },
-  kyc_hint_row: { flexDirection: 'row', gap: 6 },
+  kyc_hints: { gap: Spacing.xs, marginBottom: Spacing.lg },
+  kyc_hint_row: { flexDirection: 'row', gap: Spacing.xs },
   kyc_hint_dot: { color: Colors.primary, fontSize: FontSize.md },
   kyc_hint_text: { flex: 1, fontSize: FontSize.sm, color: Colors.gray500 },
 

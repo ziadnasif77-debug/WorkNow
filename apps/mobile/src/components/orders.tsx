@@ -5,7 +5,7 @@
 import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Colors, Spacing, FontSize, FontWeight, Radius } from '../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, AvatarSize, IconSize } from '../constants/theme'
 import { getOrderStatusLabel, formatPrice } from '@workfix/utils'
 import type { OrderStatus, Quote } from '@workfix/types'
 
@@ -242,13 +242,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm },
   timeline_step:  { alignItems: 'center', gap: 6, flex: 0 },
   timeline_dot: {
-    width: 36, height: 36, borderRadius: 18,
+    width: AvatarSize.sm, height: AvatarSize.sm, borderRadius: Radius.full,
     backgroundColor: Colors.gray100,
     borderWidth: 2, borderColor: Colors.gray200,
     alignItems: 'center', justifyContent: 'center' },
   timeline_dot_done:   { backgroundColor: Colors.successLight, borderColor: Colors.success },
   timeline_dot_active: { backgroundColor: Colors.primaryLight, borderColor: Colors.primary, transform: [{ scale: 1.15 }] },
-  timeline_dot_emoji:  { fontSize: 14 },
+  timeline_dot_emoji:  { fontSize: IconSize.sm },
   timeline_label: {
     fontSize: 9, color: Colors.gray400, textAlign: 'center',
     maxWidth: 52, fontWeight: FontWeight.medium },
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   quote_card_accepted: { borderColor: Colors.success, backgroundColor: Colors.successLight },
   quote_header:  { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   quote_avatar: {
-    width: 44, height: 44, borderRadius: 22,
+    width: AvatarSize.md, height: AvatarSize.md, borderRadius: Radius.full,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center', justifyContent: 'center' },
   quote_avatar_letter: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.primary },

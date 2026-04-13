@@ -127,7 +127,7 @@ function StatCard({ emoji, label, value, color }: {
 const cardStyles = StyleSheet.create({
   card: {
     flex: 1, backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, alignItems: 'center', gap: 4,
+    padding: Spacing.md, alignItems: 'center', gap: Spacing.xs,
     borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
   },
   emoji: { fontSize: IconSize.lg },

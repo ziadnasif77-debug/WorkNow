@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   conv_avatar_active: { backgroundColor: Colors.primaryLight, borderColor: Colors.primary },
   conv_avatar_text:   { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.gray600 },
 
-  conv_body:    { flex: 1, gap: 4 },
+  conv_body:    { flex: 1, gap: Spacing.xs },
   conv_top:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   conv_order:   { fontSize: FontSize.md, fontWeight: FontWeight.medium, color: Colors.black },
   conv_order_unread: { fontWeight: FontWeight.bold },

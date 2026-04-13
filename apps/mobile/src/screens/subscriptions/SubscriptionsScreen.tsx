@@ -210,13 +210,13 @@ const styles = StyleSheet.create({
 
   billing_toggle: {
     flexDirection: 'row', gap: 0,
-    backgroundColor: Colors.gray100, borderRadius: Radius.md, padding: 4,
+    backgroundColor: Colors.gray100, borderRadius: Radius.md, padding: Spacing.xs,
   },
-  billing_btn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: Spacing.sm, borderRadius: Radius.sm },
+  billing_btn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.xs, paddingVertical: Spacing.sm, borderRadius: Radius.sm },
   billing_btn_active: { backgroundColor: Colors.white },
   billing_label:      { fontSize: FontSize.md, color: Colors.gray500, fontWeight: FontWeight.medium },
   billing_label_active: { color: Colors.black, fontWeight: FontWeight.bold },
-  save_badge: { backgroundColor: Colors.success, borderRadius: Radius.full, paddingHorizontal: 6, paddingVertical: 2 },
+  save_badge: { backgroundColor: Colors.success, borderRadius: Radius.full, paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs },
   save_text:  { fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold },
 
   plan_card: {
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   plan_popular: { marginTop: Spacing.sm },
   popular_badge: {
     position: 'absolute', top: 0, right: 0,
-    paddingHorizontal: Spacing.md, paddingVertical: 4,
+    paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs,
     borderBottomStartRadius: Radius.md,
   },
   popular_text: { color: Colors.white, fontSize: FontSize.xs, fontWeight: FontWeight.bold },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   plan_emoji:     { fontSize: IconSize.xl },
   plan_name_wrap: { flex: 1 },
   plan_name:      { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
-  plan_price:     { fontSize: FontSize.sm, color: Colors.gray500, marginTop: 2 },
+  plan_price:     { fontSize: FontSize.sm, color: Colors.gray500, marginTop: Spacing.xxs },
   plan_radio: {
     width: 22, height: 22, borderRadius: Radius.full,
     borderWidth: 2, borderColor: Colors.gray300,
@@ -245,9 +245,9 @@ const styles = StyleSheet.create({
   plan_radio_inner: { width: 10, height: 10, borderRadius: Radius.full },
   yearly_note:    { fontSize: FontSize.xs, color: Colors.gray400 },
 
-  features_list:  { gap: 8 },
-  feature_row:    { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  feature_check:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, width: 16 },
+  features_list:  { gap: Spacing.sm },
+  feature_row:    { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm },
+  feature_check:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, width: IconSize.md },
   feature_text:   { flex: 1, fontSize: FontSize.sm, color: Colors.gray700, lineHeight: 20 },
 
   cta_btn:     { marginTop: Spacing.sm },

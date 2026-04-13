@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
   },
   order_top:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  order_id_wrap: { gap: 2 },
+  order_id_wrap: { gap: Spacing.xxs },
   order_id:      { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   order_date:    { fontSize: FontSize.xs, color: Colors.gray400 },
   order_desc:    { fontSize: FontSize.md, color: Colors.gray700, lineHeight: 20 },

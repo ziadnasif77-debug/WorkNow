@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   secondary_cards: { flexDirection: 'row', gap: Spacing.md },
   secondary_card: {
     flex: 1, backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, alignItems: 'center', gap: 4,
+    padding: Spacing.md, alignItems: 'center', gap: Spacing.xs,
     borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
   },
   secondary_emoji:  { fontSize: IconSize.lg },
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.border,
   },
   info_title: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
-  info_row:   { flexDirection: 'row', gap: 8 },
+  info_row:   { flexDirection: 'row', gap: Spacing.sm },
   info_dot:   { color: Colors.primary, fontSize: FontSize.md },
   info_text:  { flex: 1, fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },
 

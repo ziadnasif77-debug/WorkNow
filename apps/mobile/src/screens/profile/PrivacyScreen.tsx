@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight, borderRadius: Radius.lg, padding: Spacing.md,
   },
   intro_icon:   { fontSize: IconSize.xl, marginTop: 2 },
-  intro_body:   { flex: 1, gap: 4 },
+  intro_body:   { flex: 1, gap: Spacing.xs },
   intro_title:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.primary },
   intro_text:   { fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },
   queued_badge: {
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
   modal_body:   { fontSize: FontSize.md, color: Colors.gray600, lineHeight: 22 },
   modal_info:   {
     backgroundColor: Colors.background, borderRadius: Radius.md,
-    padding: Spacing.md, gap: 4,
+    padding: Spacing.md, gap: Spacing.xs,
   },
   modal_info_label:{ fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.black },
   modal_info_text: { fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },

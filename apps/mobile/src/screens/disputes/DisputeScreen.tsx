@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   section_label: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   section_hint:  { fontSize: FontSize.sm, color: Colors.gray500, marginTop: -Spacing.sm },
 
-  reasons_list: { gap: 8 },
+  reasons_list: { gap: Spacing.sm },
   reason_row: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     padding: Spacing.md, borderRadius: Radius.md,
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   evidence_add: {
     width: 90, height: 90, borderRadius: Radius.md,
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
-    alignItems: 'center', justifyContent: 'center', gap: 4,
+    alignItems: 'center', justifyContent: 'center', gap: Spacing.xs,
   },
   evidence_add_icon:  { fontSize: IconSize.lg },
   evidence_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },

@@ -6,7 +6,7 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { useIsOnline } from '../hooks/useNetworkState'
-import { Colors, FontSize, Spacing } from '../constants/theme'
+import { Colors, FontSize, FontWeight, Spacing } from '../constants/theme'
 
 export function OfflineBanner() {
   const isOnline = useIsOnline()
@@ -29,6 +29,6 @@ const styles = StyleSheet.create({
   text: {
     color:      Colors.white,
     fontSize:   FontSize.sm,
-    fontWeight: '600',
+    fontWeight: FontWeight.bold,
   },
 })

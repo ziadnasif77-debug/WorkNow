@@ -227,12 +227,12 @@ const styles = StyleSheet.create({
   email:            { fontSize: FontSize.sm, color: Colors.gray400, marginTop: 4 },
   role_chip: {
     marginTop: Spacing.sm, backgroundColor: Colors.primaryLight,
-    borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 4 },
+    borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs },
   role_text: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.medium },
 
   lang_grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, padding: Spacing.md },
   lang_chip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
     borderRadius: Radius.full, borderWidth: 1.5, borderColor: Colors.border,
     backgroundColor: Colors.white },

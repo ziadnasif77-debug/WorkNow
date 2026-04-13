@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   emoji:    { fontSize: 80 },
   title:    { fontSize: FontSize.xxxl, fontWeight: FontWeight.bold, textAlign: 'center', color: Colors.black },
   subtitle: { fontSize: FontSize.lg, textAlign: 'center', color: Colors.gray500, lineHeight: 26 },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: Spacing.lg },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: Spacing.sm, marginBottom: Spacing.lg },
   dot: {
     width: 8, height: 8, borderRadius: 4,
     backgroundColor: Colors.gray200 },
