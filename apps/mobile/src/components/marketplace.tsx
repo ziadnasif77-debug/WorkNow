@@ -11,6 +11,9 @@ import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, AvatarSize, Icon
 import { formatPrice } from '@workfix/utils'
 import type { Currency } from '@workfix/types'
 
+// Re-export EmptyState from ui/ — all screen imports continue to work
+export { EmptyState } from './ui'
+
 // ─────────────────────────────────────────────────────────────────────────────
 // STAR RATING
 // ─────────────────────────────────────────────────────────────────────────────
@@ -174,31 +177,6 @@ export function CategoryChip({ label, icon, selected, onPress }: CategoryChipPro
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// EMPTY STATE
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface EmptyStateProps {
-  emoji:    string
-  title:    string
-  subtitle?: string
-  action?:  { label: string; onPress: () => void }
-}
-
-export function EmptyState({ emoji, title, subtitle, action }: EmptyStateProps) {
-  return (
-    <View style={styles.empty}>
-      <Text style={styles.empty_emoji}>{emoji}</Text>
-      <Text style={styles.empty_title}>{title}</Text>
-      {subtitle && <Text style={styles.empty_sub}>{subtitle}</Text>}
-      {action && (
-        <TouchableOpacity style={styles.empty_btn} onPress={action.onPress}>
-          <Text style={styles.empty_btn_label}>{action.label}</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  )
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STYLES
@@ -278,14 +256,4 @@ const styles = StyleSheet.create({
   chip_label:    { fontSize: FontSize.sm, color: Colors.gray700, fontWeight: FontWeight.medium },
   chip_label_selected: { color: Colors.primary, fontWeight: FontWeight.bold },
 
-  // Empty state
-  empty: { alignItems: 'center', justifyContent: 'center', padding: Spacing.xxl, gap: Spacing.md },
-  empty_emoji: { fontSize: IconSize.xxxl },
-  empty_title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
-  empty_sub:   { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center', lineHeight: 22 },
-  empty_btn: {
-    backgroundColor: Colors.primary, borderRadius: Radius.md,
-    paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md, marginTop: Spacing.sm,
-  },
-  empty_btn_label: { color: Colors.white, fontWeight: FontWeight.bold, fontSize: FontSize.md },
 })

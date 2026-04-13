@@ -15,7 +15,7 @@ import { useOrdersStore } from '../../stores/ordersStore'
 import { useAuth } from '../../hooks/useAuth'
 import { Analytics } from '../../lib/analytics'
 import { StatusBadge, StatusTimeline, QuoteCard } from '../../components/orders'
-import { Button } from '../../components/ui'
+import { Button, FooterCTA } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
@@ -239,7 +239,7 @@ export default function OrderDetailScreen() {
       </ScrollView>
 
       {/* ── Sticky action bar ─────────────────────────────────────────── */}
-      <View style={styles.action_bar}>
+      <FooterCTA style={styles.action_bar}>
         {/* ── Download Invoice (closed orders only) ──────────────────── */}
         {o.status === 'closed' && (
           <Button
@@ -298,7 +298,7 @@ export default function OrderDetailScreen() {
             style={{ flex: 0, paddingHorizontal: Spacing.lg }}
           />
         )}
-      </View>
+      </FooterCTA>
     </View>
   )
 }
@@ -315,7 +315,7 @@ function InfoRow({ label, value, highlight }: { label: string; value: string; hi
 }
 
 const infoStyles = StyleSheet.create({
-  row:             { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  row:             { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: Spacing.sm, borderBottomWidth: 1, borderBottomColor: Colors.border },
   label:           { fontSize: FontSize.sm, color: Colors.gray500, flex: 0.4 },
   value:           { fontSize: FontSize.sm, color: Colors.black, flex: 0.6, textAlign: 'right' },
   value_highlight: { fontWeight: FontWeight.bold, color: Colors.primary, fontSize: FontSize.md },
@@ -347,8 +347,7 @@ const styles = StyleSheet.create({
   action_bar: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-    padding: Spacing.lg, backgroundColor: Colors.white,
-    borderTopWidth: 1, borderTopColor: Colors.border, ...Shadow.lg,
+    ...Shadow.lg,
   },
   main_action: { flex: 1 },
   invoice_btn: { flex: 1 },
