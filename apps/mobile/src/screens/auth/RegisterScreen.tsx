@@ -8,9 +8,8 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import { Analytics } from '../../lib/analytics'
-import { Button, Input, Screen } from '../../components/ui'
+import { Button, Input, Screen, ErrorBanner, Radio } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
-
 import { isValidEmail } from '@workfix/utils'
 
 type Step = 'credentials' | 'role'
@@ -120,19 +119,13 @@ export default function RegisterScreen() {
               <Text style={[styles.role_desc, role === r.key && styles.role_desc_active]}>
                 {r.desc}
               </Text>
-              <View style={[styles.radio, role === r.key && styles.radio_active]}>
-                {role === r.key && <View style={styles.radio_inner} />}
-              </View>
+              <Radio selected={role === r.key} />
             </TouchableOpacity>
           ))}
         </View>
       )}
 
-      {error && (
-        <View style={styles.error_box}>
-          <Text style={styles.error_text}>{error}</Text>
-        </View>
-      )}
+      <ErrorBanner error={error} />
 
       <Button
         label={step === 'credentials' ? t('common.next') : t('auth.createAccount')}
@@ -158,41 +151,27 @@ const styles = StyleSheet.create({
   logo:   { fontSize: 28, fontWeight: FontWeight.bold, color: Colors.primary },
   title:  { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
 
-  steps: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.xl, gap: 0 },
-  step_dot: { width: 12, height: 12, borderRadius: Radius.full, backgroundColor: Colors.gray200 },
-  step_dot_active: { backgroundColor: Colors.primary },
-  step_line: { width: 48, height: 2, backgroundColor: Colors.gray200 },
+  steps:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.xl, gap: 0 },
+  step_dot:       { width: 12, height: 12, borderRadius: Radius.full, backgroundColor: Colors.gray200 },
+  step_dot_active:{ backgroundColor: Colors.primary },
+  step_line:      { width: 48, height: 2, backgroundColor: Colors.gray200 },
 
   form: { gap: 0 },
 
-  role_section: { gap: Spacing.md, marginBottom: Spacing.lg },
-  role_title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black, marginBottom: Spacing.sm },
+  role_section:     { gap: Spacing.md, marginBottom: Spacing.lg },
+  role_title:       { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black, marginBottom: Spacing.sm },
   role_card: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     padding: Spacing.md, borderRadius: Radius.lg,
-    borderWidth: 1.5, borderColor: Colors.border,
-    backgroundColor: Colors.white,
+    borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.white,
   },
   role_card_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  role_emoji: { fontSize: IconSize.xl },
-  role_desc:  { flex: 1, fontSize: FontSize.md, color: Colors.gray700, fontWeight: FontWeight.medium },
+  role_emoji:       { fontSize: IconSize.xl },
+  role_desc:        { flex: 1, fontSize: FontSize.md, color: Colors.gray700, fontWeight: FontWeight.medium },
   role_desc_active: { color: Colors.primary },
-  radio: {
-    width: 22, height: 22, borderRadius: Radius.full,
-    borderWidth: 2, borderColor: Colors.gray300,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  radio_active: { borderColor: Colors.primary },
-  radio_inner:  { width: 10, height: 10, borderRadius: Radius.full, backgroundColor: Colors.primary },
 
-  error_box: {
-    backgroundColor: Colors.errorLight, borderRadius: Radius.sm,
-    padding: Spacing.md, marginBottom: Spacing.md,
-  },
-  error_text: { color: Colors.error, fontSize: FontSize.sm },
-
-  btn:    { marginVertical: Spacing.md },
-  footer: { flexDirection: 'row', justifyContent: 'center', paddingBottom: Spacing.xl },
+  btn:         { marginVertical: Spacing.md },
+  footer:      { flexDirection: 'row', justifyContent: 'center', paddingBottom: Spacing.xl },
   footer_text: { color: Colors.gray500, fontSize: FontSize.md },
   footer_link: { color: Colors.primary, fontSize: FontSize.md, fontWeight: FontWeight.bold },
 })

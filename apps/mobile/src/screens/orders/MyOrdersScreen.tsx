@@ -3,19 +3,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react'
-import {
-  View, Text, StyleSheet, FlatList,
-  TouchableOpacity, ActivityIndicator,
-} from 'react-native'
+import { View, Text, StyleSheet, FlatList } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOrdersStore } from '../../stores/ordersStore'
 import { useAuth } from '../../hooks/useAuth'
 import { StatusBadge } from '../../components/orders'
-import { EmptyState } from '../../components/marketplace'
-import { Button } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
+import { Button, Card, Chip, EmptyState, LoadingState, TabHeader } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
 import type { Order, OrderStatus } from '@workfix/types'
 
@@ -31,7 +26,6 @@ const STATUS_FILTERS: Array<{ key: OrderStatus | 'all'; label: string }> = [
 export default function MyOrdersScreen() {
   const { t }    = useTranslation()
   const router   = useRouter()
-  const insets   = useSafeAreaInsets()
   const { user } = useAuth()
   const { myOrders, ordersLoading, subscribeMyOrders, unsubscribeAll } = useOrdersStore()
 
@@ -48,47 +42,41 @@ export default function MyOrdersScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <Text style={styles.title}>{t('orders.title')}</Text>
-        <Button
-          label={t('orders.newOrder')}
-          onPress={() => router.push('/orders/create')}
-          size="sm"
-          style={styles.new_btn}
-          fullWidth={false}
-        />
-      </View>
+      <TabHeader
+        title={t('orders.title')}
+        rightEl={
+          <Button
+            label={t('orders.newOrder')}
+            onPress={() => router.push('/orders/create')}
+            size="sm"
+            fullWidth={false}
+          />
+        }
+      />
 
       {/* Status filter chips */}
       <FlatList
         horizontal
         data={STATUS_FILTERS}
         keyExtractor={f => f.key}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={5}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.filter_bar}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.filter_chip, activeFilter === item.key && styles.filter_chip_active]}
+          <Chip
+            label={item.label}
+            selected={activeFilter === item.key}
             onPress={() => setActiveFilter(item.key)}
-          >
-            <Text style={[
-              styles.filter_label,
-              activeFilter === item.key && styles.filter_label_active,
-            ]}>
-              {item.label}
-            </Text>
-          </TouchableOpacity>
+          />
         )}
         style={styles.filter_scroll}
       />
 
       {/* Orders list */}
       {ordersLoading ? (
-        <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+        <LoadingState />
       ) : (
         <FlatList
           data={filtered}
@@ -122,7 +110,7 @@ const OrderCard = React.memo(function OrderCard({ order, onPress }: { order: Ord
   const { t } = useTranslation()
 
   return (
-    <TouchableOpacity style={styles.order_card} onPress={onPress} activeOpacity={0.85}>
+    <Card onPress={onPress}>
       <View style={styles.order_top}>
         <View style={styles.order_id_wrap}>
           <Text style={styles.order_id}>#{order.id.slice(-6).toUpperCase()}</Text>
@@ -146,7 +134,6 @@ const OrderCard = React.memo(function OrderCard({ order, onPress }: { order: Ord
         )}
       </View>
 
-      {/* Quick action hint */}
       {order.status === 'quoted' && (
         <View style={styles.action_hint}>
           <Text style={styles.action_hint_text}>💬 {t('orders.quoteReceived')} — اضغط للاطلاع</Text>
@@ -159,39 +146,18 @@ const OrderCard = React.memo(function OrderCard({ order, onPress }: { order: Ord
           </Text>
         </View>
       )}
-    </TouchableOpacity>
+    </Card>
   )
-}
-)
+})
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
 
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  title:   { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
-  new_btn: {},
-
   filter_scroll: { maxHeight: 52, backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border },
   filter_bar:    { paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, gap: Spacing.sm },
-  filter_chip: {
-    paddingHorizontal: Spacing.md, paddingVertical: 6,
-    borderRadius: Radius.full, backgroundColor: Colors.gray100,
-    borderWidth: 1, borderColor: Colors.border,
-  },
-  filter_chip_active:   { backgroundColor: Colors.primaryLight, borderColor: Colors.primary },
-  filter_label:         { fontSize: FontSize.sm, color: Colors.gray600 },
-  filter_label_active:  { color: Colors.primary, fontWeight: FontWeight.bold },
 
   list: { padding: Spacing.md, gap: Spacing.md },
 
-  order_card: {
-    backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, gap: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
-  },
   order_top:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   order_id_wrap: { gap: Spacing.xxs },
   order_id:      { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
@@ -203,7 +169,7 @@ const styles = StyleSheet.create({
 
   action_hint: {
     backgroundColor: Colors.primaryLight, borderRadius: Radius.sm,
-    paddingHorizontal: Spacing.sm, paddingVertical: 6,
+    paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xs,
   },
   action_hint_green:      { backgroundColor: Colors.successLight },
   action_hint_text:       { fontSize: FontSize.xs, color: Colors.primary, fontWeight: FontWeight.medium },

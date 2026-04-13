@@ -3,16 +3,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect } from 'react'
-import {
-  View, Text, StyleSheet, FlatList,
-  ActivityIndicator, TouchableOpacity, Linking,
-} from 'react-native'
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Linking } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useJobsStore } from '../../stores/jobsStore'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { EmptyState } from '../../components/marketplace'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Badge, Button, Card, EmptyState, LoadingState } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import type { JobApplication } from '@workfix/types'
 
 const STATUS_COLOR: Record<JobApplication['status'], string> = {
@@ -42,18 +39,19 @@ export default function JobApplicationsScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           jobApplicationsLoading
-            ? <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+            ? <LoadingState />
             : <EmptyState emoji="📭" title={t('jobs.noApplications')} subtitle="" />
         }
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.cardTop}>
+          <Card>
+            <View style={styles.card_top}>
               <Text style={styles.name}>{item.applicantName}</Text>
-              <View style={[styles.badge, { backgroundColor: STATUS_COLOR[item.status] + '20' }]}>
-                <Text style={[styles.badgeText, { color: STATUS_COLOR[item.status] }]}>
-                  {t(`jobs.app_${item.status}`)}
-                </Text>
-              </View>
+              <Badge
+                variant="custom"
+                bg={STATUS_COLOR[item.status] + '20'}
+                color={STATUS_COLOR[item.status]}
+                label={t(`jobs.app_${item.status}`)}
+              />
             </View>
 
             {/* Contact info — visible to provider */}
@@ -65,23 +63,23 @@ export default function JobApplicationsScreen() {
             </TouchableOpacity>
 
             {item.coverNote ? (
-              <Text style={styles.coverNote} numberOfLines={3}>{item.coverNote}</Text>
+              <Text style={styles.cover_note} numberOfLines={3}>{item.coverNote}</Text>
             ) : null}
 
             {item.cvUrl ? (
-              <TouchableOpacity
-                style={styles.cvBtn}
+              <Button
+                label={`📎 ${item.cvFileName ?? t('jobs.uploadCV')}`}
                 onPress={() => Linking.openURL(item.cvUrl!)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.cvBtnText}>📎 {item.cvFileName ?? t('jobs.uploadCV')}</Text>
-              </TouchableOpacity>
+                variant="outline"
+                size="sm"
+                fullWidth={false}
+              />
             ) : null}
 
             <Text style={styles.date}>
               {new Date(item.createdAt.seconds * 1000).toLocaleDateString()}
             </Text>
-          </View>
+          </Card>
         )}
       />
     </View>
@@ -91,14 +89,9 @@ export default function JobApplicationsScreen() {
 const styles = StyleSheet.create({
   container:  { flex: 1, backgroundColor: Colors.background },
   list:       { padding: Spacing.md, gap: Spacing.md },
-  card:       { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.sm, ...Shadow.sm },
-  cardTop:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: Spacing.sm },
+  card_top:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: Spacing.sm },
   name:       { flex: 1, fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.gray900 },
-  badge:      { paddingHorizontal: 10, paddingVertical: 3, borderRadius: Radius.full },
-  badgeText:  { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
   contact:    { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.medium },
-  coverNote:  { fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },
-  cvBtn:      { backgroundColor: Colors.primaryLight, borderRadius: Radius.md, paddingVertical: 8, paddingHorizontal: Spacing.md, alignSelf: 'flex-start' },
-  cvBtnText:  { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.medium },
+  cover_note: { fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },
   date:       { fontSize: FontSize.xs, color: Colors.gray400 },
 })

@@ -189,11 +189,12 @@ interface CardProps {
   children:  React.ReactNode
   style?:    ViewStyle
   padding?:  number
+  gap?:      number
   onPress?:  () => void
 }
 
-export function Card({ children, style, padding = Spacing.md, onPress }: CardProps) {
-  const cardStyle: ViewStyle[] = [card.base, { padding }, style ?? {}]
+export function Card({ children, style, padding = Spacing.md, gap = Spacing.sm, onPress }: CardProps) {
+  const cardStyle: ViewStyle[] = [card.base, { padding, gap }, style ?? {}]
   if (onPress) {
     return (
       <TouchableOpacity style={cardStyle} onPress={onPress} activeOpacity={0.9}>
@@ -710,4 +711,123 @@ const info = StyleSheet.create({
   row:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: Spacing.xxs },
   label: { fontSize: FontSize.sm, color: Colors.gray500, flex: 1 },
   value: { fontSize: FontSize.sm, color: Colors.gray900, fontWeight: FontWeight.medium, textAlign: 'right' },
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ERROR BANNER  (inline error message block — replaces repeated error_box)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ErrorBannerProps {
+  error?:  string | null
+  style?:  ViewStyle
+}
+
+export function ErrorBanner({ error, style }: ErrorBannerProps) {
+  if (!error) return null
+  return (
+    <View style={[eb.box, style]}>
+      <Text style={eb.text}>{error}</Text>
+    </View>
+  )
+}
+
+const eb = StyleSheet.create({
+  box:  { backgroundColor: Colors.errorLight, borderRadius: Radius.sm, padding: Spacing.md, marginBottom: Spacing.md },
+  text: { color: Colors.error, fontSize: FontSize.sm },
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RADIO  (circular selection indicator — visual only, wrap in TouchableOpacity)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface RadioProps {
+  selected:  boolean
+  style?:    ViewStyle
+}
+
+export function Radio({ selected, style }: RadioProps) {
+  return (
+    <View style={[rb.outer, selected && rb.outer_active, style]}>
+      {selected && <View style={rb.inner} />}
+    </View>
+  )
+}
+
+const rb = StyleSheet.create({
+  outer:        { width: 22, height: 22, borderRadius: Radius.full, borderWidth: 2, borderColor: Colors.gray300, alignItems: 'center', justifyContent: 'center' },
+  outer_active: { borderColor: Colors.primary },
+  inner:        { width: 10, height: 10, borderRadius: Radius.full, backgroundColor: Colors.primary },
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MENU ITEM  (pressable row: emoji | label | arrow — for settings/profile lists)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface MenuItemProps {
+  emoji?:   string
+  label:    string
+  onPress?: () => void
+  rightEl?: React.ReactNode
+  style?:   ViewStyle
+}
+
+export function MenuItem({ emoji, label, onPress, rightEl, style }: MenuItemProps) {
+  return (
+    <TouchableOpacity
+      style={[mi.row, style]}
+      onPress={onPress}
+      disabled={!onPress}
+      activeOpacity={0.7}
+    >
+      {emoji && <Text style={mi.emoji}>{emoji}</Text>}
+      <Text style={mi.label}>{label}</Text>
+      {rightEl ?? <Text style={mi.arrow}>›</Text>}
+    </TouchableOpacity>
+  )
+}
+
+const mi = StyleSheet.create({
+  row:   { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingHorizontal: Spacing.md, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  emoji: { fontSize: IconSize.md, width: 28, textAlign: 'center' as const },
+  label: { flex: 1, fontSize: FontSize.md, color: Colors.black },
+  arrow: { fontSize: IconSize.md, color: Colors.gray300 },
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOADING STATE  (centered ActivityIndicator — replaces inline loading patterns)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function LoadingState({ style }: { style?: ViewStyle }) {
+  return (
+    <ActivityIndicator color={Colors.primary} style={[{ marginTop: Spacing.xxl }, style]} />
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TAB HEADER  (safe-area header for root tab screens — no back button)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface TabHeaderProps {
+  title:    string
+  rightEl?: React.ReactNode
+  style?:   ViewStyle
+}
+
+export function TabHeader({ title, rightEl, style }: TabHeaderProps) {
+  const insets = useSafeAreaInsets()
+  return (
+    <View style={[th.header, { paddingTop: insets.top + Spacing.md }, style]}>
+      <Text style={th.title}>{title}</Text>
+      {rightEl && <View>{rightEl}</View>}
+    </View>
+  )
+}
+
+const th = StyleSheet.create({
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md,
+    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border,
+  },
+  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.gray900 },
 })
