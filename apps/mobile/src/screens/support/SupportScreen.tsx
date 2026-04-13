@@ -10,7 +10,7 @@ import { WebView } from 'react-native-webview'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
 import { useIsOnline } from '../../hooks/useNetworkState'
 
 const SUPPORT_PAGES: Record<string, { title_key: string; url: string }> = {
@@ -65,15 +65,15 @@ const styles = StyleSheet.create({
   offline_banner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm,
-    backgroundColor: '#FEF3C7',
-    borderBottomWidth: 1, borderBottomColor: '#F59E0B',
+    backgroundColor: Colors.warningLight,
+    borderBottomWidth: 1, borderBottomColor: Colors.amber,
   },
-  offline_text: { fontSize: FontSize.sm, color: '#92400E', flex: 1 },
-  offline_link: { fontSize: FontSize.sm, color: '#1D4ED8', fontWeight: FontWeight.bold },
+  offline_text: { fontSize: FontSize.sm, color: Colors.warningDark, flex: 1 },
+  offline_link: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.bold },
   error_container: {
     flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.xl,
   },
   error_text: { fontSize: FontSize.md, color: Colors.gray600, textAlign: 'center', marginBottom: Spacing.lg },
-  open_btn:      { backgroundColor: Colors.primary, paddingHorizontal: Spacing.xl, paddingVertical: Spacing.sm, borderRadius: 8 },
+  open_btn:      { backgroundColor: Colors.primary, paddingHorizontal: Spacing.xl, paddingVertical: Spacing.sm, borderRadius: Radius.md },
   open_btn_text: { color: Colors.white, fontSize: FontSize.md, fontWeight: FontWeight.bold },
 })

@@ -14,10 +14,24 @@ export const Colors = {
   // Semantic
   success:        '#16A34A',
   successLight:   '#DCFCE7',
+  successDark:    '#065F46',   // dark green — confirmed/completed text
+  info:           '#3B82F6',
+  infoLight:      '#DBEAFE',   // blue-100 — quoted status bg
+  infoDark:       '#1E40AF',   // blue-800 — quoted status text
   warning:        '#D97706',
   warningLight:   '#FEF3C7',
+  warningDark:    '#92400E',   // dark amber — warning text on light bg
   error:          '#DC2626',
   errorLight:     '#FEE2E2',
+  errorDark:      '#7F1D1D',   // deep red — critical danger backgrounds
+  errorBold:      '#991B1B',   // red-800 — cancelled/disputed text
+
+  // Extended palette
+  amber:          '#F59E0B',   // star ratings
+  purple:         '#7C3AED',   // freelance jobs, subscription pro tier
+  purpleLight:    '#EDE9FE',   // violet-100 — in_progress status bg
+  purpleDark:     '#4C1D95',   // violet-900 — in_progress status text
+  orangeLight:    '#FFF7ED',   // warm orange background (onboarding slide 3)
 
   // Neutrals
   black:          '#0F172A',

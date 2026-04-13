@@ -25,7 +25,7 @@ function JobTypeTag({ type, t }: { type: Job['jobType']; t: (k: string) => strin
   const colors: Record<Job['jobType'], string> = {
     full_time:  Colors.primary,
     part_time:  Colors.success,
-    freelance:  '#7C3AED',
+    freelance:  Colors.purple,
     internship: Colors.warning,
   }
   return (

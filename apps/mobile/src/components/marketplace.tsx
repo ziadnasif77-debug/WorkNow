@@ -29,7 +29,7 @@ export function StarRating({ rating, total, size = 'md', showCount = true }: Sta
   return (
     <View style={styles.stars_row}>
       {[1, 2, 3, 4, 5].map(i => (
-        <Text key={i} style={{ fontSize: starSize, color: i <= filled ? '#F59E0B' : Colors.gray200 }}>
+        <Text key={i} style={{ fontSize: starSize, color: i <= filled ? Colors.amber : Colors.gray200 }}>
           ★
         </Text>
       ))}

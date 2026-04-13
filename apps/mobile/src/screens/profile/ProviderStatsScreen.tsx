@@ -96,7 +96,7 @@ export default function ProviderStatsScreen() {
             <StatCard emoji="❌" label={t('stats.cancelled')} value={String(stats.cancelledOrders)} color={Colors.error} />
           </View>
           <View style={styles.cards_row}>
-            <StatCard emoji="⭐" label={t('stats.rating')}   value={stats.avgRating.toFixed(1)} color="#F59E0B" />
+            <StatCard emoji="⭐" label={t('stats.rating')}   value={stats.avgRating.toFixed(1)} color={Colors.amber} />
             <StatCard emoji="💬" label={t('stats.reviews')}  value={String(stats.totalReviews)} />
           </View>
 

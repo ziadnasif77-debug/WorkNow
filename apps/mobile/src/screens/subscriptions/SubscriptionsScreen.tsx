@@ -39,7 +39,7 @@ const PLANS: Plan[] = [
   },
   {
     tier: 'business', priceMonthly: 299, priceYearly: 2999,
-    color: '#7C3AED', emoji: '👑',
+    color: Colors.purple, emoji: '👑',
     features: ['orders.biz.f1', 'orders.biz.f2', 'orders.biz.f3', 'orders.biz.f4', 'orders.biz.f5'],
   },
 ]

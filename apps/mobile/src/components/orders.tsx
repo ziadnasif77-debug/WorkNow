@@ -14,14 +14,14 @@ import type { OrderStatus, Quote } from '@workfix/types'
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<OrderStatus, { bg: string; text: string }> = {
-  pending:     { bg: '#FEF3C7', text: '#92400E' },
-  quoted:      { bg: '#DBEAFE', text: '#1E40AF' },
-  confirmed:   { bg: '#D1FAE5', text: '#065F46' },
-  in_progress: { bg: '#EDE9FE', text: '#4C1D95' },
-  completed:   { bg: '#D1FAE5', text: '#065F46' },
-  closed:      { bg: '#F1F5F9', text: '#475569' },
-  cancelled:   { bg: '#FEE2E2', text: '#991B1B' },
-  disputed:    { bg: '#FEE2E2', text: '#991B1B' } }
+  pending:     { bg: Colors.warningLight, text: Colors.warningDark },
+  quoted:      { bg: Colors.infoLight,    text: Colors.infoDark },
+  confirmed:   { bg: Colors.successLight, text: Colors.successDark },
+  in_progress: { bg: Colors.purpleLight,  text: Colors.purpleDark },
+  completed:   { bg: Colors.successLight, text: Colors.successDark },
+  closed:      { bg: Colors.gray100,      text: Colors.gray600 },
+  cancelled:   { bg: Colors.errorLight,   text: Colors.errorBold },
+  disputed:    { bg: Colors.errorLight,   text: Colors.errorBold } }
 
 interface StatusBadgeProps {
   status: OrderStatus
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   quote_meta:          { flex: 1, gap: 3 },
   quote_provider:      { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   quote_rating_row:    { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  quote_star:          { fontSize: 13, color: '#F59E0B' },
+  quote_star:          { fontSize: 13, color: Colors.amber },
   quote_rating:        { fontSize: FontSize.sm, color: Colors.gray500 },
   quote_price_section: { alignItems: 'flex-end', gap: 2 },
   quote_price:         { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },

@@ -453,18 +453,18 @@ const styles = StyleSheet.create({
   intro_title:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.primary },
   intro_text:   { fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },
   queued_badge: {
-    backgroundColor: '#FEF3C7', borderRadius: Radius.sm,
+    backgroundColor: Colors.warningLight, borderRadius: Radius.sm,
     padding: Spacing.sm, alignItems: 'center',
   },
-  queued_text:  { color: '#92400E', fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  queued_text:  { color: Colors.warningDark, fontSize: FontSize.sm, fontWeight: FontWeight.medium },
   detail_text:  { fontSize: FontSize.xs, color: Colors.gray500, marginTop: Spacing.sm },
   detail_list:  { fontSize: FontSize.xs, color: Colors.gray600, lineHeight: 18 },
   warning_badge:{
     flexDirection: 'row', gap: Spacing.sm, alignItems: 'flex-start',
-    backgroundColor: '#FEF3C7', borderRadius: Radius.sm, padding: Spacing.sm, marginBottom: Spacing.sm,
+    backgroundColor: Colors.warningLight, borderRadius: Radius.sm, padding: Spacing.sm, marginBottom: Spacing.sm,
   },
   warning_icon: { fontSize: IconSize.sm },
-  warning_text: { flex: 1, fontSize: FontSize.sm, color: '#92400E', lineHeight: 20 },
+  warning_text: { flex: 1, fontSize: FontSize.sm, color: Colors.warningDark, lineHeight: 20 },
   retention_note:{ fontSize: FontSize.xs, color: Colors.gray400, lineHeight: 18, marginTop: Spacing.sm },
   legal_note:   {
     fontSize: FontSize.xs, color: Colors.gray400, textAlign: 'center',
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   modal_next_disabled:{ opacity: 0.4 },
   modal_delete_final:{
     flex: 1, padding: Spacing.md, borderRadius: Radius.md,
-    backgroundColor: '#7F1D1D', alignItems: 'center',
+    backgroundColor: Colors.errorDark, alignItems: 'center',
   },
   modal_delete_text:{ color: Colors.white, fontWeight: FontWeight.bold },
   reason_btn:   {
@@ -529,7 +529,7 @@ const sectionStyles = StyleSheet.create({
     padding: Spacing.lg, gap: Spacing.sm,
     borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
   },
-  danger_card:  { borderColor: '#FCA5A5' },
+  danger_card:  { borderColor: Colors.errorLight },
   header:       { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   icon:         { fontSize: IconSize.lg },
   title:        { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
