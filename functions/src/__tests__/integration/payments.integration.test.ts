@@ -96,7 +96,7 @@ describe('Payment Escrow state machine', () => {
   })
 
   test('commission calculation: 12% of 150 SAR = 18 SAR net = 132 SAR', () => {
-    const { calcCommission, calcNetAmount } = require('../../../packages/utils/src')
+    const { calcCommission, calcNetAmount } = require('@workfix/utils')
     // Note: these are tested in utils but verifying integration behaviour
     const gross = 150, rate = 0.12
     expect(Math.round(gross * rate * 100) / 100).toBe(18)
