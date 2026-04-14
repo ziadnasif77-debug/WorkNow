@@ -85,10 +85,15 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
       orderBy('lastMessageAt', 'desc'),
     )
 
-    const seen = new Map<string, Conversation>()
+    // Two separate Maps — one per query — so deleted docs are evicted on the
+    // next snapshot from that query (rather than lingering in a shared Map).
+    const seenCustomer  = new Map<string, Conversation>()
+    const seenProvider  = new Map<string, Conversation>()
 
     const merge = () => {
-      const sorted = Array.from(seen.values()).sort(
+      // Merge both maps (provider wins on id collision — same doc either way)
+      const combined = new Map<string, Conversation>([...seenCustomer, ...seenProvider])
+      const sorted = Array.from(combined.values()).sort(
         (a, b) => {
           const ta = (a.lastMessageAt as unknown as { seconds: number })?.seconds ?? 0
           const tb = (b.lastMessageAt as unknown as { seconds: number })?.seconds ?? 0
@@ -99,11 +104,13 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     }
 
     const unsub1 = onSnapshot(q, snap => {
-      snap.docs.forEach(d => seen.set(d.id, { ...d.data(), id: d.id } as Conversation))
+      seenCustomer.clear()
+      snap.docs.forEach(d => seenCustomer.set(d.id, { ...d.data(), id: d.id } as Conversation))
       merge()
     })
     const unsub2 = onSnapshot(q2, snap => {
-      snap.docs.forEach(d => seen.set(d.id, { ...d.data(), id: d.id } as Conversation))
+      seenProvider.clear()
+      snap.docs.forEach(d => seenProvider.set(d.id, { ...d.data(), id: d.id } as Conversation))
       merge()
     })
 

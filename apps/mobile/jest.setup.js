@@ -2,6 +2,15 @@
 // Jest global setup — mocks that apply to every test file
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── TextEncoder / TextDecoder polyfill ────────────────────────────────────────
+// Required by expo-notifications (and its deps) which use the WHATWG Encoding
+// API. Jest's jsdom environment does not always include these globals.
+if (typeof global.TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util')
+  global.TextEncoder = TextEncoder
+  global.TextDecoder = TextDecoder
+}
+
 // Reanimated mock (prevents "Reanimated not found" errors in tests)
 jest.mock('react-native-reanimated', () =>
   require('react-native-reanimated/mock'),
