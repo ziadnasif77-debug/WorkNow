@@ -4,15 +4,14 @@
 
 import React, { useEffect, useState } from 'react'
 import {
-  View, Text, StyleSheet, ScrollView,
-  ActivityIndicator, Linking,
+  View, Text, StyleSheet, ScrollView, Linking,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useJobsStore } from '../../stores/jobsStore'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Button, Badge, InfoRow, FooterCTA } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Button, Badge, Card, InfoRow, FooterCTA, LoadingState } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import { useAuthStore } from '../../stores/authStore'
 import type { Job } from '@workfix/types'
 
@@ -42,7 +41,7 @@ export default function JobDetailScreen() {
   if (jobLoading || !job) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={Colors.primary} />
+        <LoadingState style={{ marginTop: 0 }} />
       </View>
     )
   }
@@ -60,7 +59,7 @@ export default function JobDetailScreen() {
       <ScreenHeader title={t('jobs.jobDetails')} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header card */}
-        <View style={styles.card}>
+        <Card>
           <Text style={styles.title}>{job.title}</Text>
           <Text style={styles.providerName}>{job.providerName}</Text>
 
@@ -70,10 +69,10 @@ export default function JobDetailScreen() {
               <Badge label={t(`jobs.status_${job.status}`)} variant="error" />
             )}
           </View>
-        </View>
+        </Card>
 
         {/* Details */}
-        <View style={styles.card}>
+        <Card>
           <InfoRow label={`📍 ${t('jobs.location')}`} value={job.location} />
           {(job.salaryMin || job.salaryMax) && (
             <InfoRow
@@ -93,20 +92,20 @@ export default function JobDetailScreen() {
               value={String(job.applicationsCount)}
             />
           )}
-        </View>
+        </Card>
 
         {/* Description */}
-        <View style={styles.card}>
+        <Card>
           <Text style={styles.sectionTitle}>{t('jobs.descriptionLabel')}</Text>
           <Text style={styles.body}>{job.description}</Text>
-        </View>
+        </Card>
 
         {/* Requirements */}
         {job.requirements ? (
-          <View style={styles.card}>
+          <Card>
             <Text style={styles.sectionTitle}>{t('jobs.requirements')}</Text>
             <Text style={styles.body}>{job.requirements}</Text>
-          </View>
+          </Card>
         ) : null}
       </ScrollView>
 
@@ -130,7 +129,6 @@ const styles = StyleSheet.create({
   container:    { flex: 1, backgroundColor: Colors.background },
   center:       { flex: 1, justifyContent: 'center', alignItems: 'center' },
   content:      { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
-  card:         { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.sm, ...Shadow.sm },
   title:        { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.gray900 },
   providerName: { fontSize: FontSize.md, color: Colors.primary, fontWeight: FontWeight.medium },
   chips:        { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },

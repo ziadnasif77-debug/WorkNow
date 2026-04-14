@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuthStore } from '../../stores/authStore'
 import { useAuth } from '../../hooks/useAuth'
 import { changeLanguage } from '../../lib/i18n'
-import { MenuItem } from '../../components/ui'
+import { Card, MenuItem } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import type { SupportedLocale } from '@workfix/types'
 
@@ -162,15 +162,14 @@ function SectionCard({ title, children }: { title: string; children: React.React
   return (
     <View style={sectionStyles.container}>
       <Text style={sectionStyles.title}>{title}</Text>
-      <View style={sectionStyles.card}>{children}</View>
+      <Card padding={0} gap={0} style={{ overflow: 'hidden' }}>{children}</Card>
     </View>
   )
 }
 
 const sectionStyles = StyleSheet.create({
   container: { paddingHorizontal: Spacing.lg, marginBottom: Spacing.md },
-  title:     { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray500, marginBottom: Spacing.sm, textTransform: 'uppercase', letterSpacing: 0.5 },
-  card:      { backgroundColor: Colors.white, borderRadius: Radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: Colors.border } })
+  title:     { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray500, marginBottom: Spacing.sm, textTransform: 'uppercase', letterSpacing: 0.5 } })
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 

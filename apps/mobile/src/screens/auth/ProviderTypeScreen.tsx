@@ -16,7 +16,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { firebaseFunctions } from '../../lib/firebase'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Screen, ErrorBanner, Radio } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 import { firebaseAuth } from '../../lib/firebase'
 import type { ProviderType } from '@workfix/types'
 
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     padding: Spacing.md, borderRadius: Radius.lg,
     borderWidth: 1.5, borderColor: Colors.border,
-    backgroundColor: Colors.white, ...Shadow.sm,
+    backgroundColor: Colors.white,
   },
   type_card_active:  { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
   type_emoji:        { fontSize: IconSize.xl },

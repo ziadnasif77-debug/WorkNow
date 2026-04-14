@@ -13,7 +13,7 @@ import { Analytics } from '../../lib/analytics'
 import { usePaymentsStore } from '../../stores/paymentsStore'
 import { Button, Screen } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 import type { SubscriptionTier } from '@workfix/types'
 
 interface Plan {
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   plan_card: {
     backgroundColor: Colors.white, borderRadius: Radius.xl, padding: Spacing.lg,
     borderWidth: 1, borderColor: Colors.border, gap: Spacing.md,
-    overflow: 'hidden', position: 'relative', ...Shadow.sm,
+    overflow: 'hidden', position: 'relative',
   },
   plan_popular: { marginTop: Spacing.sm },
   popular_badge: {
