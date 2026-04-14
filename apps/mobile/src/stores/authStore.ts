@@ -10,8 +10,6 @@ import {
   signInWithPhoneNumber,
   signOut,
   onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithCredential,
   type User as FirebaseUser,
   type ConfirmationResult,
 } from 'firebase/auth'
@@ -100,7 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signUpEmail: async (email, password) => {
     set({ isLoading: true, error: null })
     try {
-      Analytics.signUpStart('email')
+      void Analytics.signUpStart('email')
       await createUserWithEmailAndPassword(firebaseAuth, email, password)
     } catch (err) {
       set({ error: getErrorMessage(err) })

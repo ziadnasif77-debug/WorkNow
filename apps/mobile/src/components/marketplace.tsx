@@ -68,7 +68,7 @@ interface ProviderCardProps {
 }
 
 export function ProviderCard({
-  displayName, avatarUrl, type, avgRating, totalReviews,
+  displayName, avatarUrl, type: _type, avgRating, totalReviews,
   distanceKm, basePrice, currency = 'SAR', categoryName,
   isVerified, isOnline, onPress, style, horizontal,
 }: ProviderCardProps) {

@@ -66,7 +66,7 @@ export default function PaymentScreen() {
     if (!selectedMethod || !orderId) return
     if (!isOnline) { Alert.alert(t('common.error'), 'لا يوجد اتصال بالإنترنت'); return }
     clearErrors()
-    Analytics.paymentStarted(orderId, selectedMethod, total)
+    void Analytics.paymentStarted(orderId, selectedMethod, total)
 
     try {
       if (selectedMethod === 'cash') {
@@ -91,7 +91,7 @@ export default function PaymentScreen() {
   }
 
   const commissionRate = 0.12
-  const commission     = Math.round(amountNum * commissionRate * 100) / 100
+  const _commission    = Math.round(amountNum * commissionRate * 100) / 100
   const vatRate        = countryCode === 'SA' ? 0.15 : 0
   const vat            = Math.round(amountNum * vatRate * 100) / 100
   const total          = amountNum + vat

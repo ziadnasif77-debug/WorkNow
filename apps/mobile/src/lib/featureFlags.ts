@@ -12,6 +12,8 @@
 
 import { FEATURE_FLAGS } from '@workfix/config'
 import { FIREBASE_CONFIGURED } from './firebase'
+import type { RemoteConfig, Value } from 'firebase/remote-config'
+import type { firebaseApp } from './firebase'
 
 // ── Default values (used before first fetch, on failure, or when not configured)
 const DEFAULTS = {
@@ -31,15 +33,17 @@ const DEFAULTS = {
 }
 
 // Remote Config instance — created lazily so we never call getRemoteConfig on a stub
-let _remoteConfig: import('firebase/remote-config').RemoteConfig | null = null
+let _remoteConfig: RemoteConfig | null = null
 
-function getRC(): import('firebase/remote-config').RemoteConfig | null {
+function getRC(): RemoteConfig | null {
   if (!FIREBASE_CONFIGURED) return null
   if (_remoteConfig) return _remoteConfig
   try {
-    const { getRemoteConfig } = require('firebase/remote-config') as typeof import('firebase/remote-config')
-    const { firebaseApp }     = require('./firebase') as typeof import('./firebase')
-    _remoteConfig = getRemoteConfig(firebaseApp)
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getRemoteConfig } = require('firebase/remote-config') as { getRemoteConfig: (app: typeof firebaseApp) => RemoteConfig }
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { firebaseApp: fbApp } = require('./firebase') as { firebaseApp: typeof firebaseApp }
+    _remoteConfig = getRemoteConfig(fbApp)
     _remoteConfig.settings.minimumFetchIntervalMillis =
       process.env['EXPO_PUBLIC_ENV'] === 'production' ? 3600_000 : 0
     _remoteConfig.defaultConfig = DEFAULTS
@@ -81,7 +85,8 @@ function getBool(key: string, def: boolean): boolean {
   const rc = getRC()
   if (!rc) return def
   try {
-    const { getValue } = require('firebase/remote-config') as typeof import('firebase/remote-config')
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getValue } = require('firebase/remote-config') as { getValue: (rc: RemoteConfig, key: string) => Value }
     return getValue(rc, key).asBoolean()
   } catch { return def }
 }
@@ -90,7 +95,8 @@ function getString(key: string, def: string): string {
   const rc = getRC()
   if (!rc) return def
   try {
-    const { getValue } = require('firebase/remote-config') as typeof import('firebase/remote-config')
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getValue } = require('firebase/remote-config') as { getValue: (rc: RemoteConfig, key: string) => Value }
     return getValue(rc, key).asString()
   } catch { return def }
 }

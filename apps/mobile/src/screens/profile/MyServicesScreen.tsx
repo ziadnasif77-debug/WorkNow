@@ -30,7 +30,7 @@ type Tab = 'services' | 'jobs'
 
 export default function MyServicesScreen() {
   const { t }    = useTranslation()
-  const router   = useRouter()
+  const _router  = useRouter()
   const uid      = firebaseAuth.currentUser?.uid
 
   const [activeTab, setActiveTab] = useState<Tab>('services')

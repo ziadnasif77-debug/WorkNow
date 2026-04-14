@@ -12,7 +12,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import { firestore } from '../../lib/firebase'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
+import { Colors, Spacing, FontSize, Radius, IconSize } from '../../constants/theme'
 
 export default function BankAccountScreen() {
   const { t }   = useTranslation()
@@ -23,7 +23,7 @@ export default function BankAccountScreen() {
   const [bankName,  setBankName]  = useState('')
   const [accName,   setAccName]   = useState('')
   const [loading,   setLoading]   = useState(false)
-  const [fetching,  setFetching]  = useState(true)
+  const [_fetching, setFetching]  = useState(true)
   const [ibanErr,   setIbanErr]   = useState('')
 
   useEffect(() => {

@@ -72,7 +72,7 @@ interface StatusTimelineProps {
 }
 
 export function StatusTimeline({ currentStatus }: StatusTimelineProps) {
-  const { t, i18n } = useTranslation()
+  const { t: _t, i18n } = useTranslation()
   const lang = (i18n.language ?? 'ar') as 'ar' | 'en'
 
   if (currentStatus === 'cancelled' || currentStatus === 'disputed') {

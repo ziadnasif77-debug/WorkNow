@@ -9,7 +9,7 @@ import { create }           from 'zustand'
 import { httpsCallable }    from 'firebase/functions'
 import {
   collection, query, where, orderBy, limit,
-  onSnapshot, doc, updateDoc, serverTimestamp,
+  onSnapshot, doc, updateDoc,
   type Unsubscribe,
 } from 'firebase/firestore'
 import { firebaseFunctions, firestore } from '../lib/firebase'
@@ -17,7 +17,7 @@ import type { Conversation, Message } from '@workfix/types'
 
 const TYPING_TTL_MS     = 5000   // typing indicator expires after 5 s of silence
 // Legacy constant kept for backward-compat reading old boolean typingStatus docs
-const TYPING_TIMEOUT_MS = TYPING_TTL_MS
+const _TYPING_TIMEOUT_MS = TYPING_TTL_MS
 const MESSAGES_PAGE     = 30     // messages loaded per batch
 
 interface MessagingState {

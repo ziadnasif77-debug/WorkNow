@@ -7,9 +7,10 @@ import {
   View, Text, StyleSheet, FlatList,
   TouchableOpacity, ActivityIndicator, TextInput, Alert, Modal,
 } from 'react-native'
+import type { Timestamp} from 'firebase/firestore';
 import {
   getFirestore, collection, query, where,
-  orderBy, limit, getDocs, Timestamp,
+  orderBy, limit, getDocs
 } from 'firebase/firestore'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { Screen, Button } from '../../components/ui'

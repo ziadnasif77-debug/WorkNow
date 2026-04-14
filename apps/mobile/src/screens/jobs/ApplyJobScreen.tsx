@@ -34,7 +34,7 @@ export default function ApplyJobScreen() {
   const [email,     setEmail]     = useState(appUser?.email ?? '')
   const [phone,     setPhone]     = useState(appUser?.phone ?? '')
   const [coverNote, setCoverNote] = useState('')
-  const [cvUri,     setCvUri]     = useState<string | null>(null)
+  const [_cvUri,    setCvUri]     = useState<string | null>(null)
   const [cvName,    setCvName]    = useState<string | null>(null)
   const [cvUrl,     setCvUrl]     = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)

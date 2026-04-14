@@ -2,7 +2,7 @@
 // Search Screen — full provider search with filters
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TextInput,
   TouchableOpacity, Modal, ScrollView,
@@ -45,7 +45,7 @@ export default function SearchScreen() {
 
   function doSearch() {
     if (!location.lat || !location.lng) return
-    if (query.trim()) Analytics.providerSearch(query.trim(), activeCatId ?? undefined)
+    if (query.trim()) void Analytics.providerSearch(query.trim(), activeCatId ?? undefined)
     void searchProviders({
       lat: location.lat, lng: location.lng,
       radiusKm, sortBy, minRating,

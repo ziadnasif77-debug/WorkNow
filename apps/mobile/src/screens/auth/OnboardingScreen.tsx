@@ -5,10 +5,11 @@
 import React, { useRef, useState } from 'react'
 import {
   View, Text, StyleSheet, FlatList, Dimensions,
-  TouchableOpacity, Animated } from 'react-native'
+  TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import type { MMKV as MMKVType } from 'react-native-mmkv'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import { Button } from '../../components/ui'
 
@@ -17,7 +18,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window')
 let storage: { getBoolean: (k: string) => boolean | undefined; set: (k: string, v: boolean) => void }
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { MMKV } = require('react-native-mmkv') as typeof import('react-native-mmkv')
+  const { MMKV } = require('react-native-mmkv') as { MMKV: typeof MMKVType }
   const _mmkv = new MMKV({ id: 'app' })
   storage = { getBoolean: (k) => _mmkv.getBoolean(k), set: (k, v) => _mmkv.set(k, v) }
 } catch {

@@ -18,9 +18,11 @@ import { OfflineBanner }    from '../components/OfflineBanner'
 import '../lib/i18n'
 
 // ── Onboarding persistence (same MMKV pattern as OnboardingScreen) ────────────
+import type { MMKV as MMKVType } from 'react-native-mmkv'
 let _onboardingStorage: { getBoolean: (k: string) => boolean | undefined }
 try {
-  const { MMKV } = require('react-native-mmkv') as typeof import('react-native-mmkv')
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { MMKV } = require('react-native-mmkv') as { MMKV: typeof MMKVType }
   const _mmkv = new MMKV({ id: 'app' })
   _onboardingStorage = { getBoolean: (k) => _mmkv.getBoolean(k) }
 } catch {
