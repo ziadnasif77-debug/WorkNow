@@ -11,7 +11,7 @@
     "test": "turbo test",
     "emulators": "firebase emulators:start",
     "emulators:export": "firebase emulators:export ./emulator-data",
-    "deploy:dev": "firebase deploy --project dev",
+    "deploy:dev": "firebase deploy --project workfix-557e0",
     "deploy:prod": "firebase deploy --project prod",
     "rules:test": "cd functions && pnpm test:rules",
     "clean": "turbo clean && rm -rf node_modules"
