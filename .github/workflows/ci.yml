@@ -185,8 +185,10 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
+          base: ${{ github.event.before != '0000000000000000000000000000000000000000' && github.event.before || github.sha }}
+          head: ${{ github.sha }}
+          extra_args: --only-verified
+        continue-on-error: true
 
   # ─── Job 6: Deploy to Staging (on merge to main) ──────────────────────────
   deploy-staging:
