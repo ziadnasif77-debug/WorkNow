@@ -6,7 +6,7 @@
   },
   "build": {
     "base": {
-      "node": "24.x",
+      "node": "20",
       "env": {
         "EXPO_PUBLIC_ENV":          "development",
         "EXPO_PUBLIC_USE_EMULATOR": "false"
