@@ -6,11 +6,11 @@
 import React, { useState } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image,
-  SafeAreaView, ScrollView, KeyboardAvoidingView, Platform,
+  ScrollView, KeyboardAvoidingView, Platform,
   StyleSheet,
   type ViewStyle, type TextStyle, type TextInputProps, type ImageSourcePropType,
 } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   Colors, Spacing, Radius, FontSize, FontWeight, Shadow, IconSize, AvatarSize,
 } from '../../constants/theme'

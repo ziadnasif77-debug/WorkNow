@@ -2,18 +2,16 @@
 // Job Detail Screen — view full job info + apply button
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import {
-  View, Text, StyleSheet, ScrollView,
-  ActivityIndicator, Linking,
+  View, Text, StyleSheet, ScrollView, Linking,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useJobsStore } from '../../stores/jobsStore'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Button, Badge, InfoRow, FooterCTA } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
-import { useAuthStore } from '../../stores/authStore'
+import { Button, Badge, Card, InfoRow, FooterCTA, LoadingState } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import type { Job } from '@workfix/types'
 
 export default function JobDetailScreen() {
@@ -21,11 +19,6 @@ export default function JobDetailScreen() {
   const router    = useRouter()
   const { id }    = useLocalSearchParams<{ id: string }>()
   const { activeJob, jobLoading, loadJobDetail } = useJobsStore()
-  const appUser   = useAuthStore(s => s.appUser)
-
-  // Check if user already applied (simple local flag; a Cloud Function would do the authoritative check)
-  const [hasApplied, setHasApplied] = useState(false)
-
   useEffect(() => {
     if (id) void loadJobDetail(id)
   }, [id])
@@ -42,7 +35,7 @@ export default function JobDetailScreen() {
   if (jobLoading || !job) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={Colors.primary} />
+        <LoadingState style={{ marginTop: 0 }} />
       </View>
     )
   }
@@ -60,7 +53,7 @@ export default function JobDetailScreen() {
       <ScreenHeader title={t('jobs.jobDetails')} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header card */}
-        <View style={styles.card}>
+        <Card>
           <Text style={styles.title}>{job.title}</Text>
           <Text style={styles.providerName}>{job.providerName}</Text>
 
@@ -70,10 +63,10 @@ export default function JobDetailScreen() {
               <Badge label={t(`jobs.status_${job.status}`)} variant="error" />
             )}
           </View>
-        </View>
+        </Card>
 
         {/* Details */}
-        <View style={styles.card}>
+        <Card>
           <InfoRow label={`📍 ${t('jobs.location')}`} value={job.location} />
           {(job.salaryMin || job.salaryMax) && (
             <InfoRow
@@ -93,20 +86,20 @@ export default function JobDetailScreen() {
               value={String(job.applicationsCount)}
             />
           )}
-        </View>
+        </Card>
 
         {/* Description */}
-        <View style={styles.card}>
+        <Card>
           <Text style={styles.sectionTitle}>{t('jobs.descriptionLabel')}</Text>
           <Text style={styles.body}>{job.description}</Text>
-        </View>
+        </Card>
 
         {/* Requirements */}
         {job.requirements ? (
-          <View style={styles.card}>
+          <Card>
             <Text style={styles.sectionTitle}>{t('jobs.requirements')}</Text>
             <Text style={styles.body}>{job.requirements}</Text>
-          </View>
+          </Card>
         ) : null}
       </ScrollView>
 
@@ -115,8 +108,6 @@ export default function JobDetailScreen() {
         <FooterCTA>
           {job.websiteUrl ? (
             <Button label={`🌐 ${t('jobs.applyViaWebsite')}`} onPress={handleApply} />
-          ) : hasApplied ? (
-            <Button label={`✓ ${t('jobs.applied')}`} onPress={() => {}} variant="success" />
           ) : (
             <Button label={t('jobs.applyNow')} onPress={handleApply} />
           )}
@@ -130,7 +121,6 @@ const styles = StyleSheet.create({
   container:    { flex: 1, backgroundColor: Colors.background },
   center:       { flex: 1, justifyContent: 'center', alignItems: 'center' },
   content:      { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
-  card:         { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.sm, ...Shadow.sm },
   title:        { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.gray900 },
   providerName: { fontSize: FontSize.md, color: Colors.primary, fontWeight: FontWeight.medium },
   chips:        { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },

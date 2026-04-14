@@ -5,16 +5,23 @@
 import React, { useState } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Alert, Image } from 'react-native'
+  TouchableOpacity, Alert, Image, Linking, Platform } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import * as StoreReview from 'expo-store-review'
 import { useAuthStore } from '../../stores/authStore'
 import { useAuth } from '../../hooks/useAuth'
 import { changeLanguage } from '../../lib/i18n'
-import { MenuItem } from '../../components/ui'
+import { Card, MenuItem } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import type { SupportedLocale } from '@workfix/types'
+
+const STORE_URL = Platform.select({
+  ios:     'itms-apps://apps.apple.com/app/id6738890047',
+  android: 'market://details?id=app.workfix.mobile',
+  default: 'https://workfix.app',
+})
 
 const LANGUAGES: Array<{ code: SupportedLocale; label: string; flag: string }> = [
   { code: 'ar', label: 'العربية',   flag: '🇸🇦' },
@@ -40,6 +47,19 @@ export default function ProfileScreen() {
       await changeLanguage(lang)
     } finally {
       setLangChanging(false)
+    }
+  }
+
+  async function handleRateApp() {
+    try {
+      const isAvailable = await StoreReview.isAvailableAsync()
+      if (isAvailable) {
+        await StoreReview.requestReview()
+      } else {
+        await Linking.openURL(STORE_URL!)
+      }
+    } catch {
+      await Linking.openURL(STORE_URL!).catch(() => {})
     }
   }
 
@@ -137,7 +157,7 @@ export default function ProfileScreen() {
       <SectionCard title={t('profile.support')}>
         <MenuItem emoji="❓" label={t('profile.faq')}         onPress={() => router.push('/support/faq')} />
         <MenuItem emoji="📧" label={t('profile.contactUs')}   onPress={() => router.push('/support/contact')} />
-        <MenuItem emoji="⭐" label={t('profile.rateApp')}     onPress={() => { /* StoreReview */ }} />
+        <MenuItem emoji="⭐" label={t('profile.rateApp')}     onPress={handleRateApp} />
         <MenuItem emoji="📄" label={t('profile.terms')}       onPress={() => router.push('/support/terms')} />
         <MenuItem emoji="🔐" label={t('profile.privacy')}     onPress={() => router.push('/support/privacy')} />
         <MenuItem emoji="🛡️" label={t('privacy.screenTitle', 'الخصوصية وبياناتي')} onPress={() => router.push('/profile/privacy')} />
@@ -162,15 +182,14 @@ function SectionCard({ title, children }: { title: string; children: React.React
   return (
     <View style={sectionStyles.container}>
       <Text style={sectionStyles.title}>{title}</Text>
-      <View style={sectionStyles.card}>{children}</View>
+      <Card padding={0} gap={0} style={{ overflow: 'hidden' }}>{children}</Card>
     </View>
   )
 }
 
 const sectionStyles = StyleSheet.create({
   container: { paddingHorizontal: Spacing.lg, marginBottom: Spacing.md },
-  title:     { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray500, marginBottom: Spacing.sm, textTransform: 'uppercase', letterSpacing: 0.5 },
-  card:      { backgroundColor: Colors.white, borderRadius: Radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: Colors.border } })
+  title:     { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray500, marginBottom: Spacing.sm, textTransform: 'uppercase', letterSpacing: 0.5 } })
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 

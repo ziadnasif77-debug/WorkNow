@@ -1,6 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Security Rules Tests — Firestore access control
 // Uses @firebase/rules-unit-testing with local emulator
+// Run via: pnpm --filter @workfix/functions test:rules
+//   (which wraps: firebase emulators:exec --only firestore 'jest --testPathPattern=emulator')
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {

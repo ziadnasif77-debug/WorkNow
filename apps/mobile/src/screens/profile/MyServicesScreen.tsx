@@ -6,7 +6,6 @@
 import React, { useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, FlatList,
-  ActivityIndicator,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -14,8 +13,8 @@ import { collection, query, where, getDocs } from 'firebase/firestore'
 import { firestore, firebaseAuth } from '../../lib/firebase'
 import { formatPrice } from '@workfix/utils'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Badge, EmptyState, SegmentControl } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Badge, Card, EmptyState, LoadingState, SegmentControl } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import MyJobsScreen from '../jobs/MyJobsScreen'
 
 interface Service {
@@ -65,7 +64,7 @@ export default function MyServicesScreen() {
       {/* Services tab */}
       {activeTab === 'services' && (
         loading ? (
-          <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+          <LoadingState />
         ) : (
           <FlatList
             data={services}
@@ -79,7 +78,7 @@ export default function MyServicesScreen() {
               <EmptyState emoji="🔧" title="لا خدمات بعد" subtitle="أضف خدماتك لتظهر للعملاء" />
             }
             renderItem={({ item }) => (
-              <View style={styles.service_card}>
+              <Card>
                 <View style={styles.service_top}>
                   <Text style={styles.service_name}>{item.name.ar}</Text>
                   <Badge
@@ -93,7 +92,7 @@ export default function MyServicesScreen() {
                 <Text style={styles.service_price}>
                   {formatPrice(item.basePrice, item.currency as never, 'ar')}+
                 </Text>
-              </View>
+              </Card>
             )}
           />
         )
@@ -108,11 +107,6 @@ export default function MyServicesScreen() {
 const styles = StyleSheet.create({
   container:    { flex: 1, backgroundColor: Colors.background },
   list:         { padding: Spacing.md, gap: Spacing.md },
-  service_card: {
-    backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, gap: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
-  },
   service_top:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   service_name:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   service_desc:  { fontSize: FontSize.sm, color: Colors.gray500 },

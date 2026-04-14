@@ -183,7 +183,7 @@ export const useJobsStore = create<JobsState>((set, get) => ({
   createJob: async (payload) => {
     set({ actionLoading: true, actionError: null })
     try {
-      const fn = httpsCallable(firebaseFunctions, 'jobs-createJob')
+      const fn = httpsCallable(firebaseFunctions, 'createJob')
       const res = await fn(payload)
       const data = res.data as { ok: boolean; data?: { jobId: string }; message?: string }
       if (!data.ok) throw new Error(data.message ?? 'Failed to create job')
@@ -200,7 +200,7 @@ export const useJobsStore = create<JobsState>((set, get) => ({
   applyToJob: async (payload) => {
     set({ actionLoading: true, actionError: null })
     try {
-      const fn = httpsCallable(firebaseFunctions, 'jobs-applyToJob')
+      const fn = httpsCallable(firebaseFunctions, 'applyToJob')
       const res = await fn(payload)
       const data = res.data as { ok: boolean; message?: string }
       if (!data.ok) throw new Error(data.message ?? 'Failed to apply')
@@ -216,7 +216,7 @@ export const useJobsStore = create<JobsState>((set, get) => ({
   updateJobStatus: async (payload) => {
     set({ actionLoading: true, actionError: null })
     try {
-      const fn = httpsCallable(firebaseFunctions, 'jobs-updateJobStatus')
+      const fn = httpsCallable(firebaseFunctions, 'updateJobStatus')
       const res = await fn(payload)
       const data = res.data as { ok: boolean; message?: string }
       if (!data.ok) throw new Error(data.message ?? 'Failed to update job')

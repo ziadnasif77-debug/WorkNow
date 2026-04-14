@@ -12,7 +12,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Analytics } from '../../lib/analytics'
 import { useOrdersStore } from '../../stores/ordersStore'
-import { Button, Screen } from '../../components/ui'
+import { Button, Chip, Screen } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
@@ -121,15 +121,12 @@ export default function ReviewScreen() {
             <Text style={styles.section_label}>{t('reviews.whatStoodOut')}</Text>
             <View style={styles.tags_wrap}>
               {REVIEW_TAGS.map(tag => (
-                <TouchableOpacity
+                <Chip
                   key={tag.key}
-                  style={[styles.tag, tags.includes(tag.key) && styles.tag_active]}
+                  label={tag[lang]}
+                  selected={tags.includes(tag.key)}
                   onPress={() => toggleTag(tag.key)}
-                >
-                  <Text style={[styles.tag_text, tags.includes(tag.key) && styles.tag_text_active]}>
-                    {tag[lang]}
-                  </Text>
-                </TouchableOpacity>
+                />
               ))}
             </View>
           </View>
@@ -191,14 +188,6 @@ const styles = StyleSheet.create({
   tags_section: { gap: Spacing.md },
   section_label: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   tags_wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  tag: {
-    paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
-    borderRadius: Radius.full, borderWidth: 1.5, borderColor: Colors.border,
-    backgroundColor: Colors.white,
-  },
-  tag_active:      { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  tag_text:        { fontSize: FontSize.sm, color: Colors.gray700 },
-  tag_text_active: { color: Colors.primary, fontWeight: FontWeight.bold },
 
   comment_section: { gap: Spacing.md },
   comment_wrap: {
@@ -206,7 +195,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white, padding: Spacing.md,
   },
   comment_input: { fontSize: FontSize.md, color: Colors.black, minHeight: 100, lineHeight: 22 },
-  char_count:    { fontSize: FontSize.xs, color: Colors.gray400, textAlign: 'right', marginTop: 4 },
+  char_count:    { fontSize: FontSize.xs, color: Colors.gray400, textAlign: 'right', marginTop: Spacing.xs },
 
   submit_btn: {},
   skip_btn:   { alignItems: 'center', paddingVertical: Spacing.sm },
