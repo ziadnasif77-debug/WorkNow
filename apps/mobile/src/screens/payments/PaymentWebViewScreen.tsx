@@ -12,7 +12,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button, LoadingState } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, IconSize, Radius } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, IconSize } from '../../constants/theme'
 
 // Tap Payments redirects back to our callback URL after payment
 const SUCCESS_INDICATORS = ['tap_id=', 'status=CAPTURED', 'status=AUTHORIZED']

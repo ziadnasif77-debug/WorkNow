@@ -19,7 +19,7 @@ import { formatPrice } from '@workfix/utils'
 export default function WalletScreen() {
   const { t }     = useTranslation()
   const router    = useRouter()
-  const { user } = useAuth()
+  const { user: _user } = useAuth()
   const {
     wallet, walletLoading,
     payoutLoading, payoutError,

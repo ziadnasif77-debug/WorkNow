@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react'
 import {
-  View, Text, StyleSheet, FlatList, ScrollView,
+  View, Text, StyleSheet, ScrollView,
   TextInput, TouchableOpacity,
   RefreshControl,
 } from 'react-native'
@@ -144,7 +144,7 @@ export default function HomeScreen() {
               returnKeyType="search"
             />
             {searchText.length > 0 && (
-              <TouchableOpacity onPress={() => { setSearchText(''); clearSearch(); onRefresh() }}>
+              <TouchableOpacity onPress={() => { setSearchText(''); clearSearch(); void onRefresh() }}>
                 <Text style={styles.search_clear}>✕</Text>
               </TouchableOpacity>
             )}

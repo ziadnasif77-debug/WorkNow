@@ -13,7 +13,7 @@ import {
 import { firebaseAuth } from '../../lib/firebase'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
+import { Spacing } from '../../constants/theme'
 
 export default function ChangePasswordScreen() {
   const { t }   = useTranslation()

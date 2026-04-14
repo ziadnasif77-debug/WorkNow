@@ -40,13 +40,13 @@ const cancelAccountDeletionFn = httpsCallable<
 export default function PrivacyScreen() {
   const { t }    = useTranslation()
   const router   = useRouter()
-  const { user } = useAuth()
+  const { user: _user } = useAuth()
 
   // ── Export state ──────────────────────────────────────────────────────────
   const [exportLoading, setExportLoading]   = useState(false)
   const [exportStatus,  setExportStatus]    = useState<'idle'|'queued'|'ready'>('idle')
   const [downloadUrl,   setDownloadUrl]     = useState<string|null>(null)
-  const [exportExpiry,  setExportExpiry]    = useState<string|null>(null)
+  const [_exportExpiry, setExportExpiry]    = useState<string|null>(null)
 
   // ── Deletion state ─────────────────────────────────────────────────────────
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)

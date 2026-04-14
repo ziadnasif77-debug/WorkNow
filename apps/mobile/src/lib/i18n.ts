@@ -21,6 +21,7 @@ import { I18nManager } from 'react-native'
 import * as Updates from 'expo-updates'
 import { Platform } from 'react-native'
 import type { SupportedLocale } from '@workfix/types'
+import type { MMKV as MMKVType } from 'react-native-mmkv'
 
 // MMKV is a native module — not available in Expo Go or web.
 // Fall back to a simple in-memory + AsyncStorage-free stub so the app
@@ -29,7 +30,7 @@ let storage: { getString: (k: string) => string | undefined; set: (k: string, v:
 
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { MMKV } = require('react-native-mmkv') as typeof import('react-native-mmkv')
+  const { MMKV } = require('react-native-mmkv') as { MMKV: typeof MMKVType }
   storage = new MMKV({ id: 'i18n' })
 } catch {
   // Expo Go / web fallback — in-memory only (lang resets on reload, acceptable)

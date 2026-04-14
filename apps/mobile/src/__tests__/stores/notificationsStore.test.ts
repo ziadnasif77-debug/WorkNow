@@ -48,6 +48,7 @@ jest.mock('firebase/firestore', () => ({
 // ── imports (after all mocks) ─────────────────────────────────────────────────
 import { useNotificationsStore } from '../../stores/notificationsStore'
 import type { AppNotification }  from '@workfix/types'
+import type { Timestamp }        from 'firebase/firestore'
 
 // ── helper: typed access to mock fns via require() ───────────────────────────
 // This is the correct pattern — avoids hoisting issues with const variables
@@ -100,7 +101,7 @@ const makeNotif = (overrides: Partial<AppNotification> = {}): AppNotification =>
   isRead:    false,
   refId:     'order_123',
   refType:   'order',
-  createdAt: { seconds: Date.now() / 1000, nanoseconds: 0, toDate: () => new Date() } as unknown as import('firebase/firestore').Timestamp,
+  createdAt: { seconds: Date.now() / 1000, nanoseconds: 0, toDate: () => new Date() } as unknown as Timestamp,
   ...overrides,
 })
 

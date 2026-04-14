@@ -5,7 +5,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, ActivityIndicator, RefreshControl,
+  ActivityIndicator, RefreshControl,
 } from 'react-native'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { getFirestore, collection, query, where, getCountFromServer } from 'firebase/firestore'

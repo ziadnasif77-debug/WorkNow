@@ -6,7 +6,7 @@
 import React, { useState } from 'react'
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  TextInput, Alert, Animated,
+  TextInput, Alert,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -62,7 +62,7 @@ export default function ReviewScreen() {
         comment:    comment.trim() || undefined,
         tags,
       })
-      Analytics.reviewSubmitted(rating)
+      void Analytics.reviewSubmitted(rating)
       router.replace({ pathname: '/orders/[id]', params: { id: orderId } })
     } catch {
       Alert.alert(t('common.error'), t('reviews.submitFailed'))

@@ -70,7 +70,7 @@ export default function SubscriptionsScreen() {
   const [isLoading,    setIsLoading]    = useState(false)
 
   const selectedPlan = PLANS.find(p => p.tier === selectedTier)!
-  const price = billing === 'monthly'
+  const _price = billing === 'monthly'
     ? selectedPlan.priceMonthly
     : Math.round(selectedPlan.priceYearly / 12)
 
@@ -83,7 +83,7 @@ export default function SubscriptionsScreen() {
     try {
       const res = await createSubscription(selectedTier, billing)
 
-      Analytics.subscriptionStarted(selectedTier, billing)
+      void Analytics.subscriptionStarted(selectedTier, billing)
       if (res.redirectUrl) {
         router.push({
           pathname: '/orders/payment-webview',

@@ -29,7 +29,7 @@ type Step = 1 | 2 | 3
 export default function CreateOrderScreen() {
   const { t }       = useTranslation()
   const router      = useRouter()
-  const { providerId, serviceId } = useLocalSearchParams<{ providerId?: string; serviceId?: string }>()
+  const { providerId: _providerId, serviceId } = useLocalSearchParams<{ providerId?: string; serviceId?: string }>()
   const { createOrder, actionLoading, actionError, clearError } = useOrdersStore()
   const location    = useLocation()
 
@@ -100,7 +100,7 @@ export default function CreateOrderScreen() {
         attachmentUrls: urls,
         isScheduled,
         scheduledAt:    isScheduled ? scheduledAt.toISOString() : undefined })
-      Analytics.orderSubmitted(orderId)
+      void Analytics.orderSubmitted(orderId)
       router.replace({ pathname: '/orders/[id]', params: { id: orderId } })
     } catch {
       // error shown from store

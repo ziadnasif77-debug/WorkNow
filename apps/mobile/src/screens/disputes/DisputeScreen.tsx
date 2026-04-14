@@ -13,7 +13,6 @@ import * as ImagePicker from 'expo-image-picker'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { Analytics } from '../../lib/analytics'
 import { useOrdersStore } from '../../stores/ordersStore'
-import { firebaseFunctions, firebaseAuth } from '../../lib/firebase'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Radio, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
@@ -37,7 +36,7 @@ export default function DisputeScreen() {
   const [reason,       setReason]       = useState('')
   const [description,  setDescription]  = useState('')
   const [evidence,     setEvidence]     = useState<string[]>([])
-  const { openDispute, actionLoading }  = useOrdersStore()
+  const { openDispute, actionLoading: _actionLoading }  = useOrdersStore()
   const [isLoading,    setIsLoading]    = useState(false)
   const [uploading,    setUploading]    = useState(false)
 
@@ -54,7 +53,6 @@ export default function DisputeScreen() {
   }
 
   async function uploadEvidence(): Promise<string[]> {
-    const uid     = firebaseAuth.currentUser?.uid ?? 'anon'
     const storage = getStorage()
     const urls: string[] = []
     for (let i = 0; i < evidence.length; i++) {
@@ -90,7 +88,7 @@ export default function DisputeScreen() {
     setIsLoading(true)
     try {
       await openDispute({ orderId, reason, description: description.trim(), evidenceUrls })
-      Analytics.disputeOpened(reason)
+      void Analytics.disputeOpened(reason)
       Alert.alert(
         t('disputes.submitted'),
         t('disputes.submittedDesc'),

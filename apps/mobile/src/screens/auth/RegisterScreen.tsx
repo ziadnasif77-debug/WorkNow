@@ -45,7 +45,7 @@ export default function RegisterScreen() {
       try {
         await signUpEmail(email.trim(), password)
         await completeProfile({ displayName: name.trim(), preferredLang: 'ar' })
-        Analytics.signUpComplete(role)
+        void Analytics.signUpComplete(role)
         if (role === 'provider') {
           router.replace('/auth/provider-type')
         } else {

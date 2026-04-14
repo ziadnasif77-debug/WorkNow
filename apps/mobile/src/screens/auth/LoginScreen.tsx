@@ -9,6 +9,7 @@ import {
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
+import { firebaseApp } from '../../lib/firebase'
 import { Analytics } from '../../lib/analytics'
 import { Button, Input, Divider, Screen, ErrorBanner } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
@@ -61,7 +62,7 @@ export default function LoginScreen() {
     try {
       if (tab === 'email') {
         await signInEmail(email.trim(), password)
-        Analytics.login('email')
+        void Analytics.login('email')
       } else {
         if (recaptchaRef.current) {
           setRecaptchaVerifier(recaptchaRef.current)
@@ -72,7 +73,7 @@ export default function LoginScreen() {
           setRecaptchaVerifier(webVerifier)
         }
         await sendPhoneOtp(phone.trim())
-        Analytics.signUpStart('phone')
+        void Analytics.signUpStart('phone')
         router.push({ pathname: '/auth/otp', params: { phone: phone.trim() } })
       }
     } catch {
@@ -85,10 +86,7 @@ export default function LoginScreen() {
       {FirebaseRecaptchaVerifierModal && (
         <FirebaseRecaptchaVerifierModal
           ref={recaptchaRef}
-          firebaseConfig={
-            (require('../../lib/firebase') as { firebaseApp: { options: Record<string, unknown> } })
-              .firebaseApp.options
-          }
+          firebaseConfig={firebaseApp.options as Record<string, unknown>}
           attemptInvisibleVerification
         />
       )}
@@ -171,7 +169,7 @@ export default function LoginScreen() {
 
         <Button
           label={t('auth.google')}
-          onPress={async () => {
+          onPress={() => {
               Alert.alert('قريباً', 'تسجيل الدخول بـ Google قيد التطوير')
             }}
           variant="outline"

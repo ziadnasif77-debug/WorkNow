@@ -2,7 +2,7 @@
 // Chat Screen — realtime messaging with typing indicator + read receipts
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TextInput,
   TouchableOpacity, Image, KeyboardAvoidingView,
@@ -31,7 +31,7 @@ export default function ChatScreen() {
     messages, messagesLoading, typingUsers,
     sendLoading, sendError,
     openConversation, subscribeMessages,
-    sendMessage, sendTyping, markRead,
+    sendMessage, sendTyping,
     unsubscribeAll, clearError,
   } = useMessagingStore()
 

@@ -19,6 +19,9 @@ import {
 import { getStorage }                                        from 'firebase/storage'
 import { getFunctions, connectFunctionsEmulator }            from 'firebase/functions'
 import { getFirebaseConfig }                                 from '@workfix/config'
+import type { connectFirestoreEmulator as ConnectFirestoreEmulatorFn } from 'firebase/firestore'
+import type { connectAuthEmulator as ConnectAuthEmulatorFn } from 'firebase/auth'
+import type { connectStorageEmulator as ConnectStorageEmulatorFn } from 'firebase/storage'
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -67,13 +70,16 @@ if (__DEV__ && process.env['EXPO_PUBLIC_USE_EMULATOR'] === 'true') {
 
     connectFunctionsEmulator(firebaseFunctions, HOST, 5001)
 
-    const { connectFirestoreEmulator } = require('firebase/firestore') as typeof import('firebase/firestore')
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { connectFirestoreEmulator } = require('firebase/firestore') as { connectFirestoreEmulator: typeof ConnectFirestoreEmulatorFn }
     connectFirestoreEmulator(firestore, HOST, 8080)
 
-    const { connectAuthEmulator } = require('firebase/auth') as typeof import('firebase/auth')
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { connectAuthEmulator } = require('firebase/auth') as { connectAuthEmulator: typeof ConnectAuthEmulatorFn }
     connectAuthEmulator(firebaseAuth, `http://${HOST}:9099`, { disableWarnings: true })
 
-    const { connectStorageEmulator } = require('firebase/storage') as typeof import('firebase/storage')
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { connectStorageEmulator } = require('firebase/storage') as { connectStorageEmulator: typeof ConnectStorageEmulatorFn }
     connectStorageEmulator(firebaseStorage, HOST, 9199)
 
     if (__DEV__) console.info('🔥 Firebase Emulators connected')

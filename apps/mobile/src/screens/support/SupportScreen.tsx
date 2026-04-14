@@ -21,7 +21,7 @@ const SUPPORT_PAGES: Record<string, { title_key: string; url: string }> = {
 }
 
 export default function SupportScreen() {
-  const router       = useRouter()
+  const _router      = useRouter()
   const { page }     = useLocalSearchParams<{ page?: string }>()
   const { t }        = useTranslation()
   const isConnected  = useIsOnline()

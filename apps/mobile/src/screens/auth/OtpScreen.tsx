@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import { ScreenHeader } from '../../components/ScreenHeader'
@@ -15,7 +15,6 @@ const RESEND_SECONDS = 60
 
 export default function OtpScreen() {
   const { t } = useTranslation()
-  const router = useRouter()
   const { phone } = useLocalSearchParams<{ phone: string }>()
   const { confirmPhoneOtp, sendPhoneOtp, isLoading, error, clearError } = useAuthStore()
 

@@ -19,7 +19,7 @@ export default function PaymentSuccessScreen() {
 
   // Fire payment complete event once
   React.useEffect(() => {
-    if (orderId) Analytics.paymentComplete(orderId, 0, 'SAR')
+    if (orderId) void Analytics.paymentComplete(orderId, 0, 'SAR')
   }, [])
 
   // Entrance animation

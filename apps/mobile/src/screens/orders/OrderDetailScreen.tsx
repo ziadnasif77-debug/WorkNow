@@ -31,8 +31,8 @@ export default function OrderDetailScreen() {
     markComplete, clearError,
   } = useOrdersStore()
 
-  const [showCancelModal, setShowCancelModal] = useState(false)
-  const [cancelReason,    setCancelReason]    = useState('')
+  const [_showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelReason,     _setCancelReason]   = useState('')
   const [invoiceLoading,  setInvoiceLoading]  = useState(false)
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function OrderDetailScreen() {
     clearError()
     try {
       const payment = await acceptQuote({ orderId: o.id, quoteId })
-      if (payment) Analytics.quoteAccepted(o.id, payment.amount, payment.currency)
+      if (payment) void Analytics.quoteAccepted(o.id, payment.amount, payment.currency)
       if (payment) {
         router.push({
           pathname: '/orders/payment',
@@ -103,7 +103,7 @@ export default function OrderDetailScreen() {
         onPress: async () => {
           try {
             await confirmCompletion(o.id)
-            Analytics.orderCompleted(o.id)
+            void Analytics.orderCompleted(o.id)
             router.push({ pathname: '/orders/review', params: { orderId: o.id } })
           } catch { /* error from store */ }
         },
@@ -111,7 +111,7 @@ export default function OrderDetailScreen() {
     ])
   }
 
-  async function handleCancel() {
+  async function _handleCancel() {
     if (cancelReason.trim().length < 5) return
     try {
       await cancelOrder({ orderId: o.id, reason: cancelReason.trim() })

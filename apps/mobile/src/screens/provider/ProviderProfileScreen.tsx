@@ -26,7 +26,7 @@ export default function ProviderProfileScreen() {
   useEffect(() => {
     if (id) {
       void getProviderProfile(id)
-      Analytics.providerProfileView(id, 'search')
+      void Analytics.providerProfileView(id, 'search')
     }
   }, [id])
 
