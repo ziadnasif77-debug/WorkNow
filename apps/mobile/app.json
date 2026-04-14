@@ -111,12 +111,11 @@
         "origin": false,
         "root": "src/app"
       },
-      "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
-      }
+      "eas": {}
+
     },
     "updates": {
-      "url": "https://u.expo.dev/YOUR_EAS_PROJECT_ID",
+      "url": "https://u.expo.dev/placeholder",
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 3000,
