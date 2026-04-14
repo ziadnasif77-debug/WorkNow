@@ -115,7 +115,7 @@
 
     },
     "updates": {
-      "url": "https://u.expo.dev/placeholder",
+      "url": "https://u.expo.dev/7177c184-c126-44e9-a170-b20c0d4c4ae1",
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 3000,
