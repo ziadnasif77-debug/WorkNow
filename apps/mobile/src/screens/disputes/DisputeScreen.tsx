@@ -15,7 +15,7 @@ import { Analytics } from '../../lib/analytics'
 import { useOrdersStore } from '../../stores/ordersStore'
 import { firebaseFunctions, firebaseAuth } from '../../lib/firebase'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Button, Input, Screen } from '../../components/ui'
+import { Button, Input, Radio, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 const DISPUTE_REASONS = [
@@ -123,9 +123,7 @@ export default function DisputeScreen() {
               style={[styles.reason_row, reason === r.key && styles.reason_row_active]}
               onPress={() => setReason(r.key)}
             >
-              <View style={[styles.radio, reason === r.key && styles.radio_active]}>
-                {reason === r.key && <View style={styles.radio_inner} />}
-              </View>
+              <Radio selected={reason === r.key} />
               <Text style={[styles.reason_label, reason === r.key && styles.reason_label_active]}>
                 {r[lang]}
               </Text>
@@ -202,13 +200,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   reason_row_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  radio: {
-    width: 20, height: 20, borderRadius: Radius.full,
-    borderWidth: 2, borderColor: Colors.gray300,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  radio_active:      { borderColor: Colors.primary },
-  radio_inner:       { width: 8, height: 8, borderRadius: Radius.full, backgroundColor: Colors.primary },
   reason_label:      { flex: 1, fontSize: FontSize.md, color: Colors.gray700 },
   reason_label_active: { color: Colors.primary, fontWeight: FontWeight.medium },
 

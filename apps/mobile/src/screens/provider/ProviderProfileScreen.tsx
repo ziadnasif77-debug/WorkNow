@@ -4,15 +4,14 @@
 
 import React, { useEffect } from 'react'
 import {
-  View, Text, StyleSheet, ScrollView, Image,
-  TouchableOpacity, ActivityIndicator,
+  View, Text, StyleSheet, ScrollView, Image, TouchableOpacity,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useMarketplaceStore } from '../../stores/marketplaceStore'
 import { Analytics } from '../../lib/analytics'
 import { StarRating } from '../../components/marketplace'
-import { Button } from '../../components/ui'
+import { Avatar, Button, Card, FooterCTA, LoadingState } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
@@ -33,8 +32,8 @@ export default function ProviderProfileScreen() {
 
   if (profileLoading || !selectedProvider) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator color={Colors.primary} size="large" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState style={{ marginTop: 0 }} />
       </View>
     )
   }
@@ -94,15 +93,15 @@ export default function ProviderProfileScreen() {
 
         {/* ── About ──────────────────────────────────────────────────────── */}
         {p.bio && (
-          <View style={styles.section}>
+          <Card style={{ margin: Spacing.md }}>
             <Text style={styles.section_title}>{t('provider.about')}</Text>
             <Text style={styles.bio_text}>{p.bio}</Text>
-          </View>
+          </Card>
         )}
 
         {/* ── Working hours ───────────────────────────────────────────────── */}
         {p.workingHours && (
-          <View style={styles.section}>
+          <Card style={{ margin: Spacing.md }}>
             <Text style={styles.section_title}>{t('provider.workingHours')}</Text>
             {Object.entries(p.workingHours).map(([day, hours]) => (
               <View key={day} style={styles.hours_row}>
@@ -115,11 +114,11 @@ export default function ProviderProfileScreen() {
                 </Text>
               </View>
             ))}
-          </View>
+          </Card>
         )}
 
         {/* ── Reviews ────────────────────────────────────────────────────── */}
-        <View style={styles.section}>
+        <Card style={{ margin: Spacing.md }}>
           <View style={styles.section_header}>
             <Text style={styles.section_title}>{t('provider.reviews')}</Text>
             <StarRating rating={p.avgRating} total={p.totalReviews} />
@@ -130,45 +129,38 @@ export default function ProviderProfileScreen() {
           ) : (
             reviews.map(r => <ReviewCard key={r.id} review={r} />)
           )}
-        </View>
-
-        <View style={{ height: 100 }} />
+        </Card>
       </ScrollView>
 
       {/* ── Sticky CTA ─────────────────────────────────────────────────── */}
-      <View style={styles.cta_bar}>
+      <FooterCTA style={{ flexDirection: 'row', gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg }}>
         <Button
           label={t('provider.bookNow')}
           onPress={() => router.push({
             pathname: '/orders/create',
             params: { providerId: id },
           })}
-          style={styles.cta_btn}
+          style={{ flex: 1 }}
         />
         <TouchableOpacity
           style={styles.chat_btn}
           onPress={() => router.push({
-              pathname: '/chat/[id]',
-              params: { id: `direct_${id}` },
-            })}
+            pathname: '/chat/[id]',
+            params: { id: `direct_${id}` },
+          })}
         >
           <Text style={styles.chat_icon}>💬</Text>
         </TouchableOpacity>
-      </View>
+      </FooterCTA>
     </View>
   )
 }
 
 function ReviewCard({ review }: { review: Review }) {
-  const { t } = useTranslation()
   return (
     <View style={reviewStyles.card}>
       <View style={reviewStyles.header}>
-        <View style={reviewStyles.avatar}>
-          <Text style={reviewStyles.avatar_letter}>
-            {(review.reviewerName ?? '?')[0]?.toUpperCase()}
-          </Text>
-        </View>
+        <Avatar size="sm" name={review.reviewerName ?? '?'} />
         <View style={reviewStyles.meta}>
           <Text style={reviewStyles.name}>{review.reviewerName}</Text>
           <Text style={reviewStyles.date}>
@@ -184,9 +176,7 @@ function ReviewCard({ review }: { review: Review }) {
 
 const reviewStyles = StyleSheet.create({
   card:    { paddingVertical: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  header:  { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: 6 },
-  avatar:  { width: AvatarSize.sm, height: AvatarSize.sm, borderRadius: Radius.full, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  avatar_letter: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.primary },
+  header:  { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.xs },
   meta:    { flex: 1 },
   name:    { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.black },
   date:    { fontSize: FontSize.xs, color: Colors.gray400 },
@@ -195,7 +185,6 @@ const reviewStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  loading:   { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
   hero: {
     backgroundColor: Colors.white,
@@ -207,10 +196,10 @@ const styles = StyleSheet.create({
     ...Shadow.md,
   },
 
-  avatar_section: { position: 'relative', marginBottom: Spacing.md },
-  avatar: { width: AvatarSize.xxl, height: AvatarSize.xxl, borderRadius: Radius.full, borderWidth: 3, borderColor: Colors.white, ...Shadow.md },
+  avatar_section:   { position: 'relative', marginBottom: Spacing.md },
+  avatar:           { width: AvatarSize.xxl, height: AvatarSize.xxl, borderRadius: Radius.full, borderWidth: 3, borderColor: Colors.white, ...Shadow.md },
   avatar_placeholder: { backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  avatar_letter: { fontSize: IconSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },
+  avatar_letter:    { fontSize: IconSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },
 
   verified_badge: {
     position: 'absolute', bottom: -8, alignSelf: 'center',
@@ -220,33 +209,24 @@ const styles = StyleSheet.create({
   verified_text: { color: Colors.white, fontSize: FontSize.xs, fontWeight: FontWeight.bold },
 
   name:       { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black, marginTop: Spacing.sm },
-  type_badge: { fontSize: FontSize.sm, color: Colors.gray500, marginTop: 4 },
+  type_badge: { fontSize: FontSize.sm, color: Colors.gray500, marginTop: Spacing.xs },
 
-  stats_row:   { flexDirection: 'row', marginTop: Spacing.lg, paddingHorizontal: Spacing.xl },
-  stat:        { flex: 1, alignItems: 'center' },
-  stat_value:  { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },
-  stat_label:  { fontSize: FontSize.xs, color: Colors.gray500, marginTop: 2 },
-  stat_divider:{ width: 1, backgroundColor: Colors.border, marginHorizontal: Spacing.md },
+  stats_row:    { flexDirection: 'row', marginTop: Spacing.lg, paddingHorizontal: Spacing.xl },
+  stat:         { flex: 1, alignItems: 'center' },
+  stat_value:   { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },
+  stat_label:   { fontSize: FontSize.xs, color: Colors.gray500, marginTop: Spacing.xxs },
+  stat_divider: { width: 1, backgroundColor: Colors.border, marginHorizontal: Spacing.md },
 
-  section: { backgroundColor: Colors.white, margin: Spacing.md, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.sm },
-  section_title: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
+  section_title:  { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
   section_header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 
   bio_text:   { fontSize: FontSize.md, color: Colors.gray700, lineHeight: 24 },
   no_reviews: { fontSize: FontSize.md, color: Colors.gray400, textAlign: 'center', paddingVertical: Spacing.md },
 
-  hours_row:  { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
+  hours_row:  { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: Spacing.xs },
   hours_day:  { fontSize: FontSize.md, color: Colors.gray700, fontWeight: FontWeight.medium },
   hours_time: { fontSize: FontSize.md, color: Colors.gray500 },
 
-  cta_bar: {
-    position: 'absolute', bottom: 0, left: 0, right: 0,
-    flexDirection: 'row', gap: Spacing.md,
-    padding: Spacing.lg, backgroundColor: Colors.white,
-    borderTopWidth: 1, borderTopColor: Colors.border,
-    ...Shadow.lg,
-  },
-  cta_btn:  { flex: 1 },
   chat_btn: {
     width: 52, height: 52, borderRadius: Radius.md,
     backgroundColor: Colors.gray100, alignItems: 'center', justifyContent: 'center',

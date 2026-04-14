@@ -4,12 +4,13 @@
 
 import React from 'react'
 import {
-  View, Text, StyleSheet, FlatList,
-  TouchableOpacity, ActivityIndicator } from 'react-native'
+  View, Text, StyleSheet, FlatList, TouchableOpacity,
+} from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useNotificationsStore } from '../../stores/notificationsStore'
 import { EmptyState } from '../../components/marketplace'
+import { LoadingState } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, IconSize, Radius } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
@@ -69,7 +70,7 @@ export default function NotificationsScreen() {
       />
 
       {isLoading ? (
-        <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+        <LoadingState />
       ) : (
         <FlatList
           data={notifications}

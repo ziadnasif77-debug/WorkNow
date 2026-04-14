@@ -3,25 +3,20 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react'
-import {
-  View, Text, StyleSheet, FlatList, TouchableOpacity,
-  Modal, TextInput, ActivityIndicator, Alert } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Modal, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOrdersStore } from '../../stores/ordersStore'
 import { useAuth } from '../../hooks/useAuth'
 import { StatusBadge } from '../../components/orders'
-import { EmptyState } from '../../components/marketplace'
-import { Button, Input } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
+import { Badge, Button, Card, EmptyState, ErrorBanner, Input, LoadingState, TabHeader } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Order } from '@workfix/types'
 
 export default function ProviderDashboardScreen() {
   const { t }    = useTranslation()
   const router   = useRouter()
-  const insets   = useSafeAreaInsets()
   const { user } = useAuth()
   const {
     incomingOrders, incomingLoading,
@@ -80,15 +75,15 @@ export default function ProviderDashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <Text style={styles.title}>{t('provider.dashboard')}</Text>
-        <View style={styles.stats_pill}>
-          <Text style={styles.stats_text}>{active.length} {t('provider.newRequests')}</Text>
-        </View>
-      </View>
+      <TabHeader
+        title={t('provider.dashboard')}
+        rightEl={
+          <Badge variant="primary" label={`${active.length} ${t('provider.newRequests')}`} />
+        }
+      />
 
       {incomingLoading ? (
-        <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+        <LoadingState />
       ) : incomingOrders.length === 0 ? (
         <EmptyState
           emoji="📭"
@@ -113,9 +108,7 @@ export default function ProviderDashboardScreen() {
               return (
                 <View style={styles.section_header}>
                   <Text style={styles.section_title}>{item.title}</Text>
-                  <View style={styles.count_badge}>
-                    <Text style={styles.count_text}>{item.count}</Text>
-                  </View>
+                  <Badge variant="neutral" label={String(item.count)} />
                 </View>
               )
             }
@@ -168,9 +161,7 @@ export default function ProviderDashboardScreen() {
               multiline
             />
 
-            {actionError && (
-              <Text style={styles.modal_error}>{actionError}</Text>
-            )}
+            <ErrorBanner error={actionError} />
 
             <View style={styles.modal_actions}>
               <Button label={t('provider.sendQuote')} onPress={handleSubmitQuote} isLoading={actionLoading} />
@@ -192,7 +183,7 @@ function IncomingOrderCard({
   const { t } = useTranslation()
 
   return (
-    <TouchableOpacity style={styles.order_card} onPress={onViewDetail} activeOpacity={0.85}>
+    <Card onPress={onViewDetail}>
       <View style={styles.order_top}>
         <Text style={styles.order_id}>#{order.id.slice(-6).toUpperCase()}</Text>
         <StatusBadge status={order.status} size="sm" />
@@ -203,56 +194,34 @@ function IncomingOrderCard({
         <Text style={styles.order_time}>{formatDate(order.createdAt, 'ar', 'relative')}</Text>
       </View>
       {onSendQuote && (
-        <TouchableOpacity style={styles.quote_btn} onPress={onSendQuote}>
-          <Text style={styles.quote_btn_text}>💬 {t('provider.sendQuote')}</Text>
-        </TouchableOpacity>
+        <Button label={`💬 ${t('provider.sendQuote')}`} onPress={onSendQuote} size="sm" />
       )}
-    </TouchableOpacity>
+    </Card>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  title:      { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
-  stats_pill: { backgroundColor: Colors.primaryLight, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 4 },
-  stats_text: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.bold },
 
-  list: { padding: Spacing.md, gap: Spacing.sm },
-  section_header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.sm, marginBottom: 4 },
+  list:           { padding: Spacing.md, gap: Spacing.sm },
+  section_header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.sm, marginBottom: Spacing.xs },
   section_title:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.gray700 },
-  count_badge:    { backgroundColor: Colors.gray200, borderRadius: Radius.full, width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
-  count_text:     { fontSize: FontSize.xs, fontWeight: FontWeight.bold, color: Colors.gray600 },
 
-  order_card: {
-    backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, gap: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border, ...Shadow.sm },
   order_top:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   order_id:   { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   order_desc: { fontSize: FontSize.md, color: Colors.gray700, lineHeight: 20 },
   order_meta: { flexDirection: 'row', justifyContent: 'space-between' },
   order_addr: { fontSize: FontSize.sm, color: Colors.gray500, flex: 1 },
   order_time: { fontSize: FontSize.xs, color: Colors.gray400 },
-  quote_btn: {
-    backgroundColor: Colors.primary, borderRadius: Radius.md,
-    paddingVertical: Spacing.sm, alignItems: 'center' },
-  quote_btn_text: { color: Colors.white, fontWeight: FontWeight.bold, fontSize: FontSize.md },
 
   // Modal
-  modal_overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  modal_sheet: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg, paddingBottom: Spacing.xxl, gap: Spacing.md },
-  modal_handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.gray200, alignSelf: 'center', marginBottom: Spacing.sm },
-  modal_title:  { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-  order_preview: { backgroundColor: Colors.gray50, borderRadius: Radius.md, padding: Spacing.md, gap: Spacing.xs },
+  modal_overlay:      { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  modal_sheet:        { backgroundColor: Colors.white, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, paddingBottom: Spacing.xxl, gap: Spacing.md },
+  modal_handle:       { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.gray200, alignSelf: 'center', marginBottom: Spacing.sm },
+  modal_title:        { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
+  order_preview:      { backgroundColor: Colors.gray50, borderRadius: Radius.md, padding: Spacing.md, gap: Spacing.xs },
   order_preview_id:   { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray600 },
   order_preview_desc: { fontSize: FontSize.md, color: Colors.black },
   order_preview_addr: { fontSize: FontSize.sm, color: Colors.gray500 },
-  modal_error:    { color: Colors.error, fontSize: FontSize.sm },
-  modal_actions:  { gap: Spacing.sm } })
+  modal_actions:      { gap: Spacing.sm },
+})

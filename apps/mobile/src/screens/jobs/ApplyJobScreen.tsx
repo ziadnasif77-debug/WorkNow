@@ -4,10 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react'
-import {
-  View, Text, StyleSheet, ScrollView, TextInput,
-  TouchableOpacity, Alert, ActivityIndicator, Platform,
-} from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import * as DocumentPicker from 'expo-document-picker'
@@ -16,7 +13,8 @@ import { firebaseStorage, firebaseAuth } from '../../lib/firebase'
 import { useJobsStore } from '../../stores/jobsStore'
 import { useAuthStore } from '../../stores/authStore'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
+import { Button, Card, Input } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
 
 // Accepted CV MIME types and extensions
 const CV_MIME_TYPES = [
@@ -120,107 +118,54 @@ export default function ApplyJobScreen() {
       <ScreenHeader title={t('jobs.applyTitle')} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Job title display */}
-        <View style={styles.jobBanner}>
-          <Text style={styles.jobBannerLabel}>{t('jobs.applyTitle')}</Text>
-          <Text style={styles.jobBannerTitle} numberOfLines={2}>{jobTitle}</Text>
-          <Text style={styles.jobBannerSub}>{t('jobs.applySubtitle')}</Text>
+        <View style={styles.job_banner}>
+          <Text style={styles.job_banner_label}>{t('jobs.applyTitle')}</Text>
+          <Text style={styles.job_banner_title} numberOfLines={2}>{jobTitle}</Text>
+          <Text style={styles.job_banner_sub}>{t('jobs.applySubtitle')}</Text>
         </View>
 
         {/* Form */}
-        <View style={styles.card}>
-          <Field label={t('jobs.fullName')} value={name} onChangeText={setName} placeholder="..." />
-          <Field label={t('jobs.email')} value={email} onChangeText={setEmail} placeholder="name@example.com" keyboardType="email-address" autoCapitalize="none" />
-          <Field label={t('jobs.phone')} value={phone} onChangeText={setPhone} placeholder="+966 5X XXX XXXX" keyboardType="phone-pad" />
-          <Field
+        <Card gap={Spacing.md}>
+          <Input label={t('jobs.fullName')} value={name} onChangeText={setName} placeholder="..." containerStyle={{ marginBottom: 0 }} />
+          <Input label={t('jobs.email')} value={email} onChangeText={setEmail} placeholder="name@example.com" keyboardType="email-address" autoCapitalize="none" containerStyle={{ marginBottom: 0 }} />
+          <Input label={t('jobs.phone')} value={phone} onChangeText={setPhone} placeholder="+966 5X XXX XXXX" keyboardType="phone-pad" containerStyle={{ marginBottom: 0 }} />
+          <Input
             label={t('jobs.coverNote')} value={coverNote} onChangeText={setCoverNote}
             placeholder={t('jobs.coverNotePlaceholder')} multiline
+            style={{ height: 100, textAlignVertical: 'top', paddingTop: Spacing.sm }}
+            containerStyle={{ marginBottom: 0 }}
           />
-        </View>
+        </Card>
 
         {/* CV Upload */}
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>{t('jobs.uploadCV')}</Text>
-          <Text style={styles.cvTypesHint}>{t('jobs.cvTypes')}</Text>
-
-          <TouchableOpacity
-            style={[styles.cvButton, cvUrl && styles.cvButtonDone]}
+        <Card gap={Spacing.md}>
+          <Text style={styles.cv_types_hint}>{t('jobs.cvTypes')}</Text>
+          <Button
+            label={cvUrl ? `✓ ${cvName ?? t('jobs.cvUploaded')}` : `📎 ${t('jobs.uploadCV')}`}
+            variant={cvUrl ? 'success' : 'primary'}
             onPress={pickCV}
-            disabled={uploading}
-            activeOpacity={0.8}
-          >
-            {uploading ? (
-              <ActivityIndicator color={Colors.white} />
-            ) : cvUrl ? (
-              <Text style={styles.cvButtonText}>✓ {cvName ?? t('jobs.cvUploaded')}</Text>
-            ) : (
-              <Text style={styles.cvButtonText}>📎 {t('jobs.uploadCV')}</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+            isLoading={uploading}
+          />
+        </Card>
 
         {/* Submit */}
-        <TouchableOpacity
-          style={[styles.submitBtn, (actionLoading || uploading) && styles.submitBtnDisabled]}
+        <Button
+          label={t('jobs.submitApplication')}
           onPress={handleSubmit}
-          disabled={actionLoading || uploading}
-          activeOpacity={0.85}
-        >
-          {actionLoading ? (
-            <ActivityIndicator color={Colors.white} />
-          ) : (
-            <Text style={styles.submitBtnText}>{t('jobs.submitApplication')}</Text>
-          )}
-        </TouchableOpacity>
+          isLoading={actionLoading || uploading}
+          style={{ marginTop: Spacing.sm }}
+        />
       </ScrollView>
     </View>
   )
 }
 
-function Field({
-  label, value, onChangeText, placeholder,
-  multiline, keyboardType, autoCapitalize,
-}: {
-  label: string; value: string; onChangeText: (v: string) => void
-  placeholder?: string; multiline?: boolean
-  keyboardType?: 'default' | 'email-address' | 'phone-pad'
-  autoCapitalize?: 'none' | 'sentences'
-}) {
-  return (
-    <View style={styles.fieldWrap}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        style={[styles.input, multiline && styles.inputMulti]}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={Colors.gray300}
-        multiline={multiline}
-        numberOfLines={multiline ? 4 : 1}
-        keyboardType={keyboardType}
-        autoCapitalize={autoCapitalize ?? 'sentences'}
-        textAlignVertical={multiline ? 'top' : 'center'}
-      />
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: Colors.background },
-  content:         { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
-  jobBanner:       { backgroundColor: Colors.primaryLight, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.xs },
-  jobBannerLabel:  { fontSize: FontSize.xs, color: Colors.primary, fontWeight: FontWeight.medium, textTransform: 'uppercase', letterSpacing: 0.5 },
-  jobBannerTitle:  { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.gray900 },
-  jobBannerSub:    { fontSize: FontSize.sm, color: Colors.gray500 },
-  card:            { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.md, ...Shadow.sm },
-  fieldWrap:       { gap: Spacing.xs },
-  fieldLabel:      { fontSize: FontSize.sm, fontWeight: FontWeight.medium, color: Colors.gray700 },
-  input:           { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, fontSize: FontSize.md, color: Colors.gray900, backgroundColor: Colors.white },
-  inputMulti:      { height: 100, paddingTop: Spacing.sm },
-  cvTypesHint:     { fontSize: FontSize.xs, color: Colors.gray400 },
-  cvButton:        { backgroundColor: Colors.primary, borderRadius: Radius.md, paddingVertical: Spacing.md, alignItems: 'center' },
-  cvButtonDone:    { backgroundColor: Colors.success },
-  cvButtonText:    { color: Colors.white, fontSize: FontSize.md, fontWeight: FontWeight.medium },
-  submitBtn:       { backgroundColor: Colors.primary, borderRadius: Radius.lg, paddingVertical: Spacing.md, alignItems: 'center', marginTop: Spacing.sm },
-  submitBtnDisabled: { opacity: 0.5 },
-  submitBtnText:   { color: Colors.white, fontSize: FontSize.md, fontWeight: FontWeight.bold },
+  container:        { flex: 1, backgroundColor: Colors.background },
+  content:          { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
+  job_banner:       { backgroundColor: Colors.primaryLight, borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.xs },
+  job_banner_label: { fontSize: FontSize.xs, color: Colors.primary, fontWeight: FontWeight.medium, textTransform: 'uppercase', letterSpacing: 0.5 },
+  job_banner_title: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.gray900 },
+  job_banner_sub:   { fontSize: FontSize.sm, color: Colors.gray500 },
+  cv_types_hint:    { fontSize: FontSize.xs, color: Colors.gray400 },
 })

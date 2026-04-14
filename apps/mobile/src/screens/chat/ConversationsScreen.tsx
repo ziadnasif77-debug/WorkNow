@@ -5,21 +5,19 @@
 import React, { useEffect } from 'react'
 import {
   View, Text, StyleSheet, FlatList,
-  TouchableOpacity, ActivityIndicator } from 'react-native'
+  TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMessagingStore } from '../../stores/messagingStore'
 import { useAuth } from '../../hooks/useAuth'
-import { EmptyState } from '../../components/marketplace'
-import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
+import { EmptyState, LoadingState, TabHeader } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight, Radius, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Conversation } from '@workfix/types'
 
 export default function ConversationsScreen() {
   const { t }    = useTranslation()
   const router   = useRouter()
-  const insets   = useSafeAreaInsets()
   const { user } = useAuth()
   const { conversations, convsLoading, subscribeConversations, unsubscribeAll } = useMessagingStore()
 
@@ -30,12 +28,10 @@ export default function ConversationsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <Text style={styles.title}>{t('tabs.messages')}</Text>
-      </View>
+      <TabHeader title={t('tabs.messages')} />
 
       {convsLoading ? (
-        <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+        <LoadingState />
       ) : (
         <FlatList
           data={conversations}
@@ -116,10 +112,6 @@ function ConversationRow({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  title: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
   list:  { paddingVertical: Spacing.sm },
 
   conv_row: {
@@ -149,4 +141,4 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary, borderRadius: Radius.full,
     minWidth: 20, height: 20, alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 5 },
-  unread_text: { color: Colors.white, fontSize: IconSize.xs, fontWeight: FontWeight.bold } })
+  unread_text: { color: Colors.white, fontSize: FontSize.xs, fontWeight: FontWeight.bold } })

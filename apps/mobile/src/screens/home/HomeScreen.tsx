@@ -5,7 +5,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import {
   View, Text, StyleSheet, FlatList, ScrollView,
-  TextInput, TouchableOpacity, ActivityIndicator,
+  TextInput, TouchableOpacity,
   RefreshControl,
 } from 'react-native'
 import { useRouter } from 'expo-router'
@@ -14,7 +14,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { useMarketplaceStore } from '../../stores/marketplaceStore'
 import { useLocation } from '../../hooks/useLocation'
 import { ProviderCard, CategoryChip, EmptyState } from '../../components/marketplace'
-import { Screen } from '../../components/ui'
+import { Card, LoadingState, Screen, SectionHeader } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 
 import { useNotificationsStore } from '../../stores/notificationsStore'
@@ -153,15 +153,15 @@ export default function HomeScreen() {
 
         {/* ── Categories ─────────────────────────────────────────────────── */}
         <View style={styles.section}>
-          <View style={styles.section_header}>
-            <Text style={styles.section_title}>{t('home.categories')}</Text>
-            <TouchableOpacity onPress={() => router.push('/categories')}>
-              <Text style={styles.see_all}>{t('home.seeAll')}</Text>
-            </TouchableOpacity>
-          </View>
+          <SectionHeader
+            title={t('home.categories')}
+            seeAll={t('home.seeAll')}
+            onSeeAll={() => router.push('/categories')}
+            style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.md }}
+          />
 
           {categoriesLoading ? (
-            <ActivityIndicator color={Colors.primary} style={{ marginVertical: Spacing.md }} />
+            <LoadingState style={{ marginTop: Spacing.md }} />
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cats_scroll}>
               <CategoryChip
@@ -183,12 +183,12 @@ export default function HomeScreen() {
 
         {/* ── Nearby Providers ───────────────────────────────────────────── */}
         <View style={styles.section}>
-          <View style={styles.section_header}>
-            <Text style={styles.section_title}>{t('home.nearbyProviders')}</Text>
-            <TouchableOpacity onPress={() => router.push('/search')}>
-              <Text style={styles.see_all}>{t('home.seeAll')}</Text>
-            </TouchableOpacity>
-          </View>
+          <SectionHeader
+            title={t('home.nearbyProviders')}
+            seeAll={t('home.seeAll')}
+            onSeeAll={() => router.push('/search')}
+            style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.md }}
+          />
 
           {searchLoading && providers.length === 0 ? (
             <View style={styles.loading_row}>
@@ -226,18 +226,17 @@ export default function HomeScreen() {
 
         {/* ── Quick Actions ───────────────────────────────────────────────── */}
         <View style={[styles.section, { paddingHorizontal: Spacing.lg }]}>
-          <Text style={styles.section_title}>{t('home.quickActions')}</Text>
+          <SectionHeader title={t('home.quickActions')} style={{ marginBottom: Spacing.md }} />
           <View style={styles.quick_grid}>
             {QUICK_ACTIONS.map(a => (
-              <TouchableOpacity
+              <Card
                 key={a.key}
-                style={styles.quick_card}
                 onPress={() => router.push(a.route as never)}
-                activeOpacity={0.8}
+                style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}
               >
                 <Text style={styles.quick_emoji}>{a.emoji}</Text>
                 <Text style={styles.quick_label}>{t(a.labelKey)}</Text>
-              </TouchableOpacity>
+              </Card>
             ))}
           </View>
         </View>
@@ -307,21 +306,12 @@ const styles = StyleSheet.create({
   search_clear: { fontSize: IconSize.sm, color: Colors.gray400, padding: 4 },
 
   section:        { marginTop: Spacing.lg },
-  section_header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: Spacing.lg, marginBottom: Spacing.md },
-  section_title:  { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
-  see_all:        { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.medium },
 
   cats_scroll:      { paddingHorizontal: Spacing.lg, gap: Spacing.sm },
   providers_scroll: { paddingHorizontal: Spacing.lg, gap: Spacing.md },
   loading_row:      { flexDirection: 'row', gap: Spacing.md, paddingHorizontal: Spacing.lg },
 
   quick_grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginTop: Spacing.sm },
-  quick_card: {
-    flex: 1, minWidth: '45%',
-    backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, alignItems: 'center', gap: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
-  },
   quick_emoji: { fontSize: IconSize.xl },
   quick_label: { fontSize: FontSize.sm, color: Colors.gray700, fontWeight: FontWeight.medium, textAlign: 'center' },
 })

@@ -15,6 +15,7 @@ import { useMessagingStore } from '../../stores/messagingStore'
 import { useAuth } from '../../hooks/useAuth'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import { ScreenHeader } from '../../components/ScreenHeader'
+import { LoadingState } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Message } from '@workfix/types'
@@ -161,7 +162,7 @@ export default function ChatScreen() {
 
       {/* ── Messages ───────────────────────────────────────────────────── */}
       {messagesLoading ? (
-        <ActivityIndicator color={Colors.primary} style={styles.loader} />
+        <LoadingState />
       ) : (
         <FlatList
           ref={flatRef}
@@ -380,7 +381,6 @@ function isDifferentDay(
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   center:    { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.md },
-  loader:    { marginTop: Spacing.xxl },
 
   // Header
   order_btn:    { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },

@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TextInput,
-  TouchableOpacity, Modal, ScrollView, ActivityIndicator,
+  TouchableOpacity, Modal, ScrollView,
 } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -14,7 +14,7 @@ import { useMarketplaceStore } from '../../stores/marketplaceStore'
 import { Analytics } from '../../lib/analytics'
 import { useLocation } from '../../hooks/useLocation'
 import { ProviderCard, CategoryChip, EmptyState } from '../../components/marketplace'
-import { Button } from '../../components/ui'
+import { Button, Chip, LoadingState } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 type SortBy = 'distance' | 'rating' | 'price'
@@ -130,7 +130,7 @@ export default function SearchScreen() {
         onEndReachedThreshold={0.3}
         ListEmptyComponent={
           searchLoading ? (
-            <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+            <LoadingState />
           ) : (
             <EmptyState
               emoji="🔍"
@@ -141,7 +141,7 @@ export default function SearchScreen() {
           )
         }
         ListFooterComponent={
-          hasMore ? <ActivityIndicator color={Colors.primary} style={{ marginVertical: Spacing.lg }} /> : null
+          hasMore ? <LoadingState style={{ marginTop: Spacing.lg }} /> : null
         }
         renderItem={({ item: p }) => (
           <ProviderCard
@@ -176,15 +176,7 @@ export default function SearchScreen() {
             <Text style={styles.filter_label}>{t('search.sortBy')}</Text>
             <View style={styles.filter_row}>
               {(['distance', 'rating', 'price'] as SortBy[]).map(s => (
-                <TouchableOpacity
-                  key={s}
-                  style={[styles.filter_chip, sortBy === s && styles.filter_chip_active]}
-                  onPress={() => setSortBy(s)}
-                >
-                  <Text style={[styles.filter_chip_text, sortBy === s && styles.filter_chip_text_active]}>
-                    {t(`search.sort_${s}`)}
-                  </Text>
-                </TouchableOpacity>
+                <Chip key={s} label={t(`search.sort_${s}`)} selected={sortBy === s} onPress={() => setSortBy(s)} />
               ))}
             </View>
 
@@ -192,15 +184,7 @@ export default function SearchScreen() {
             <Text style={styles.filter_label}>{t('search.minRating')}</Text>
             <View style={styles.filter_row}>
               {[undefined, 3, 4, 4.5].map(r => (
-                <TouchableOpacity
-                  key={String(r)}
-                  style={[styles.filter_chip, minRating === r && styles.filter_chip_active]}
-                  onPress={() => setMinRating(r)}
-                >
-                  <Text style={[styles.filter_chip_text, minRating === r && styles.filter_chip_text_active]}>
-                    {r == null ? t('common.all') : `${r}★+`}
-                  </Text>
-                </TouchableOpacity>
+                <Chip key={String(r)} label={r == null ? t('common.all') : `${r}★+`} selected={minRating === r} onPress={() => setMinRating(r)} />
               ))}
             </View>
 
@@ -208,15 +192,7 @@ export default function SearchScreen() {
             <Text style={styles.filter_label}>{t('search.radius')}: {radiusKm} {t('common.km')}</Text>
             <View style={styles.filter_row}>
               {[5, 10, 20, 50].map(r => (
-                <TouchableOpacity
-                  key={r}
-                  style={[styles.filter_chip, radiusKm === r && styles.filter_chip_active]}
-                  onPress={() => setRadiusKm(r)}
-                >
-                  <Text style={[styles.filter_chip_text, radiusKm === r && styles.filter_chip_text_active]}>
-                    {r} {t('common.km')}
-                  </Text>
-                </TouchableOpacity>
+                <Chip key={r} label={`${r} ${t('common.km')}`} selected={radiusKm === r} onPress={() => setRadiusKm(r)} />
               ))}
             </View>
 
@@ -284,13 +260,4 @@ const styles = StyleSheet.create({
   modal_title:    { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   filter_label:   { fontSize: FontSize.md, fontWeight: FontWeight.medium, color: Colors.gray700 },
   filter_row:     { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  filter_chip: {
-    paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
-    borderRadius: Radius.full, borderWidth: 1, borderColor: Colors.border,
-    backgroundColor: Colors.white,
-  },
-  filter_chip_active:      { backgroundColor: Colors.primaryLight, borderColor: Colors.primary },
-  filter_chip_text:        { fontSize: FontSize.sm, color: Colors.gray700 },
-  filter_chip_text_active: { color: Colors.primary, fontWeight: FontWeight.bold },
-  filter_actions: { gap: Spacing.sm, marginTop: Spacing.sm },
-})
+  filter_actions: { gap: Spacing.sm, marginTop: Spacing.sm } })

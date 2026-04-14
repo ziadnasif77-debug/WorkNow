@@ -5,14 +5,13 @@
 import React, { useEffect } from 'react'
 import {
   View, Text, StyleSheet, FlatList,
-  TouchableOpacity, ActivityIndicator,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useMarketplaceStore } from '../../stores/marketplaceStore'
-import { EmptyState } from '../../components/marketplace'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
+import { Card, EmptyState, LoadingState } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 export default function CategoriesScreen() {
   const { t, i18n } = useTranslation()
@@ -27,7 +26,7 @@ export default function CategoriesScreen() {
       <ScreenHeader title={t('home.categories')} />
 
       {categoriesLoading ? (
-        <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+        <LoadingState />
       ) : (
         <FlatList
           data={categories}
@@ -46,17 +45,18 @@ export default function CategoriesScreen() {
             />
           }
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.cat_card}
+            <Card
               onPress={() => router.push(`/search?cat=${item.id}`)}
-              activeOpacity={0.8}
+              padding={Spacing.lg}
+              gap={Spacing.sm}
+              style={{ flex: 1, alignItems: 'center', borderRadius: Radius.xl, minHeight: 120 }}
             >
               <Text style={styles.cat_icon}>{item.icon ?? '🔧'}</Text>
               <Text style={styles.cat_name}>{item.name[lang]}</Text>
               {item.serviceCount != null && (
                 <Text style={styles.cat_count}>{item.serviceCount} خدمة</Text>
               )}
-            </TouchableOpacity>
+            </Card>
           )}
         />
       )}
@@ -68,12 +68,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   grid:  { padding: Spacing.md, gap: Spacing.md },
   row:   { gap: Spacing.md },
-  cat_card: {
-    flex: 1, backgroundColor: Colors.white, borderRadius: Radius.xl,
-    padding: Spacing.lg, alignItems: 'center', gap: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
-    minHeight: 120,
-  },
   cat_icon:  { fontSize: IconSize.xl },
   cat_name:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
   cat_count: { fontSize: FontSize.xs, color: Colors.gray400 },
