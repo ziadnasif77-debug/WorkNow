@@ -5,7 +5,7 @@
 import { z } from 'zod'
 import { callable, requireAuth, validate, db, serverTimestamp, appError } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
-import type { Conversation, Message } from '@workfix/types'
+import type { Conversation, Message, Timestamp } from '@workfix/types'
 
 const getOrCreateConversationSchema = z.object({
   orderId: z.string().min(1),
@@ -45,13 +45,13 @@ export const getOrCreateConversation = callable(async (data, context) => {
     orderId:             input.orderId,
     customerId:          order['customerId'] as string,
     providerId:          order['providerId'] as string,
-    lastMessageAt:       serverTimestamp() as unknown as import('@workfix/types').Timestamp,
+    lastMessageAt:       serverTimestamp() as unknown as Timestamp,
     lastMessageText:     '',
     lastMessageSenderId: uid,
     unreadCount:         {},
     typingStatus:        {},        // legacy — kept for migration
     typingExpiresAt:     {},        // TTL-based typing indicator (v2)
-    createdAt:           serverTimestamp() as unknown as import('@workfix/types').Timestamp,
+    createdAt:           serverTimestamp() as unknown as Timestamp,
   }
 
   await convRef.set({ ...conv, id: convRef.id })
@@ -98,7 +98,7 @@ export const sendMessage = callable(async (data, context) => {
     ...(input.mediaUrl !== undefined && { mediaUrl: input.mediaUrl }),
     ...(input.mediaType !== undefined && { mediaType: input.mediaType }),
     isRead:         false,
-    sentAt:         serverTimestamp() as unknown as import('@workfix/types').Timestamp,
+    sentAt:         serverTimestamp() as unknown as Timestamp,
   }
 
   await msgRef.set({ ...msg, id: msgRef.id })

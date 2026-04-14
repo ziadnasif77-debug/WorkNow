@@ -9,8 +9,8 @@ import {
   initializeTestEnvironment,
   assertFails,
   assertSucceeds,
-  RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
+import type { RulesTestEnvironment } from '@firebase/rules-unit-testing'
 import * as fs from 'fs'
 import * as path from 'path'
 

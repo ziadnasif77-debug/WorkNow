@@ -8,7 +8,7 @@ import {
   appError, increment,
 } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
-import type { Job, JobApplication } from '@workfix/types'
+import type { Job, JobApplication, Timestamp, Currency } from '@workfix/types'
 
 // ── createJob ─────────────────────────────────────────────────────────────────
 
@@ -48,15 +48,15 @@ export const createJob = callable(async (data, context) => {
     ...(input.requirements !== undefined        && { requirements: input.requirements }),
     ...(input.salaryMin    !== undefined        && { salaryMin:    input.salaryMin }),
     ...(input.salaryMax    !== undefined        && { salaryMax:    input.salaryMax }),
-    ...(input.currency     !== undefined        && { currency:     input.currency as import('@workfix/types').Currency }),
+    ...(input.currency     !== undefined        && { currency:     input.currency as Currency }),
     ...(input.websiteUrl   !== undefined        && { websiteUrl:   input.websiteUrl }),
     ...(input.applicationDeadline !== undefined && {
-      applicationDeadline: new Date(input.applicationDeadline) as unknown as import('@workfix/types').Timestamp,
+      applicationDeadline: new Date(input.applicationDeadline) as unknown as Timestamp,
     }),
     status:              'open',
     applicationsCount:   0,
-    createdAt:           serverTimestamp() as unknown as import('@workfix/types').Timestamp,
-    updatedAt:           serverTimestamp() as unknown as import('@workfix/types').Timestamp,
+    createdAt:           serverTimestamp() as unknown as Timestamp,
+    updatedAt:           serverTimestamp() as unknown as Timestamp,
   }
 
   await jobRef.set({ ...job, id: jobRef.id })
@@ -113,8 +113,8 @@ export const applyToJob = callable(async (data, context) => {
     ...(input.cvUrl      !== undefined && { cvUrl:      input.cvUrl }),
     ...(input.cvFileName !== undefined && { cvFileName: input.cvFileName }),
     status:         'pending',
-    createdAt:      serverTimestamp() as unknown as import('@workfix/types').Timestamp,
-    updatedAt:      serverTimestamp() as unknown as import('@workfix/types').Timestamp,
+    createdAt:      serverTimestamp() as unknown as Timestamp,
+    updatedAt:      serverTimestamp() as unknown as Timestamp,
   }
 
   const batch = db.batch()

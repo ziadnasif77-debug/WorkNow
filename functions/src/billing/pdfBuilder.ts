@@ -15,8 +15,8 @@
 
 import {
   PDFDocument, StandardFonts, rgb, degrees,
-  PDFPage, PDFFont,
 } from 'pdf-lib'
+import type { PDFPage, PDFFont } from 'pdf-lib'
 
 // ── Invoice data interface ────────────────────────────────────────────────────
 
@@ -315,7 +315,7 @@ function drawFinancialSummary(
 
 function drawFooter(
   page: PDFPage, fontReg: PDFFont, fontItalic: PDFFont,
-  data: InvoiceData, y: number,
+  data: InvoiceData, _y: number,
 ): void {
   const footerY = MARGIN + 50
 

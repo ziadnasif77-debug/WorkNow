@@ -4,8 +4,8 @@
 
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
-import { ZodSchema } from 'zod'
-import type { UserRole, ApiError, ErrorCode } from '@workfix/types'
+import type { ZodSchema } from 'zod'
+import type { UserRole, ApiError } from '@workfix/types'
 
 export const db = admin.firestore()
 export const auth = admin.auth()

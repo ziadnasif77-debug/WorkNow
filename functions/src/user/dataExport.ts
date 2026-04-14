@@ -22,7 +22,7 @@
 import { z }                           from 'zod'
 import * as admin                      from 'firebase-admin'
 import { callable, requireAuth,
-         validate, db, auth,
+         validate, db,
          storage }                     from '../_shared/helpers'
 import { rateLimit }                   from '../_shared/ratelimit'
 import { logger, auditLog }            from '../_shared/monitoring'
