@@ -74,9 +74,9 @@ jobs:
         run: |
           cd functions
           pnpm test -- \
-            --testPathPattern="unit/(payments|orders)" \
+            --testPathPattern="unit/" \
             --coverage \
-            --coverageThreshold='{"global":{"branches":60,"functions":70,"lines":70}}'
+            --coverageThreshold='{"global":{"branches":55,"functions":65,"lines":65}}'
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4

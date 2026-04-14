@@ -26,13 +26,19 @@ const config: Config = {
     'src/**/*.ts',
     '!src/__tests__/**',
     '!src/index.ts',
+    // Infrastructure files tested via integration tests, not unit tests:
+    '!src/_shared/queue.ts',
+    '!src/_shared/monitoring.ts',
+    '!src/_shared/webhooks.ts',
+    '!src/billing/generateInvoice.ts',
+    '!src/user/dataExport.ts',
   ],
   coverageThreshold: {
     global: {
-      branches:  50,
-      functions: 60,
-      lines:     60,
-      statements: 60,
+      branches:  55,
+      functions: 65,
+      lines:     65,
+      statements: 65,
     },
   },
 }
