@@ -2,7 +2,7 @@
 // Job Detail Screen — view full job info + apply button
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, Linking,
 } from 'react-native'
@@ -12,7 +12,6 @@ import { useJobsStore } from '../../stores/jobsStore'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Badge, Card, InfoRow, FooterCTA, LoadingState } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
-import { useAuthStore } from '../../stores/authStore'
 import type { Job } from '@workfix/types'
 
 export default function JobDetailScreen() {
@@ -20,11 +19,6 @@ export default function JobDetailScreen() {
   const router    = useRouter()
   const { id }    = useLocalSearchParams<{ id: string }>()
   const { activeJob, jobLoading, loadJobDetail } = useJobsStore()
-  const appUser   = useAuthStore(s => s.appUser)
-
-  // Check if user already applied (simple local flag; a Cloud Function would do the authoritative check)
-  const [hasApplied, setHasApplied] = useState(false)
-
   useEffect(() => {
     if (id) void loadJobDetail(id)
   }, [id])
@@ -114,8 +108,6 @@ export default function JobDetailScreen() {
         <FooterCTA>
           {job.websiteUrl ? (
             <Button label={`🌐 ${t('jobs.applyViaWebsite')}`} onPress={handleApply} />
-          ) : hasApplied ? (
-            <Button label={`✓ ${t('jobs.applied')}`} onPress={() => {}} variant="success" />
           ) : (
             <Button label={t('jobs.applyNow')} onPress={handleApply} />
           )}
