@@ -116,7 +116,7 @@ jobs:
           firebase emulators:exec \
             --only firestore \
             --project workfix-test \
-            'cd functions && pnpm test -- --testPathPattern=security-rules'
+            'cd functions && pnpm test -- --testPathPattern=emulator'
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 

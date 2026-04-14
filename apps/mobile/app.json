@@ -107,7 +107,6 @@
       "typedRoutes": true
     },
     "extra": {
-      "hostUri": "192.168.0.8:8081",
       "router": {
         "origin": false,
         "root": "src/app"
