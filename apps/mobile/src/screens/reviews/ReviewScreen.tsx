@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   stars_row:     { flexDirection: 'row', gap: Spacing.sm },
   star_btn:      { padding: 4 },
   star:          { fontSize: IconSize.xxl, color: Colors.gray200 },
-  star_filled:   { color: '#F59E0B' },
+  star_filled:   { color: Colors.amber },
   rating_label:  { fontSize: FontSize.lg, color: Colors.gray500, fontWeight: FontWeight.medium },
 
   tags_section: { gap: Spacing.md },

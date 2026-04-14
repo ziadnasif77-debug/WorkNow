@@ -5,14 +5,14 @@
 
 import React, { useState, useRef } from 'react'
 import {
-  View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Alert,
+  View, Text, StyleSheet, TouchableOpacity, Alert,
 } from 'react-native'
 import { WebView, type WebViewNavigation } from 'react-native-webview'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Colors, Spacing, FontSize, FontWeight, IconSize } from '../../constants/theme'
+import { Button, LoadingState } from '../../components/ui'
+import { Colors, Spacing, FontSize, FontWeight, IconSize, Radius } from '../../constants/theme'
 
 // Tap Payments redirects back to our callback URL after payment
 const SUCCESS_INDICATORS = ['tap_id=', 'status=CAPTURED', 'status=AUTHORIZED']
@@ -84,9 +84,7 @@ export default function PaymentWebViewScreen() {
       <View style={styles.error_screen}>
         <Text style={styles.error_emoji}>❌</Text>
         <Text style={styles.error_text}>{t('payment.invalidSession')}</Text>
-        <TouchableOpacity onPress={() => router.back()} style={styles.error_btn}>
-          <Text style={styles.error_btn_text}>{t('common.back')}</Text>
-        </TouchableOpacity>
+        <Button label={t('common.back')} onPress={() => router.back()} />
       </View>
     )
   }
@@ -147,18 +145,13 @@ export default function PaymentWebViewScreen() {
         <View style={styles.error_screen}>
           <Text style={styles.error_emoji}>📡</Text>
           <Text style={styles.error_text}>{t('payment.loadError')}</Text>
-          <TouchableOpacity
-            style={styles.error_btn}
-            onPress={() => { setLoadError(false); webviewRef.current?.reload() }}
-          >
-            <Text style={styles.error_btn_text}>{t('common.retry')}</Text>
-          </TouchableOpacity>
+          <Button label={t('common.retry')} onPress={() => { setLoadError(false); webviewRef.current?.reload() }} />
         </View>
       )}
 
       {isLoading && (
         <View style={styles.loading_overlay}>
-          <ActivityIndicator color={Colors.primary} size="large" />
+          <LoadingState style={{ marginTop: 0 }} />
           <Text style={styles.loading_text}>{t('payment.loading')}</Text>
         </View>
       )}
@@ -177,9 +170,9 @@ const styles = StyleSheet.create({
   },
   close_btn:     { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   close_icon:    { fontSize: IconSize.md, color: Colors.gray600 },
-  header_center: { flex: 1, alignItems: 'center', gap: 2 },
+  header_center: { flex: 1, alignItems: 'center', gap: Spacing.xxs },
   header_title:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
-  secure_badge:  { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  secure_badge:  { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
   secure_icon:   { fontSize: IconSize.xs },
   secure_text:   { fontSize: FontSize.xs, color: Colors.gray400 },
   header_spacer: { width: 36 },
@@ -199,6 +192,4 @@ const styles = StyleSheet.create({
   error_screen:   { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.md, padding: Spacing.xl },
   error_emoji:    { fontSize: IconSize.xxl },
   error_text:     { fontSize: FontSize.lg, color: Colors.gray600, textAlign: 'center' },
-  error_btn:      { backgroundColor: Colors.primary, borderRadius: 10, paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md },
-  error_btn_text: { color: Colors.white, fontWeight: FontWeight.bold, fontSize: FontSize.md },
 })

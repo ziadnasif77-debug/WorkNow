@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Alert, ActivityIndicator, Linking,
+  TouchableOpacity, Alert, Linking,
 } from 'react-native'
 import { httpsCallable } from 'firebase/functions'
 import { firebaseFunctions } from '../../lib/firebase'
@@ -15,7 +15,7 @@ import { useOrdersStore } from '../../stores/ordersStore'
 import { useAuth } from '../../hooks/useAuth'
 import { Analytics } from '../../lib/analytics'
 import { StatusBadge, StatusTimeline, QuoteCard } from '../../components/orders'
-import { Button } from '../../components/ui'
+import { Button, Card, FooterCTA, InfoRow, LoadingState } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
@@ -42,7 +42,7 @@ export default function OrderDetailScreen() {
   if (orderLoading || !activeOrder) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color={Colors.primary} size="large" />
+        <LoadingState style={{ marginTop: 0 }} />
       </View>
     )
   }
@@ -154,39 +154,40 @@ export default function OrderDetailScreen() {
         />
 
         {/* ── Timeline ─────────────────────────────────────────────────── */}
-        <View style={styles.section}>
+        <Card style={{ margin: Spacing.md }}>
           <StatusTimeline currentStatus={o.status} />
-        </View>
+        </Card>
 
         {/* ── Order info ───────────────────────────────────────────────── */}
-        <View style={styles.section}>
+        <Card style={{ margin: Spacing.md }}>
           <Text style={styles.section_title}>{t('orders.details')}</Text>
-          <View style={styles.info_rows}>
-            <InfoRow label={t('orders.descriptionLabel')} value={o.description} />
-            <InfoRow label={t('orders.addressLabel')}     value={o.address} />
+          <InfoRow label={t('orders.descriptionLabel')} value={o.description} style={styles.info_row} />
+          <InfoRow label={t('orders.addressLabel')}     value={o.address}      style={styles.info_row} />
+          <InfoRow
+            label={t('orders.createdAt')}
+            value={formatDate(o.createdAt, 'ar', 'datetime')}
+            style={styles.info_row}
+          />
+          {o.isScheduled && o.scheduledAt && (
             <InfoRow
-              label={t('orders.createdAt')}
-              value={formatDate(o.createdAt, 'ar', 'datetime')}
+              label={t('orders.scheduledAt')}
+              value={formatDate(o.scheduledAt, 'ar', 'datetime')}
+              style={styles.info_row}
             />
-            {o.isScheduled && o.scheduledAt && (
-              <InfoRow
-                label={t('orders.scheduledAt')}
-                value={formatDate(o.scheduledAt, 'ar', 'datetime')}
-              />
-            )}
-            {o.finalPrice != null && (
-              <InfoRow
-                label={t('orders.price')}
-                value={formatPrice(o.finalPrice, o.currency ?? 'SAR', 'ar')}
-                highlight
-              />
-            )}
-          </View>
-        </View>
+          )}
+          {o.finalPrice != null && (
+            <InfoRow
+              label={t('orders.price')}
+              value={formatPrice(o.finalPrice, o.currency ?? 'SAR', 'ar')}
+              style={styles.info_row}
+              valueStyle={{ fontWeight: FontWeight.bold, color: Colors.primary, fontSize: FontSize.md }}
+            />
+          )}
+        </Card>
 
         {/* ── Payment status ─────────────────────────────────────────── */}
         {o.paymentStatus !== 'unpaid' && (
-          <View style={styles.section}>
+          <Card style={{ margin: Spacing.md }}>
             <View style={styles.payment_banner}>
               <Text style={styles.payment_emoji}>
                 {o.paymentStatus === 'held'     ? '🔒' :
@@ -202,12 +203,12 @@ export default function OrderDetailScreen() {
                 )}
               </View>
             </View>
-          </View>
+          </Card>
         )}
 
         {/* ── Quotes (customer sees all, provider sees own) ────────────── */}
         {activeQuotes.length > 0 && (
-          <View style={styles.section}>
+          <Card style={{ margin: Spacing.md }}>
             <Text style={styles.section_title}>
               {t('orders.quotes')} ({activeQuotes.length})
             </Text>
@@ -223,23 +224,23 @@ export default function OrderDetailScreen() {
                 />
               ))}
             </View>
-          </View>
+          </Card>
         )}
 
         {activeQuotes.length === 0 && o.status === 'pending' && (
-          <View style={styles.section}>
+          <Card style={{ margin: Spacing.md }}>
             <View style={styles.waiting_box}>
               <Text style={styles.waiting_emoji}>⏳</Text>
               <Text style={styles.waiting_text}>{t('orders.waitingForQuotes')}</Text>
             </View>
-          </View>
+          </Card>
         )}
 
         <View style={{ height: 120 }} />
       </ScrollView>
 
       {/* ── Sticky action bar ─────────────────────────────────────────── */}
-      <View style={styles.action_bar}>
+      <FooterCTA style={styles.action_bar}>
         {/* ── Download Invoice (closed orders only) ──────────────────── */}
         {o.status === 'closed' && (
           <Button
@@ -298,41 +299,17 @@ export default function OrderDetailScreen() {
             style={{ flex: 0, paddingHorizontal: Spacing.lg }}
           />
         )}
-      </View>
+      </FooterCTA>
     </View>
   )
 }
-
-function InfoRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
-  return (
-    <View style={infoStyles.row}>
-      <Text style={infoStyles.label}>{label}</Text>
-      <Text style={[infoStyles.value, highlight && infoStyles.value_highlight]}>
-        {value}
-      </Text>
-    </View>
-  )
-}
-
-const infoStyles = StyleSheet.create({
-  row:             { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  label:           { fontSize: FontSize.sm, color: Colors.gray500, flex: 0.4 },
-  value:           { fontSize: FontSize.sm, color: Colors.black, flex: 0.6, textAlign: 'right' },
-  value_highlight: { fontWeight: FontWeight.bold, color: Colors.primary, fontSize: FontSize.md },
-})
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   loading:   { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-
-  section: {
-    backgroundColor: Colors.white, margin: Spacing.md,
-    borderRadius: Radius.lg, padding: Spacing.md, gap: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
-  },
-  section_title: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black, marginBottom: 4 },
-  info_rows:     { gap: 0 },
+  section_title: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black, marginBottom: Spacing.xs },
+  info_row: { paddingVertical: Spacing.sm, borderBottomWidth: 1, borderBottomColor: Colors.border },
 
   payment_banner: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   payment_emoji:  { fontSize: IconSize.xl },
@@ -347,8 +324,7 @@ const styles = StyleSheet.create({
   action_bar: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-    padding: Spacing.lg, backgroundColor: Colors.white,
-    borderTopWidth: 1, borderTopColor: Colors.border, ...Shadow.lg,
+    ...Shadow.lg,
   },
   main_action: { flex: 1 },
   invoice_btn: { flex: 1 },

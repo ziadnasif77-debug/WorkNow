@@ -4,14 +4,15 @@
 
 import React, { useEffect, useState } from 'react'
 import {
-  View, Text, StyleSheet, ScrollView, ActivityIndicator,
+  View, Text, StyleSheet, ScrollView,
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { firestore, firebaseAuth } from '../../lib/firebase'
 import { formatPrice } from '@workfix/utils'
+import { Card, LoadingState } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 interface Stats {
   totalOrders:     number
@@ -79,7 +80,7 @@ export default function ProviderStatsScreen() {
       <ScreenHeader title={t('profile.statistics')} />
 
       {loading ? (
-        <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+        <LoadingState />
       ) : !stats ? null : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* This Month */}
@@ -96,7 +97,7 @@ export default function ProviderStatsScreen() {
             <StatCard emoji="❌" label={t('stats.cancelled')} value={String(stats.cancelledOrders)} color={Colors.error} />
           </View>
           <View style={styles.cards_row}>
-            <StatCard emoji="⭐" label={t('stats.rating')}   value={stats.avgRating.toFixed(1)} color="#F59E0B" />
+            <StatCard emoji="⭐" label={t('stats.rating')}   value={stats.avgRating.toFixed(1)} color={Colors.amber} />
             <StatCard emoji="💬" label={t('stats.reviews')}  value={String(stats.totalReviews)} />
           </View>
 
@@ -116,20 +117,15 @@ function StatCard({ emoji, label, value, color }: {
   emoji: string; label: string; value: string; color?: string
 }) {
   return (
-    <View style={cardStyles.card}>
+    <Card style={{ flex: 1, alignItems: 'center', gap: Spacing.xs }} padding={Spacing.md}>
       <Text style={cardStyles.emoji}>{emoji}</Text>
       <Text style={[cardStyles.value, color ? { color } : {}]}>{value}</Text>
       <Text style={cardStyles.label}>{label}</Text>
-    </View>
+    </Card>
   )
 }
 
 const cardStyles = StyleSheet.create({
-  card: {
-    flex: 1, backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, alignItems: 'center', gap: 4,
-    borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
-  },
   emoji: { fontSize: IconSize.lg },
   value: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },
   label: { fontSize: FontSize.xs, color: Colors.gray500 },

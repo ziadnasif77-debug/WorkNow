@@ -15,7 +15,7 @@ import { httpsCallable } from 'firebase/functions'
 import { useAuthStore } from '../../stores/authStore'
 import { firebaseFunctions } from '../../lib/firebase'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Button, Input, Screen } from '../../components/ui'
+import { Button, Input, Screen, ErrorBanner, Radio } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { firebaseAuth } from '../../lib/firebase'
 import type { ProviderType } from '@workfix/types'
@@ -30,7 +30,7 @@ export default function ProviderTypeScreen() {
   const [step,         setStep]         = useState<Step>('type')
   const [type,         setType]         = useState<ProviderType>('individual')
   const [businessName, setBusinessName] = useState('')
-  const [documents,    setDocuments]    = useState<string[]>([])   // local URIs
+  const [documents,    setDocuments]    = useState<string[]>([])
   const [uploading,    setUploading]    = useState(false)
 
   async function pickDocument() {
@@ -70,12 +70,10 @@ export default function ProviderTypeScreen() {
         urls.push(url)
       }
 
-      // Submit KYC documents to backend (stores URLs + creates admin review task)
       const uploadKyc = httpsCallable<{ documentUrls: string[] }, { ok: boolean }>(
         firebaseFunctions, 'uploadKyc',
       )
       await uploadKyc({ documentUrls: urls })
-
       await setProviderType(type, businessName || undefined)
       setStep('pending')
     } catch {
@@ -113,9 +111,7 @@ export default function ProviderTypeScreen() {
                 </Text>
                 <Text style={styles.type_desc}>{tp.desc}</Text>
               </View>
-              <View style={[styles.radio, type === tp.key && styles.radio_active]}>
-                {type === tp.key && <View style={styles.radio_inner} />}
-              </View>
+              <Radio selected={type === tp.key} />
             </TouchableOpacity>
           ))}
         </View>
@@ -185,11 +181,7 @@ export default function ProviderTypeScreen() {
           ))}
         </View>
 
-        {error && (
-          <View style={styles.error_box}>
-            <Text style={styles.error_text}>{error}</Text>
-          </View>
-        )}
+        <ErrorBanner error={error} />
 
         <Button
           label={t('auth.submitKyc')}
@@ -221,34 +213,26 @@ export default function ProviderTypeScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { paddingTop: Spacing.xl, paddingBottom: Spacing.lg, gap: 8 },
-  title:   { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
+  header:   { paddingTop: Spacing.xl, paddingBottom: Spacing.lg, gap: Spacing.sm },
+  title:    { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
   subtitle: { fontSize: FontSize.md, color: Colors.gray500, lineHeight: 22 },
 
-  type_cards:      { gap: Spacing.md, marginBottom: Spacing.lg },
+  type_cards:       { gap: Spacing.md, marginBottom: Spacing.lg },
   type_card: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     padding: Spacing.md, borderRadius: Radius.lg,
     borderWidth: 1.5, borderColor: Colors.border,
     backgroundColor: Colors.white, ...Shadow.sm,
   },
-  type_card_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  type_emoji: { fontSize: IconSize.xl },
-  type_text:  { flex: 1 },
-  type_label: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
+  type_card_active:  { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
+  type_emoji:        { fontSize: IconSize.xl },
+  type_text:         { flex: 1 },
+  type_label:        { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
   type_label_active: { color: Colors.primary },
-  type_desc:  { fontSize: FontSize.sm, color: Colors.gray500, marginTop: 2 },
-
-  radio: {
-    width: 22, height: 22, borderRadius: Radius.full,
-    borderWidth: 2, borderColor: Colors.gray300,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  radio_active: { borderColor: Colors.primary },
-  radio_inner:  { width: 10, height: 10, borderRadius: Radius.full, backgroundColor: Colors.primary },
+  type_desc:         { fontSize: FontSize.sm, color: Colors.gray500, marginTop: Spacing.xxs },
 
   business_input: { marginBottom: Spacing.md },
-  btn: { marginTop: Spacing.sm },
+  btn:            { marginTop: Spacing.sm },
 
   back:      { paddingTop: Spacing.lg, paddingBottom: Spacing.md },
   back_text: { color: Colors.primary, fontSize: FontSize.md },
@@ -257,7 +241,7 @@ const styles = StyleSheet.create({
   doc_thumb: { width: 100, height: 120, borderRadius: Radius.md, overflow: 'hidden', position: 'relative' },
   doc_img:   { width: '100%', height: '100%' },
   doc_remove: {
-    position: 'absolute', top: 4, right: 4,
+    position: 'absolute', top: Spacing.xs, right: Spacing.xs,
     width: 22, height: 22, borderRadius: Radius.full,
     backgroundColor: Colors.error,
     alignItems: 'center', justifyContent: 'center',
@@ -266,24 +250,18 @@ const styles = StyleSheet.create({
   doc_add: {
     width: 100, height: 120, borderRadius: Radius.md,
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
-    alignItems: 'center', justifyContent: 'center', gap: 4,
+    alignItems: 'center', justifyContent: 'center', gap: Spacing.xs,
   },
   doc_add_icon:  { fontSize: IconSize.xl, color: Colors.gray400 },
   doc_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },
 
-  kyc_hints: { gap: 6, marginBottom: Spacing.lg },
-  kyc_hint_row: { flexDirection: 'row', gap: 6 },
+  kyc_hints:    { gap: Spacing.xs, marginBottom: Spacing.lg },
+  kyc_hint_row: { flexDirection: 'row', gap: Spacing.xs },
   kyc_hint_dot: { color: Colors.primary, fontSize: FontSize.md },
-  kyc_hint_text: { flex: 1, fontSize: FontSize.sm, color: Colors.gray500 },
-
-  error_box: {
-    backgroundColor: Colors.errorLight, borderRadius: Radius.sm,
-    padding: Spacing.md, marginBottom: Spacing.md,
-  },
-  error_text: { color: Colors.error, fontSize: FontSize.sm },
+  kyc_hint_text:{ flex: 1, fontSize: FontSize.sm, color: Colors.gray500 },
 
   pending_container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.xl },
-  pending_emoji: { fontSize: IconSize.xxxl, marginBottom: Spacing.lg },
-  pending_title: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center', marginBottom: Spacing.md },
-  pending_body:  { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center', lineHeight: 24 },
+  pending_emoji:     { fontSize: IconSize.xxxl, marginBottom: Spacing.lg },
+  pending_title:     { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center', marginBottom: Spacing.md },
+  pending_body:      { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center', lineHeight: 24 },
 })

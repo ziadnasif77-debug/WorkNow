@@ -4,19 +4,17 @@
 
 import React, { useRef, useState } from 'react'
 import {
-  View, Text, StyleSheet, TouchableOpacity, Image, Alert, Platform,
+  View, Text, StyleSheet, TouchableOpacity, Alert, Platform,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import { Analytics } from '../../lib/analytics'
-import { Button, Input, Divider, Screen } from '../../components/ui'
+import { Button, Input, Divider, Screen, ErrorBanner } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 import { isValidEmail, isValidPhone } from '@workfix/utils'
 
 // expo-firebase-recaptcha provides a native-compatible ApplicationVerifier.
-// It renders an invisible modal that handles reCAPTCHA for iOS/Android.
-// Import lazily so the app doesn't crash if the package is missing in Expo Go.
 let FirebaseRecaptchaVerifierModal: React.ComponentType<{
   ref: React.Ref<unknown>
   firebaseConfig: Record<string, unknown>
@@ -65,11 +63,9 @@ export default function LoginScreen() {
         await signInEmail(email.trim(), password)
         Analytics.login('email')
       } else {
-        // Inject the reCAPTCHA verifier before calling sendPhoneOtp
         if (recaptchaRef.current) {
           setRecaptchaVerifier(recaptchaRef.current)
         } else if (Platform.OS === 'web' && typeof window !== 'undefined') {
-          // Web fallback — RecaptchaVerifier created inline
           const { RecaptchaVerifier } = await import('firebase/auth')
           const { firebaseAuth } = await import('../../lib/firebase')
           const webVerifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' })
@@ -86,7 +82,6 @@ export default function LoginScreen() {
 
   return (
     <Screen scroll avoidKeyboard>
-      {/* reCAPTCHA modal — renders invisibly on native, no-op on web */}
       {FirebaseRecaptchaVerifierModal && (
         <FirebaseRecaptchaVerifierModal
           ref={recaptchaRef}
@@ -163,12 +158,7 @@ export default function LoginScreen() {
           />
         )}
 
-        {/* Global error */}
-        {error && (
-          <View style={styles.error_box}>
-            <Text style={styles.error_text}>{error}</Text>
-          </View>
-        )}
+        <ErrorBanner error={error} />
 
         <Button
           label={tab === 'phone' ? t('auth.sendOtp') : t('auth.loginTitle')}
@@ -179,12 +169,9 @@ export default function LoginScreen() {
 
         <Divider label={t('auth.orContinueWith')} />
 
-        {/* Google */}
         <Button
           label={t('auth.google')}
           onPress={async () => {
-              // Google Sign-In: implement with expo-auth-session
-              // See: https://docs.expo.dev/guides/google-authentication/
               Alert.alert('قريباً', 'تسجيل الدخول بـ Google قيد التطوير')
             }}
           variant="outline"
@@ -204,37 +191,29 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', paddingTop: Spacing.xxl, paddingBottom: Spacing.xl, gap: 6 },
-  logo:   { fontSize: 28, fontWeight: FontWeight.bold, color: Colors.primary, letterSpacing: -0.5 },
-  title:  { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
+  header:   { alignItems: 'center', paddingTop: Spacing.xxl, paddingBottom: Spacing.xl, gap: Spacing.xs },
+  logo:     { fontSize: 28, fontWeight: FontWeight.bold, color: Colors.primary, letterSpacing: -0.5 },
+  title:    { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.black },
   subtitle: { fontSize: FontSize.md, color: Colors.gray500 },
 
   tabs: {
     flexDirection: 'row',
     backgroundColor: Colors.gray100,
     borderRadius: Radius.md,
-    padding: 4,
+    padding: Spacing.xs,
     marginBottom: Spacing.lg,
   },
-  tab: { flex: 1, paddingVertical: Spacing.sm, alignItems: 'center', borderRadius: Radius.sm },
-  tab_active: { backgroundColor: Colors.white },
-  tab_label:  { fontSize: FontSize.md, color: Colors.gray500, fontWeight: FontWeight.medium },
-  tab_label_active: { color: Colors.primary, fontWeight: FontWeight.bold },
+  tab:             { flex: 1, paddingVertical: Spacing.sm, alignItems: 'center', borderRadius: Radius.sm },
+  tab_active:      { backgroundColor: Colors.white },
+  tab_label:       { fontSize: FontSize.md, color: Colors.gray500, fontWeight: FontWeight.medium },
+  tab_label_active:{ color: Colors.primary, fontWeight: FontWeight.bold },
 
-  form:       { gap: 0 },
-  forgot:     { alignSelf: 'flex-end', marginBottom: Spacing.sm },
-  forgot_text: { fontSize: FontSize.sm, color: Colors.primary },
-  submit_btn: { marginTop: Spacing.sm, marginBottom: Spacing.md },
+  form:         { gap: 0 },
+  forgot:       { alignSelf: 'flex-end', marginBottom: Spacing.sm },
+  forgot_text:  { fontSize: FontSize.sm, color: Colors.primary },
+  submit_btn:   { marginTop: Spacing.sm, marginBottom: Spacing.md },
 
-  error_box: {
-    backgroundColor: Colors.errorLight,
-    borderRadius: Radius.sm,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-  },
-  error_text: { color: Colors.error, fontSize: FontSize.sm },
-
-  footer: { flexDirection: 'row', justifyContent: 'center', paddingVertical: Spacing.xl },
+  footer:      { flexDirection: 'row', justifyContent: 'center', paddingVertical: Spacing.xl },
   footer_text: { color: Colors.gray500, fontSize: FontSize.md },
   footer_link: { color: Colors.primary, fontSize: FontSize.md, fontWeight: FontWeight.bold },
 })

@@ -5,13 +5,14 @@
 import React, { useState } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Alert, Switch, Image } from 'react-native'
+  TouchableOpacity, Alert, Image } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuthStore } from '../../stores/authStore'
 import { useAuth } from '../../hooks/useAuth'
 import { changeLanguage } from '../../lib/i18n'
+import { MenuItem } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import type { SupportedLocale } from '@workfix/types'
 
@@ -37,7 +38,6 @@ export default function ProfileScreen() {
     setLangChanging(true)
     try {
       await changeLanguage(lang)
-      // App reloads if direction changes (ar ↔ others)
     } finally {
       setLangChanging(false)
     }
@@ -97,19 +97,19 @@ export default function ProfileScreen() {
       {/* ── Provider section ──────────────────────────────────────────── */}
       {isProvider && (
         <SectionCard title={t('profile.providerTools')}>
-          <MenuRow emoji="💼" label={t('profile.myServices')}    onPress={() => router.push('/profile/services')} />
-          <MenuRow emoji="⭐" label={t('subscriptions.title')}   onPress={() => router.push('/subscriptions')} />
-          <MenuRow emoji="💳" label={t('provider.wallet')}       onPress={() => router.push('/wallet')} />
-          <MenuRow emoji="📊" label={t('profile.statistics')}    onPress={() => router.push('/profile/stats')} />
-          <MenuRow emoji="🏦" label={t('provider.bankAccount')}  onPress={() => router.push('/profile/bank-account')} />
+          <MenuItem emoji="💼" label={t('profile.myServices')}    onPress={() => router.push('/profile/services')} />
+          <MenuItem emoji="⭐" label={t('subscriptions.title')}   onPress={() => router.push('/subscriptions')} />
+          <MenuItem emoji="💳" label={t('provider.wallet')}       onPress={() => router.push('/wallet')} />
+          <MenuItem emoji="📊" label={t('profile.statistics')}    onPress={() => router.push('/profile/stats')} />
+          <MenuItem emoji="🏦" label={t('provider.bankAccount')}  onPress={() => router.push('/profile/bank-account')} />
         </SectionCard>
       )}
 
       {/* ── Account ───────────────────────────────────────────────────── */}
       <SectionCard title={t('profile.account')}>
-        <MenuRow emoji="👤" label={t('profile.editProfile')}   onPress={() => router.push('/profile/edit')} />
-        <MenuRow emoji="🔒" label={t('profile.changePassword')} onPress={() => router.push('/profile/change-password')} />
-        <MenuRow emoji="🔔" label={t('profile.notifications')} onPress={() => router.push('/notifications')} />
+        <MenuItem emoji="👤" label={t('profile.editProfile')}    onPress={() => router.push('/profile/edit')} />
+        <MenuItem emoji="🔒" label={t('profile.changePassword')} onPress={() => router.push('/profile/change-password')} />
+        <MenuItem emoji="🔔" label={t('profile.notifications')}  onPress={() => router.push('/notifications')} />
       </SectionCard>
 
       {/* ── Language ──────────────────────────────────────────────────── */}
@@ -135,12 +135,12 @@ export default function ProfileScreen() {
 
       {/* ── Support ───────────────────────────────────────────────────── */}
       <SectionCard title={t('profile.support')}>
-        <MenuRow emoji="❓" label={t('profile.faq')}         onPress={() => router.push('/support/faq')} />
-        <MenuRow emoji="📧" label={t('profile.contactUs')}   onPress={() => router.push('/support/contact')} />
-        <MenuRow emoji="⭐" label={t('profile.rateApp')}     onPress={() => { /* StoreReview */ }} />
-        <MenuRow emoji="📄" label={t('profile.terms')}       onPress={() => router.push('/support/terms')} />
-        <MenuRow emoji="🔐" label={t('profile.privacy')}     onPress={() => router.push('/support/privacy')} />
-        <MenuRow emoji="🛡️" label={t('privacy.screenTitle', 'الخصوصية وبياناتي')} onPress={() => router.push('/profile/privacy')} />
+        <MenuItem emoji="❓" label={t('profile.faq')}         onPress={() => router.push('/support/faq')} />
+        <MenuItem emoji="📧" label={t('profile.contactUs')}   onPress={() => router.push('/support/contact')} />
+        <MenuItem emoji="⭐" label={t('profile.rateApp')}     onPress={() => { /* StoreReview */ }} />
+        <MenuItem emoji="📄" label={t('profile.terms')}       onPress={() => router.push('/support/terms')} />
+        <MenuItem emoji="🔐" label={t('profile.privacy')}     onPress={() => router.push('/support/privacy')} />
+        <MenuItem emoji="🛡️" label={t('privacy.screenTitle', 'الخصوصية وبياناتي')} onPress={() => router.push('/profile/privacy')} />
       </SectionCard>
 
       {/* ── Danger zone ───────────────────────────────────────────────── */}
@@ -172,35 +172,6 @@ const sectionStyles = StyleSheet.create({
   title:     { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray500, marginBottom: Spacing.sm, textTransform: 'uppercase', letterSpacing: 0.5 },
   card:      { backgroundColor: Colors.white, borderRadius: Radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: Colors.border } })
 
-// ── Menu row ─────────────────────────────────────────────────────────────────
-
-function MenuRow({
-  emoji, label, onPress, rightEl }: {
-  emoji:    string
-  label:    string
-  onPress?: () => void
-  rightEl?: React.ReactNode
-}) {
-  return (
-    <TouchableOpacity
-      style={menuStyles.row}
-      onPress={onPress}
-      disabled={!onPress}
-      activeOpacity={0.7}
-    >
-      <Text style={menuStyles.emoji}>{emoji}</Text>
-      <Text style={menuStyles.label}>{label}</Text>
-      {rightEl ?? <Text style={menuStyles.arrow}>›</Text>}
-    </TouchableOpacity>
-  )
-}
-
-const menuStyles = StyleSheet.create({
-  row:   { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingHorizontal: Spacing.md, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  emoji: { fontSize: IconSize.md, width: 28, textAlign: 'center' },
-  label: { flex: 1, fontSize: FontSize.md, color: Colors.black },
-  arrow: { fontSize: IconSize.md, color: Colors.gray300 } })
-
 // ── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
@@ -224,15 +195,15 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center' },
   edit_avatar_icon: { fontSize: IconSize.sm },
   display_name:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-  email:            { fontSize: FontSize.sm, color: Colors.gray400, marginTop: 4 },
+  email:            { fontSize: FontSize.sm, color: Colors.gray400, marginTop: Spacing.xs },
   role_chip: {
     marginTop: Spacing.sm, backgroundColor: Colors.primaryLight,
-    borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 4 },
+    borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs },
   role_text: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.medium },
 
-  lang_grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, padding: Spacing.md },
+  lang_grid:         { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, padding: Spacing.md },
   lang_chip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
     borderRadius: Radius.full, borderWidth: 1.5, borderColor: Colors.border,
     backgroundColor: Colors.white },

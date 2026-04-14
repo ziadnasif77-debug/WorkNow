@@ -15,6 +15,7 @@ import { useMessagingStore } from '../../stores/messagingStore'
 import { useAuth } from '../../hooks/useAuth'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import { ScreenHeader } from '../../components/ScreenHeader'
+import { LoadingState } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Message } from '@workfix/types'
@@ -161,7 +162,7 @@ export default function ChatScreen() {
 
       {/* ── Messages ───────────────────────────────────────────────────── */}
       {messagesLoading ? (
-        <ActivityIndicator color={Colors.primary} style={styles.loader} />
+        <LoadingState />
       ) : (
         <FlatList
           ref={flatRef}
@@ -380,14 +381,13 @@ function isDifferentDay(
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   center:    { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.md },
-  loader:    { marginTop: Spacing.xxl },
 
   // Header
   order_btn:    { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   order_btn_icon: { fontSize: IconSize.md },
 
   // Messages
-  messages_content: { padding: Spacing.md, gap: 2, paddingBottom: Spacing.lg },
+  messages_content: { padding: Spacing.md, gap: Spacing.xxs, paddingBottom: Spacing.lg },
   empty_chat:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.xxl, gap: Spacing.md },
   empty_emoji: { fontSize: IconSize.xxl },
   empty_text:  { fontSize: FontSize.md, color: Colors.gray400, textAlign: 'center' },
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   bubble_text_mine: { color: Colors.white },
   bubble_image:     { width: 200, height: 200, borderRadius: Radius.md },
 
-  bubble_meta:      { flexDirection: 'row', alignItems: 'center', gap: 4, paddingStart: 4 },
+  bubble_meta:      { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingStart: Spacing.xs },
   bubble_meta_mine: { flexDirection: 'row-reverse', paddingStart: 0, paddingEnd: 4 },
   bubble_time:      { fontSize: 10, color: Colors.gray400 },
   read_receipt:     { fontSize: 11, color: Colors.gray300 },
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
     borderWidth: 1, borderColor: Colors.border,
   },
-  typing_dots:  { flexDirection: 'row', gap: 4, alignItems: 'center' },
+  typing_dots:  { flexDirection: 'row', gap: Spacing.xs, alignItems: 'center' },
   dot:          { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.gray400 },
   typing_label: { fontSize: FontSize.xs, color: Colors.gray400 },
 

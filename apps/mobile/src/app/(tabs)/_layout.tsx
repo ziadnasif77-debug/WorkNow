@@ -6,7 +6,7 @@ import React from 'react'
 import { Tabs } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { View, Text, StyleSheet } from 'react-native'
-import { Colors, FontSize } from '../../constants/theme'
+import { Colors, FontSize, FontWeight } from '../../constants/theme'
 import { useMessagingStore } from '../../stores/messagingStore'
 
 function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
@@ -33,7 +33,7 @@ const badgeStyles = StyleSheet.create({
     backgroundColor: Colors.error, alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 3, borderWidth: 1.5, borderColor: Colors.white,
   },
-  text: { color: Colors.white, fontSize: 9, fontWeight: '700' },
+  text: { color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold },
 })
 
 export default function TabsLayout() {

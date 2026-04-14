@@ -13,7 +13,7 @@ import { doc, updateDoc } from 'firebase/firestore'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Button, Input, Screen } from '../../components/ui'
-import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, AvatarSize, IconSize } from '../../constants/theme'
 
 export default function EditProfileScreen() {
   const { t }   = useTranslation()
@@ -100,21 +100,15 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  back: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
   content: { padding: Spacing.lg, gap: Spacing.md, alignItems: 'center' },
   avatar_wrap: { position: 'relative', marginBottom: Spacing.md },
-  avatar: { width: 96, height: 96, borderRadius: 48 },
+  avatar: { width: AvatarSize.xxl, height: AvatarSize.xxl, borderRadius: Radius.full },
   avatar_placeholder: {
     backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
   avatar_initials: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.primary },
   avatar_edit: {
     position: 'absolute', bottom: 0, right: 0,
-    width: 30, height: 30, borderRadius: 15,
+    width: 30, height: 30, borderRadius: Radius.full,
     backgroundColor: Colors.white, borderWidth: 1.5, borderColor: Colors.border,
     alignItems: 'center', justifyContent: 'center' },
-  avatar_edit_icon: { fontSize: 14 } })
+  avatar_edit_icon: { fontSize: IconSize.sm } })

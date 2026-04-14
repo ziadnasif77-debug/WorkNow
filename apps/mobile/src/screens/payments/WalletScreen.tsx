@@ -5,14 +5,14 @@
 import React, { useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Alert, TextInput, Modal, ActivityIndicator,
+  Alert, Modal,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { usePaymentsStore } from '../../stores/paymentsStore'
 import { useAuth } from '../../hooks/useAuth'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Button, Screen } from '../../components/ui'
+import { Button, Card, ErrorBanner, Input, LoadingState, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatPrice } from '@workfix/utils'
 
@@ -63,7 +63,7 @@ export default function WalletScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {walletLoading ? (
-          <ActivityIndicator color={Colors.primary} style={{ marginTop: Spacing.xxl }} />
+          <LoadingState />
         ) : (
           <>
             {/* ── Balance cards ─────────────────────────────────────────── */}
@@ -81,24 +81,24 @@ export default function WalletScreen() {
             </View>
 
             <View style={styles.secondary_cards}>
-              <View style={styles.secondary_card}>
+              <Card style={{ flex: 1, alignItems: 'center' }} gap={Spacing.xs}>
                 <Text style={styles.secondary_emoji}>⏳</Text>
                 <Text style={styles.secondary_label}>{t('provider.pending')}</Text>
                 <Text style={styles.secondary_amount}>
                   {formatPrice(wallet?.pendingBalance ?? 0, currency, 'ar')}
                 </Text>
-              </View>
-              <View style={styles.secondary_card}>
+              </Card>
+              <Card style={{ flex: 1, alignItems: 'center' }} gap={Spacing.xs}>
                 <Text style={styles.secondary_emoji}>🔄</Text>
                 <Text style={styles.secondary_label}>{t('provider.processing')}</Text>
                 <Text style={styles.secondary_amount}>
                   {formatPrice(wallet?.processingPayouts ?? 0, currency, 'ar')}
                 </Text>
-              </View>
+              </Card>
             </View>
 
             {/* ── How it works ─────────────────────────────────────────── */}
-            <View style={styles.info_card}>
+            <Card>
               <Text style={styles.info_title}>{t('provider.howPayoutWorks')}</Text>
               {[
                 t('provider.payoutInfo1'),
@@ -110,20 +110,17 @@ export default function WalletScreen() {
                   <Text style={styles.info_text}>{info}</Text>
                 </View>
               ))}
-            </View>
+            </Card>
 
             {/* ── Bank account reminder ─────────────────────────────────── */}
-            <TouchableOpacity
-              style={styles.bank_card}
-              onPress={() => router.push('/profile/bank-account')}
-            >
+            <Card onPress={() => router.push('/profile/bank-account' as never)} style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={styles.bank_emoji}>🏦</Text>
               <View style={styles.bank_info}>
                 <Text style={styles.bank_title}>{t('provider.bankAccount')}</Text>
                 <Text style={styles.bank_desc}>{t('provider.bankAccountDesc')}</Text>
               </View>
               <Text style={styles.bank_arrow}>›</Text>
-            </TouchableOpacity>
+            </Card>
           </>
         )}
       </ScrollView>
@@ -147,26 +144,21 @@ export default function WalletScreen() {
               </Text>
             </View>
 
-            <View style={styles.amount_input_wrap}>
-              <TextInput
-                style={styles.amount_input}
-                value={payoutAmount}
-                onChangeText={v => { setPayoutAmount(v); setAmountErr('') }}
-                keyboardType="decimal-pad"
-                placeholder={t('provider.payoutAmountPlaceholder')}
-                placeholderTextColor={Colors.gray400}
-              />
-              <Text style={styles.amount_currency}>{currency}</Text>
-            </View>
-            {amountErr && <Text style={styles.amount_err}>{amountErr}</Text>}
+            <Input
+              value={payoutAmount}
+              onChangeText={v => { setPayoutAmount(v); setAmountErr('') }}
+              keyboardType="decimal-pad"
+              placeholder={t('provider.payoutAmountPlaceholder')}
+              error={amountErr}
+              containerStyle={{ marginBottom: 0 }}
+              rightIcon={<Text style={styles.amount_currency}>{currency}</Text>}
+            />
 
             <Text style={styles.full_amount_hint}>
               {t('provider.leaveBlankForFull')}
             </Text>
 
-            {payoutError && (
-              <Text style={styles.modal_error}>{payoutError}</Text>
-            )}
+            <ErrorBanner error={payoutError} />
 
             <View style={styles.modal_actions}>
               <Button
@@ -199,30 +191,15 @@ const styles = StyleSheet.create({
   payout_btn:     { backgroundColor: Colors.white, marginTop: Spacing.sm },
 
   secondary_cards: { flexDirection: 'row', gap: Spacing.md },
-  secondary_card: {
-    flex: 1, backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, alignItems: 'center', gap: 4,
-    borderWidth: 1, borderColor: Colors.border, ...Shadow.sm,
-  },
   secondary_emoji:  { fontSize: IconSize.lg },
   secondary_label:  { fontSize: FontSize.xs, color: Colors.gray500 },
   secondary_amount: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
 
-  info_card: {
-    backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, gap: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
-  },
   info_title: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
-  info_row:   { flexDirection: 'row', gap: 8 },
+  info_row:   { flexDirection: 'row', gap: Spacing.sm },
   info_dot:   { color: Colors.primary, fontSize: FontSize.md },
   info_text:  { flex: 1, fontSize: FontSize.sm, color: Colors.gray600, lineHeight: 20 },
 
-  bank_card: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.md, borderWidth: 1, borderColor: Colors.border,
-  },
   bank_emoji: { fontSize: IconSize.xl },
   bank_info:  { flex: 1 },
   bank_title: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
@@ -240,15 +217,7 @@ const styles = StyleSheet.create({
   modal_balance:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.gray50, borderRadius: Radius.md, padding: Spacing.md },
   modal_balance_label:  { fontSize: FontSize.md, color: Colors.gray500 },
   modal_balance_amount: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.primary },
-  amount_input_wrap: {
-    flexDirection: 'row', alignItems: 'center',
-    borderWidth: 1.5, borderColor: Colors.border, borderRadius: Radius.md,
-    backgroundColor: Colors.white, overflow: 'hidden',
-  },
-  amount_input:    { flex: 1, height: 52, paddingHorizontal: Spacing.md, fontSize: FontSize.xl, color: Colors.black },
-  amount_currency: { paddingHorizontal: Spacing.md, fontSize: FontSize.md, color: Colors.gray500, fontWeight: FontWeight.medium },
-  amount_err:      { color: Colors.error, fontSize: FontSize.sm },
+  amount_currency: { paddingHorizontal: Spacing.sm, fontSize: FontSize.md, color: Colors.gray500, fontWeight: FontWeight.medium },
   full_amount_hint: { fontSize: FontSize.xs, color: Colors.gray400 },
-  modal_error:     { color: Colors.error, fontSize: FontSize.sm },
   modal_actions:   { gap: Spacing.sm },
 })

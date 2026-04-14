@@ -15,7 +15,7 @@ import { Analytics } from '../../lib/analytics'
 import { useOrdersStore } from '../../stores/ordersStore'
 import { firebaseFunctions, firebaseAuth } from '../../lib/firebase'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Button, Input, Screen } from '../../components/ui'
+import { Button, Input, Radio, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
 const DISPUTE_REASONS = [
@@ -123,9 +123,7 @@ export default function DisputeScreen() {
               style={[styles.reason_row, reason === r.key && styles.reason_row_active]}
               onPress={() => setReason(r.key)}
             >
-              <View style={[styles.radio, reason === r.key && styles.radio_active]}>
-                {reason === r.key && <View style={styles.radio_inner} />}
-              </View>
+              <Radio selected={reason === r.key} />
               <Text style={[styles.reason_label, reason === r.key && styles.reason_label_active]}>
                 {r[lang]}
               </Text>
@@ -194,7 +192,7 @@ const styles = StyleSheet.create({
   section_label: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
   section_hint:  { fontSize: FontSize.sm, color: Colors.gray500, marginTop: -Spacing.sm },
 
-  reasons_list: { gap: 8 },
+  reasons_list: { gap: Spacing.sm },
   reason_row: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     padding: Spacing.md, borderRadius: Radius.md,
@@ -202,13 +200,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   reason_row_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  radio: {
-    width: 20, height: 20, borderRadius: Radius.full,
-    borderWidth: 2, borderColor: Colors.gray300,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  radio_active:      { borderColor: Colors.primary },
-  radio_inner:       { width: 8, height: 8, borderRadius: Radius.full, backgroundColor: Colors.primary },
   reason_label:      { flex: 1, fontSize: FontSize.md, color: Colors.gray700 },
   reason_label_active: { color: Colors.primary, fontWeight: FontWeight.medium },
 
@@ -226,7 +217,7 @@ const styles = StyleSheet.create({
   evidence_add: {
     width: 90, height: 90, borderRadius: Radius.md,
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
-    alignItems: 'center', justifyContent: 'center', gap: 4,
+    alignItems: 'center', justifyContent: 'center', gap: Spacing.xs,
   },
   evidence_add_icon:  { fontSize: IconSize.lg },
   evidence_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },

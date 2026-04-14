@@ -18,7 +18,7 @@ import { useOrdersStore } from '../../stores/ordersStore'
 import { useIsOnline } from '../../hooks/useNetworkState'
 import { useLocation } from '../../hooks/useLocation'
 import { Analytics } from '../../lib/analytics'
-import { Button, Input, Screen } from '../../components/ui'
+import { Button, ErrorBanner, Input, Screen } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 import { firebaseAuth } from '../../lib/firebase'
@@ -306,11 +306,7 @@ export default function CreateOrderScreen() {
               )}
             </View>
 
-            {actionError && (
-              <View style={styles.error_box}>
-                <Text style={styles.error_text}>{actionError}</Text>
-              </View>
-            )}
+            <ErrorBanner error={actionError} />
 
             <Button
               label={t('orders.submitOrder')}
@@ -340,7 +336,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: Colors.border, borderRadius: Radius.md,
     backgroundColor: Colors.white, padding: Spacing.md },
   textarea:   { fontSize: FontSize.md, color: Colors.black, minHeight: 120, lineHeight: 22 },
-  char_count: { fontSize: FontSize.xs, color: Colors.gray400, textAlign: 'right', marginTop: 4 },
+  char_count: { fontSize: FontSize.xs, color: Colors.gray400, textAlign: 'right', marginTop: Spacing.xs },
   field_label: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, color: Colors.gray700 },
 
   photos_grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
@@ -355,7 +351,7 @@ const styles = StyleSheet.create({
   photo_add: {
     width: 90, height: 90, borderRadius: Radius.md,
     borderWidth: 1.5, borderColor: Colors.border, borderStyle: 'dashed',
-    alignItems: 'center', justifyContent: 'center', gap: 4 },
+    alignItems: 'center', justifyContent: 'center', gap: Spacing.xs },
   photo_add_icon:  { fontSize: IconSize.lg },
   photo_add_label: { fontSize: FontSize.xs, color: Colors.gray400 },
 
@@ -372,7 +368,7 @@ const styles = StyleSheet.create({
   schedule_option: {
     flex: 1, padding: Spacing.md, borderRadius: Radius.lg,
     borderWidth: 1.5, borderColor: Colors.border,
-    backgroundColor: Colors.white, alignItems: 'center', gap: 4 },
+    backgroundColor: Colors.white, alignItems: 'center', gap: Spacing.xs },
   schedule_option_active: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
   schedule_emoji:  { fontSize: IconSize.lg },
   schedule_label:  { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.gray700 },
@@ -396,6 +392,4 @@ const styles = StyleSheet.create({
   summary_key:   { fontSize: FontSize.sm, color: Colors.gray500, flex: 0.4 },
   summary_val:   { fontSize: FontSize.sm, color: Colors.black, flex: 0.6, textAlign: 'right' },
 
-  error_box: { backgroundColor: Colors.errorLight, borderRadius: Radius.sm, padding: Spacing.md },
-  error_text: { color: Colors.error, fontSize: FontSize.sm },
-  next_btn:   { marginTop: Spacing.sm } })
+  next_btn: { marginTop: Spacing.sm } })

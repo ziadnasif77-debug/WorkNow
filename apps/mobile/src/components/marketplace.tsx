@@ -7,9 +7,12 @@ import {
   View, Text, Image, StyleSheet, TouchableOpacity,
   type ViewStyle,
 } from 'react-native'
-import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../constants/theme'
+import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, AvatarSize, IconSize } from '../constants/theme'
 import { formatPrice } from '@workfix/utils'
 import type { Currency } from '@workfix/types'
+
+// Re-export EmptyState from ui/ — all screen imports continue to work
+export { EmptyState } from './ui'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STAR RATING
@@ -29,7 +32,7 @@ export function StarRating({ rating, total, size = 'md', showCount = true }: Sta
   return (
     <View style={styles.stars_row}>
       {[1, 2, 3, 4, 5].map(i => (
-        <Text key={i} style={{ fontSize: starSize, color: i <= filled ? '#F59E0B' : Colors.gray200 }}>
+        <Text key={i} style={{ fontSize: starSize, color: i <= filled ? Colors.amber : Colors.gray200 }}>
           ★
         </Text>
       ))}
@@ -174,43 +177,15 @@ export function CategoryChip({ label, icon, selected, onPress }: CategoryChipPro
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// EMPTY STATE
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface EmptyStateProps {
-  emoji:    string
-  title:    string
-  subtitle?: string
-  action?:  { label: string; onPress: () => void }
-}
-
-export function EmptyState({ emoji, title, subtitle, action }: EmptyStateProps) {
-  return (
-    <View style={styles.empty}>
-      <Text style={styles.empty_emoji}>{emoji}</Text>
-      <Text style={styles.empty_title}>{title}</Text>
-      {subtitle && <Text style={styles.empty_sub}>{subtitle}</Text>}
-      {action && (
-        <TouchableOpacity style={styles.empty_btn} onPress={action.onPress}>
-          <Text style={styles.empty_btn_label}>{action.label}</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  )
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STYLES
 // ─────────────────────────────────────────────────────────────────────────────
 
-const AVATAR_SIZE    = 52
-const AVATAR_SIZE_LG = 72
-
 const styles = StyleSheet.create({
   // Stars
-  stars_row:      { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  stars_count:    { fontSize: FontSize.sm, color: Colors.gray500, marginStart: 4 },
+  stars_row:      { flexDirection: 'row', alignItems: 'center', gap: Spacing.xxs },
+  stars_count:    { fontSize: FontSize.sm, color: Colors.gray500, marginStart: Spacing.xs },
   stars_count_sm: { fontSize: FontSize.xs },
 
   // Horizontal card
@@ -221,16 +196,16 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.border,
     ...Shadow.sm,
   },
-  card_h_body:   { flex: 1, gap: 3 },
-  card_h_top:    { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  card_h_footer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
+  card_h_body:   { flex: 1, gap: Spacing.xxs },
+  card_h_top:    { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  card_h_footer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs },
   card_name:     { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black, flex: 1 },
   card_category: { fontSize: FontSize.sm, color: Colors.gray500 },
   card_meta:     { fontSize: FontSize.sm, color: Colors.gray500 },
   card_price:    { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.primary },
   verified_badge: {
     backgroundColor: Colors.primaryLight, borderRadius: Radius.full,
-    paddingHorizontal: 6, paddingVertical: 2,
+    paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs,
   },
 
   // Vertical card
@@ -238,57 +213,47 @@ const styles = StyleSheet.create({
     width: 150, backgroundColor: Colors.surface,
     borderRadius: Radius.lg, padding: Spacing.md,
     borderWidth: 1, borderColor: Colors.border,
-    alignItems: 'center', gap: 4, ...Shadow.sm,
+    alignItems: 'center', gap: Spacing.xs, ...Shadow.sm,
   },
   card_v_name: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
   card_v_cat:  { fontSize: FontSize.xs, color: Colors.gray500, textAlign: 'center' },
-  card_v_footer: { flexDirection: 'row', justifyContent: 'center', gap: Spacing.sm, marginTop: 2 },
+  card_v_footer: { flexDirection: 'row', justifyContent: 'center', gap: Spacing.sm, marginTop: Spacing.xxs },
   card_meta_sm: { fontSize: FontSize.xs, color: Colors.gray400 },
   card_price_sm: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.primary },
 
   // Avatar
   avatar_wrap: { position: 'relative' },
-  avatar: { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2 },
-  avatar_lg: { width: AVATAR_SIZE_LG, height: AVATAR_SIZE_LG, borderRadius: AVATAR_SIZE_LG / 2 },
+  avatar:    { width: AvatarSize.lg,  height: AvatarSize.lg,  borderRadius: Radius.full },
+  avatar_lg: { width: AvatarSize.xl,  height: AvatarSize.xl,  borderRadius: Radius.full },
   avatar_placeholder: { backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
   avatar_letter:    { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.primary },
   avatar_letter_lg: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.primary },
   online_dot: {
-    position: 'absolute', bottom: 2, right: 2,
-    width: 12, height: 12, borderRadius: 6,
+    position: 'absolute', bottom: Spacing.xxs, right: Spacing.xxs,
+    width: 12, height: 12, borderRadius: Radius.full,
     backgroundColor: Colors.success, borderWidth: 2, borderColor: Colors.white,
   },
-  online_dot_lg: { width: 16, height: 16, borderRadius: 8 },
+  online_dot_lg: { width: 16, height: 16, borderRadius: Radius.full },
   verified_badge_lg: {
     position: 'absolute', bottom: 0, right: 0,
-    width: 22, height: 22, borderRadius: 11,
+    width: 22, height: 22, borderRadius: Radius.full,
     backgroundColor: Colors.primary,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: Colors.white,
   },
-  verified_text: { color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold },
+  verified_text: { color: Colors.white, fontSize: FontSize.xs, fontWeight: FontWeight.bold },
 
   // Category chip
   chip: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
     borderRadius: Radius.full,
     backgroundColor: Colors.gray100,
     borderWidth: 1, borderColor: Colors.border,
   },
   chip_selected: { backgroundColor: Colors.primaryLight, borderColor: Colors.primary },
-  chip_icon:     { fontSize: 14 },
+  chip_icon:     { fontSize: IconSize.sm },
   chip_label:    { fontSize: FontSize.sm, color: Colors.gray700, fontWeight: FontWeight.medium },
   chip_label_selected: { color: Colors.primary, fontWeight: FontWeight.bold },
 
-  // Empty state
-  empty: { alignItems: 'center', justifyContent: 'center', padding: Spacing.xxl, gap: Spacing.md },
-  empty_emoji: { fontSize: 56 },
-  empty_title: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black, textAlign: 'center' },
-  empty_sub:   { fontSize: FontSize.md, color: Colors.gray500, textAlign: 'center', lineHeight: 22 },
-  empty_btn: {
-    backgroundColor: Colors.primary, borderRadius: Radius.md,
-    paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md, marginTop: Spacing.sm,
-  },
-  empty_btn_label: { color: Colors.white, fontWeight: FontWeight.bold, fontSize: FontSize.md },
 })

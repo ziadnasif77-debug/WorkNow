@@ -13,7 +13,7 @@ import { usePaymentsStore } from '../../stores/paymentsStore'
 import { useIsOnline } from '../../hooks/useNetworkState'
 import { Analytics } from '../../lib/analytics'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Button, Screen } from '../../components/ui'
+import { Button, Card, ErrorBanner, FooterCTA, Radio, Screen } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme'
 import { formatPrice } from '@workfix/utils'
 import type { PaymentMethod, Currency } from '@workfix/types'
@@ -104,7 +104,7 @@ export default function PaymentScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* ── Amount summary ────────────────────────────────────────────── */}
-        <View style={styles.amount_card}>
+        <Card gap={Spacing.md} padding={Spacing.lg}>
           <View style={styles.amount_row}>
             <Text style={styles.amount_label}>{t('payment.serviceAmount')}</Text>
             <Text style={styles.amount_val}>{formatPrice(amountNum, curr, 'ar')}</Text>
@@ -126,7 +126,7 @@ export default function PaymentScreen() {
             <Text style={styles.escrow_icon}>🔒</Text>
             <Text style={styles.escrow_text}>{t('payment.escrowNote')}</Text>
           </View>
-        </View>
+        </Card>
 
         {/* ── Payment methods ───────────────────────────────────────────── */}
         <Text style={styles.section_title}>{t('payment.method')}</Text>
@@ -157,22 +157,13 @@ export default function PaymentScreen() {
                   <Text style={styles.method_hint}>{t('payment.cashHint')}</Text>
                 )}
               </View>
-              <View style={[
-                styles.radio,
-                selectedMethod === method.key && styles.radio_selected,
-              ]}>
-                {selectedMethod === method.key && <View style={styles.radio_inner} />}
-              </View>
+              <Radio selected={selectedMethod === method.key} />
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Error */}
-        {initError && (
-          <View style={styles.error_box}>
-            <Text style={styles.error_text}>{initError}</Text>
-          </View>
-        )}
+        <ErrorBanner error={initError} />
 
         {/* Terms */}
         <Text style={styles.terms}>{t('payment.terms')}</Text>
@@ -180,32 +171,21 @@ export default function PaymentScreen() {
       </ScrollView>
 
       {/* ── Pay button (sticky) ───────────────────────────────────────── */}
-      <View style={styles.cta_bar}>
+      <FooterCTA style={{ position: 'absolute', bottom: 0, left: 0, right: 0, ...Shadow.lg }}>
         <Button
           label={`${t('payment.payNow')} — ${formatPrice(total, curr, 'ar')}`}
           onPress={handlePay}
           isLoading={isInitiating}
           disabled={!selectedMethod}
-          style={styles.pay_btn}
         />
-      </View>
+      </FooterCTA>
     </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
-    backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  title:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-
   content: { padding: Spacing.lg, gap: Spacing.lg, paddingBottom: 120 },
 
-  amount_card: {
-    backgroundColor: Colors.white, borderRadius: Radius.lg,
-    padding: Spacing.lg, gap: Spacing.md,
-    borderWidth: 1, borderColor: Colors.border, ...Shadow.sm },
   amount_row:          { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   amount_label:        { fontSize: FontSize.md, color: Colors.gray500 },
   amount_val:          { fontSize: FontSize.md, color: Colors.black, fontWeight: FontWeight.medium },
@@ -229,24 +209,9 @@ const styles = StyleSheet.create({
     padding: Spacing.md, borderWidth: 1.5, borderColor: Colors.border },
   method_card_selected: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
   method_emoji:         { fontSize: 28 },
-  method_info:          { flex: 1, gap: 2 },
+  method_info:          { flex: 1, gap: Spacing.xxs },
   method_label:         { fontSize: FontSize.md, fontWeight: FontWeight.medium, color: Colors.black },
   method_label_selected:{ color: Colors.primary, fontWeight: FontWeight.bold },
   method_hint:          { fontSize: FontSize.xs, color: Colors.gray400 },
-  radio: {
-    width: 22, height: 22, borderRadius: 11,
-    borderWidth: 2, borderColor: Colors.gray300,
-    alignItems: 'center', justifyContent: 'center' },
-  radio_selected: { borderColor: Colors.primary },
-  radio_inner:    { width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.primary },
 
-  error_box:  { backgroundColor: Colors.errorLight, borderRadius: Radius.sm, padding: Spacing.md },
-  error_text: { color: Colors.error, fontSize: FontSize.sm },
-
-  terms: { fontSize: FontSize.xs, color: Colors.gray400, textAlign: 'center', lineHeight: 18 },
-
-  cta_bar: {
-    position: 'absolute', bottom: 0, left: 0, right: 0,
-    padding: Spacing.lg, backgroundColor: Colors.white,
-    borderTopWidth: 1, borderTopColor: Colors.border, ...Shadow.lg },
-  pay_btn: {} })
+  terms: { fontSize: FontSize.xs, color: Colors.gray400, textAlign: 'center', lineHeight: 18 } })

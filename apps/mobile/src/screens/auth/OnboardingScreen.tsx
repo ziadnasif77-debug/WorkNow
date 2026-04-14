@@ -35,15 +35,15 @@ interface Slide {
 
 const SLIDES: Slide[] = [
   {
-    id: '1', emoji: '🔍', bg: '#EEF2FF',
+    id: '1', emoji: '🔍', bg: Colors.primaryLight,
     titleKey:    'onboarding.slide1_title',
     subtitleKey: 'onboarding.slide1_sub' },
   {
-    id: '2', emoji: '✅', bg: '#F0FDF4',
+    id: '2', emoji: '✅', bg: Colors.successLight,
     titleKey:    'onboarding.slide2_title',
     subtitleKey: 'onboarding.slide2_sub' },
   {
-    id: '3', emoji: '💳', bg: '#FFF7ED',
+    id: '3', emoji: '💳', bg: Colors.orangeLight,
     titleKey:    'onboarding.slide3_title',
     subtitleKey: 'onboarding.slide3_sub' },
 ]
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   emoji:    { fontSize: 80 },
   title:    { fontSize: FontSize.xxxl, fontWeight: FontWeight.bold, textAlign: 'center', color: Colors.black },
   subtitle: { fontSize: FontSize.lg, textAlign: 'center', color: Colors.gray500, lineHeight: 26 },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: Spacing.lg },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: Spacing.sm, marginBottom: Spacing.lg },
   dot: {
     width: 8, height: 8, borderRadius: 4,
     backgroundColor: Colors.gray200 },
