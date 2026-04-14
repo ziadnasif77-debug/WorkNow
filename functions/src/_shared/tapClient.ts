@@ -6,7 +6,7 @@
 
 const TAP_BASE = 'https://api.tap.company/v2'
 
-function tapHeaders() {
+function _tapHeaders() {
   const apiKey = process.env['TAP_SECRET_KEY']
   if (!apiKey) throw new Error('TAP_SECRET_KEY missing')
   return {

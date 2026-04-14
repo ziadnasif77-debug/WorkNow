@@ -5,7 +5,7 @@
 import { z } from 'zod'
 import {
   callable, requireAuth, validate, db,
-  serverTimestamp, appError, increment,
+  serverTimestamp, appError,
 } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
 import type { Order } from '@workfix/types'

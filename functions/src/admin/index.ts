@@ -82,7 +82,7 @@ export const resolveDispute = callable(async (data, context) => {
   const orderDoc = await orderRef.get()
   if (!orderDoc.exists) appError('ORD_001', 'Order not found', 'not-found')
 
-  const order = orderDoc.data()!
+  const _order = orderDoc.data()!
 
   await db.runTransaction(async tx => {
     // Resolve dispute

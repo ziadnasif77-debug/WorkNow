@@ -5,7 +5,7 @@
 import { z } from 'zod'
 import { callable, requireAuth, validate, db, auth, serverTimestamp, appError } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
-import type { User, ProviderProfile } from '@workfix/types'
+import type { User, ProviderProfile, Timestamp } from '@workfix/types'
 import { encodeGeohash } from '@workfix/utils'
 
 // ── completeProfile ───────────────────────────────────────────────────────────
@@ -33,8 +33,8 @@ export const completeProfile = callable(async (data, context) => {
       isVerified: false,
       isActive: true,
       preferredLang: input.preferredLang ?? 'ar',
-      createdAt: serverTimestamp() as unknown as import('@workfix/types').Timestamp,
-      updatedAt: serverTimestamp() as unknown as import('@workfix/types').Timestamp,
+      createdAt: serverTimestamp() as unknown as Timestamp,
+      updatedAt: serverTimestamp() as unknown as Timestamp,
     }
     await userRef.set(user)
   } else {
@@ -112,8 +112,8 @@ export const setProviderType = callable(async (data, context) => {
     kycDocumentUrls: [],
     subscriptionTier: 'free',
     isActive: false,  // inactive until KYC approved
-    createdAt: serverTimestamp() as unknown as import('@workfix/types').Timestamp,
-    updatedAt: serverTimestamp() as unknown as import('@workfix/types').Timestamp,
+    createdAt: serverTimestamp() as unknown as Timestamp,
+    updatedAt: serverTimestamp() as unknown as Timestamp,
   }
 
   await db.collection('providerProfiles').doc(uid).set(profile)

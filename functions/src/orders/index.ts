@@ -5,11 +5,11 @@
 import { z } from 'zod'
 import {
   callable, requireAuth, validate, db, serverTimestamp,
-  appError, increment } from '../_shared/helpers'
+  appError } from '../_shared/helpers'
 import { rateLimit }        from '../_shared/ratelimit'
 import { isValidTransition, calcCommission, calcNetAmount } from '@workfix/utils'
 import { DEFAULT_COMMISSION_RATE, QUOTE_EXPIRY_HOURS } from '@workfix/config'
-import type { Order, Quote } from '@workfix/types'
+import type { Order, Quote, Timestamp, LocalizedString } from '@workfix/types'
 
 // ── createOrder ───────────────────────────────────────────────────────────────
 
@@ -45,7 +45,7 @@ export const createOrder = callable(async (data, context) => {
     customerName:    userData['displayName'] as string,
     ...(userData['avatarUrl'] !== undefined && { customerAvatarUrl: userData['avatarUrl'] as string }),
     serviceId:       input.serviceId,
-    serviceName:     serviceData['title'] as import('@workfix/types').LocalizedString,
+    serviceName:     serviceData['title'] as LocalizedString,
     categoryId:      input.categoryId,
     status:          'pending',
     commissionRate:  DEFAULT_COMMISSION_RATE,
@@ -56,9 +56,9 @@ export const createOrder = callable(async (data, context) => {
     description:     input.description,
     attachmentUrls:  input.attachmentUrls ?? [],
     isScheduled:     input.isScheduled ?? false,
-    ...(input.scheduledAt && { scheduledAt: new Date(input.scheduledAt) as unknown as import('@workfix/types').Timestamp }),
-    createdAt:       serverTimestamp() as unknown as import('@workfix/types').Timestamp,
-    updatedAt:       serverTimestamp() as unknown as import('@workfix/types').Timestamp }
+    ...(input.scheduledAt && { scheduledAt: new Date(input.scheduledAt) as unknown as Timestamp }),
+    createdAt:       serverTimestamp() as unknown as Timestamp,
+    updatedAt:       serverTimestamp() as unknown as Timestamp }
 
   await orderRef.set({ ...order, id: orderRef.id })
 
@@ -114,8 +114,8 @@ export const submitQuote = callable(async (data, context) => {
     estimatedDurationMinutes: input.estimatedDurationMinutes,
     ...(input.note !== undefined && { note: input.note }),
     status:                   'pending',
-    expiresAt:                expiresAt as unknown as import('@workfix/types').Timestamp,
-    createdAt:                serverTimestamp() as unknown as import('@workfix/types').Timestamp }
+    expiresAt:                expiresAt as unknown as Timestamp,
+    createdAt:                serverTimestamp() as unknown as Timestamp }
 
   await quoteRef.set({ ...quote, id: quoteRef.id })
 

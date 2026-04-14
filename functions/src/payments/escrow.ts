@@ -2,7 +2,6 @@
 // Escrow helpers — used by triggers, queue, and webhook handlers
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as functions from 'firebase-functions'
 import { db, serverTimestamp } from '../_shared/helpers'
 import { logger, auditLog } from '../_shared/monitoring'
 import { tapRequestWithRetry } from '../_shared/webhooks'

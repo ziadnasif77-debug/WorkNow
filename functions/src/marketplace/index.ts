@@ -60,7 +60,7 @@ export const searchProviders = callable(async (data, context) => {
     }
   }
 
-  let results = Array.from(seen.values())
+  const results = Array.from(seen.values())
 
   // Sort
   if (input.sortBy === 'distance') {

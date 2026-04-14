@@ -8,15 +8,13 @@ import * as functions from 'firebase-functions'
 import { z } from 'zod'
 import {
   callable, requireAuth, validate, db,
-  serverTimestamp, appError, increment,
+  serverTimestamp, appError,
 } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
-import type { Order, Payment } from '@workfix/types'
+import type { Order, Payment, Currency, Timestamp } from '@workfix/types'
 import { tapRequest, toTapSource } from '../_shared/tapClient'
 
 // ── Tap Payments API client ───────────────────────────────────────────────────
-
-const TAP_BASE = 'https://api.tap.company/v2'
 
 /**
  * Map WorkFix PaymentMethod → Tap Payments source type
@@ -121,9 +119,9 @@ export const initiatePayment = callable(async (data, context) => {
     netAmount:  order.netAmount ?? 0,
     status:     'initiated',
     method:     input.method,
-    currency:   currency as import('@workfix/types').Currency,
-    createdAt:  serverTimestamp() as unknown as import('@workfix/types').Timestamp,
-    updatedAt:  serverTimestamp() as unknown as import('@workfix/types').Timestamp,
+    currency:   currency as Currency,
+    createdAt:  serverTimestamp() as unknown as Timestamp,
+    updatedAt:  serverTimestamp() as unknown as Timestamp,
   }
   await paymentRef.set({ ...payment, id: paymentRef.id })
 
