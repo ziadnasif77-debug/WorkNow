@@ -126,7 +126,6 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "owner": "your-expo-username",
     "main": "expo-router/entry"
   }
 }
