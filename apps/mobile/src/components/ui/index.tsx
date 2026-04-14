@@ -84,7 +84,7 @@ const btn = StyleSheet.create({
   base:        { borderRadius: Radius.lg, alignItems: 'center', justifyContent: 'center' },
   inner:       { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   icon_wrap:   { width: IconSize.md, height: IconSize.md, alignItems: 'center', justifyContent: 'center' },
-  full:        { width: '100%' as unknown as Record<string, unknown> },
+  full:        { width: '100%' },
   disabled:    { opacity: 0.5 },
 
   primary:     { backgroundColor: Colors.primary, ...Shadow.sm },
