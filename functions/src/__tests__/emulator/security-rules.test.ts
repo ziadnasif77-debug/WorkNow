@@ -225,3 +225,180 @@ describe('providerProfiles collection', () => {
     )
   })
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+// reviews collection — all client writes must be impossible
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('reviews collection — client write protection', () => {
+  test('authenticated customer cannot directly create a review', async () => {
+    const alice = testEnv.authenticatedContext('alice', { role: 'customer' })
+    await assertFails(
+      alice.firestore().collection('reviews').doc('rev_001').set({
+        orderId: 'ord_001', reviewerId: 'alice', rating: 5,
+      }),
+    )
+  })
+
+  test('authenticated provider cannot directly create a review', async () => {
+    const provider = testEnv.authenticatedContext('prov_001', { role: 'provider' })
+    await assertFails(
+      provider.firestore().collection('reviews').doc('rev_001').set({
+        orderId: 'ord_001', reviewerId: 'prov_001', rating: 4,
+      }),
+    )
+  })
+
+  test('unauthenticated user cannot create a review', async () => {
+    const unauth = testEnv.unauthenticatedContext()
+    await assertFails(
+      unauth.firestore().collection('reviews').doc('rev_001').set({
+        orderId: 'ord_001', reviewerId: 'anon', rating: 3,
+      }),
+    )
+  })
+
+  test('admin cannot directly create a review via client SDK', async () => {
+    const admin = testEnv.authenticatedContext('admin_001', { role: 'admin' })
+    await assertFails(
+      admin.firestore().collection('reviews').doc('rev_001').set({
+        orderId: 'ord_001', reviewerId: 'admin_001', rating: 5,
+      }),
+    )
+  })
+
+  test('authenticated customer cannot update an existing review', async () => {
+    await testEnv.withSecurityRulesDisabled(async ctx => {
+      await ctx.firestore().collection('reviews').doc('rev_001').set({
+        orderId: 'ord_001', reviewerId: 'alice', rating: 5,
+      })
+    })
+    const alice = testEnv.authenticatedContext('alice', { role: 'customer' })
+    await assertFails(
+      alice.firestore().collection('reviews').doc('rev_001').update({ rating: 1 }),
+    )
+  })
+
+  test('admin cannot delete a review via client SDK', async () => {
+    await testEnv.withSecurityRulesDisabled(async ctx => {
+      await ctx.firestore().collection('reviews').doc('rev_001').set({
+        orderId: 'ord_001', reviewerId: 'alice', rating: 5,
+      })
+    })
+    const admin = testEnv.authenticatedContext('admin_001', { role: 'admin' })
+    await assertFails(
+      admin.firestore().collection('reviews').doc('rev_001').delete(),
+    )
+  })
+
+  test('authenticated user can read reviews', async () => {
+    await testEnv.withSecurityRulesDisabled(async ctx => {
+      await ctx.firestore().collection('reviews').doc('rev_001').set({
+        orderId: 'ord_001', reviewerId: 'alice', rating: 5,
+      })
+    })
+    const alice = testEnv.authenticatedContext('alice', { role: 'customer' })
+    await assertSucceeds(
+      alice.firestore().collection('reviews').doc('rev_001').get(),
+    )
+  })
+
+  test('unauthenticated user cannot read reviews', async () => {
+    await testEnv.withSecurityRulesDisabled(async ctx => {
+      await ctx.firestore().collection('reviews').doc('rev_001').set({
+        orderId: 'ord_001', reviewerId: 'alice', rating: 5,
+      })
+    })
+    const unauth = testEnv.unauthenticatedContext()
+    await assertFails(
+      unauth.firestore().collection('reviews').doc('rev_001').get(),
+    )
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// providerProfiles — protected field injection on create
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('providerProfiles — protected field injection on create', () => {
+  test('provider cannot inject kycStatus on create', async () => {
+    const provider = testEnv.authenticatedContext('prov_new', { role: 'provider' })
+    await assertFails(
+      provider.firestore().collection('providerProfiles').doc('prov_new').set({
+        name: 'New Provider', kycStatus: 'approved', createdAt: new Date(),
+      }),
+    )
+  })
+
+  test('provider cannot inject avgRating on create', async () => {
+    const provider = testEnv.authenticatedContext('prov_new', { role: 'provider' })
+    await assertFails(
+      provider.firestore().collection('providerProfiles').doc('prov_new').set({
+        name: 'New Provider', avgRating: 5.0, createdAt: new Date(),
+      }),
+    )
+  })
+
+  test('provider cannot inject totalReviews on create', async () => {
+    const provider = testEnv.authenticatedContext('prov_new', { role: 'provider' })
+    await assertFails(
+      provider.firestore().collection('providerProfiles').doc('prov_new').set({
+        name: 'New Provider', totalReviews: 999, createdAt: new Date(),
+      }),
+    )
+  })
+
+  test('provider cannot inject isVerified on create', async () => {
+    const provider = testEnv.authenticatedContext('prov_new', { role: 'provider' })
+    await assertFails(
+      provider.firestore().collection('providerProfiles').doc('prov_new').set({
+        name: 'New Provider', isVerified: true, createdAt: new Date(),
+      }),
+    )
+  })
+
+  test('provider cannot inject role on create', async () => {
+    const provider = testEnv.authenticatedContext('prov_new', { role: 'provider' })
+    await assertFails(
+      provider.firestore().collection('providerProfiles').doc('prov_new').set({
+        name: 'New Provider', role: 'admin', createdAt: new Date(),
+      }),
+    )
+  })
+
+  test('provider cannot include extra fields beyond the allowlist on create', async () => {
+    const provider = testEnv.authenticatedContext('prov_new', { role: 'provider' })
+    await assertFails(
+      provider.firestore().collection('providerProfiles').doc('prov_new').set({
+        name: 'New Provider', bio: 'Plumber', createdAt: new Date(), arbitraryField: 'injected',
+      }),
+    )
+  })
+
+  test('provider can create profile with only allowed fields', async () => {
+    const provider = testEnv.authenticatedContext('prov_new', { role: 'provider' })
+    await assertSucceeds(
+      provider.firestore().collection('providerProfiles').doc('prov_new').set({
+        name: 'New Provider', bio: 'Professional plumber', createdAt: new Date(),
+      }),
+    )
+  })
+
+  test('provider cannot create profile for a different provider ID', async () => {
+    const provider = testEnv.authenticatedContext('prov_new', { role: 'provider' })
+    await assertFails(
+      provider.firestore().collection('providerProfiles').doc('prov_other').set({
+        name: 'Impersonated Provider', createdAt: new Date(),
+      }),
+    )
+  })
+
+  test('customer cannot create a provider profile', async () => {
+    const customer = testEnv.authenticatedContext('alice', { role: 'customer' })
+    await assertFails(
+      customer.firestore().collection('providerProfiles').doc('alice').set({
+        name: 'Alice as Provider', createdAt: new Date(),
+      }),
+    )
+  })
+})

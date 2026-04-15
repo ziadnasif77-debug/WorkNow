@@ -7,7 +7,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import {
   callable, requireAuth, validate, db,
-  serverTimestamp, appError,
+  appError,
 } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
 import { logger } from '../_shared/monitoring'
@@ -16,24 +16,50 @@ import type { Order } from '@workfix/types'
 // ── submitReview ──────────────────────────────────────────────────────────────
 
 export const submitReview = callable(async (data, context) => {
-  const { uid } = requireAuth(context)
+  const { uid, role } = requireAuth(context)
 
   // Dedicated rate limit: max 10 reviews per day per user
   await rateLimit(uid, 'review')
 
   const input = validate(z.object({
-    orderId:    z.string().trim().min(1).max(128),
-    targetId:   z.string().trim().min(1).max(128),
-    targetType: z.enum(['provider', 'customer']),
-    rating:     z.number().int().min(1).max(5),
-    comment:    z.string().trim().max(500).optional(),
-    tags:       z.array(z.string().trim().min(1).max(50)).max(6).default([]),
+    orderId:        z.string().trim().min(1).max(128),
+    targetId:       z.string().trim().min(1).max(128),
+    targetType:     z.enum(['provider', 'customer']),
+    rating:         z.number().int().min(1).max(5),
+    comment:        z.string().trim().max(500).optional(),
+    tags:           z.array(z.string().trim().min(1).max(50)).max(6).default([]),
+    idempotencyKey: z.string().trim().min(1).max(64).optional(),
   }), data)
+
+  // ── Role-based targetType enforcement ──────────────────────────────────────
+  if (role === 'customer' && input.targetType !== 'provider') {
+    logger.security('review_role_targettype_mismatch', { uid, role, targetType: input.targetType })
+    appError('AUTH_002', 'Customers can only review providers', 'permission-denied')
+  }
+  if (role === 'provider' && input.targetType !== 'customer') {
+    logger.security('review_role_targettype_mismatch', { uid, role, targetType: input.targetType })
+    appError('AUTH_002', 'Providers can only review customers', 'permission-denied')
+  }
 
   // Reviewer cannot review themselves
   if (input.targetId === uid) {
     logger.security('review_self_attempt', { uid, orderId: input.orderId })
     appError('AUTH_002', 'Cannot review yourself', 'permission-denied')
+  }
+
+  // ── Idempotency: safe retry — return cached result for duplicate requests ────
+  if (input.idempotencyKey) {
+    const keyDocId = `review_${input.idempotencyKey}_${uid}`
+    const keySnap  = await db.collection('_idempotencyKeys').doc(keyDocId).get()
+    if (keySnap.exists) {
+      const cached = keySnap.data()!
+      if (cached['uid'] !== uid) {
+        logger.security('idempotency_key_uid_mismatch', { uid, idempotencyKey: input.idempotencyKey })
+        appError('AUTH_002', 'Idempotency key does not match caller', 'permission-denied')
+      }
+      logger.info('review_idempotent_return', { uid, idempotencyKey: input.idempotencyKey })
+      return cached['result'] as { ok: boolean; reviewId: string }
+    }
   }
 
   // Verify order exists and caller is a party
@@ -47,7 +73,7 @@ export const submitReview = callable(async (data, context) => {
   if (order.customerId !== uid && order.providerId !== uid) {
     logger.security('review_not_party', {
       uid,
-      orderId: input.orderId,
+      orderId:    input.orderId,
       customerId: order.customerId,
       providerId: order.providerId,
     })
@@ -57,13 +83,13 @@ export const submitReview = callable(async (data, context) => {
   if (!['closed', 'completed'].includes(order.status)) {
     logger.warn('review_invalid_order_status', {
       uid,
-      orderId:  input.orderId,
-      status:   order.status,
+      orderId: input.orderId,
+      status:  order.status,
     })
     appError('ORD_002', 'Can only review closed or completed orders')
   }
 
-  // Verify targetId is actually the other party in this order
+  // Verify targetId is the actual order counterparty
   const expectedTargetId = order.customerId === uid ? order.providerId : order.customerId
   if (input.targetId !== expectedTargetId) {
     logger.security('review_invalid_target', {
@@ -75,17 +101,16 @@ export const submitReview = callable(async (data, context) => {
     appError('AUTH_002', 'Target does not match the order counterparty', 'permission-denied')
   }
 
-  // Get reviewer display name (fail fast before transaction)
+  // Get reviewer display name (fail fast before atomic transaction)
   const userDoc = await db.collection('users').doc(uid).get()
   if (!userDoc.exists) {
     appError('AUTH_001', 'Reviewer user record not found', 'not-found')
   }
   const userData = userDoc.data()!
 
-  // ── Atomic write: duplicate check + review creation + rating update ───────────
-  // Deterministic document ID prevents TOCTOU race: two concurrent calls for
-  // the same (orderId, uid) pair will collide on the same doc ID and only one
-  // transaction will commit.
+  // ── Atomic transaction: duplicate check + review write + rating update ────────
+  // Deterministic doc ID eliminates TOCTOU: two concurrent calls for the same
+  // (orderId, uid) pair collide on the same document ID — only one tx commits.
   const reviewId  = `${input.orderId}_${uid}`
   const reviewRef = db.collection('reviews').doc(reviewId)
 
@@ -101,7 +126,7 @@ export const submitReview = callable(async (data, context) => {
       )
     }
 
-    // 2. Write review (Admin SDK — client rules deny all writes to /reviews)
+    // 2. Write review — Admin SDK only (client rules deny all writes to /reviews)
     tx.set(reviewRef, {
       id:                reviewId,
       orderId:           input.orderId,
@@ -117,7 +142,7 @@ export const submitReview = callable(async (data, context) => {
       updatedAt:         admin.firestore.FieldValue.serverTimestamp(),
     })
 
-    // 3. Atomically update provider's avgRating in the same transaction
+    // 3. Atomically update provider avgRating in same transaction
     if (input.targetType === 'provider') {
       const profileRef = db.collection('providerProfiles').doc(input.targetId)
       const profileDoc = await tx.get(profileRef)
@@ -137,6 +162,36 @@ export const submitReview = callable(async (data, context) => {
     }
   })
 
+  const result = { ok: true as const, reviewId }
+
+  // ── Store idempotency result — 24h TTL, cleaned up by scheduled job ──────────
+  if (input.idempotencyKey) {
+    const keyDocId = `review_${input.idempotencyKey}_${uid}`
+    await db.collection('_idempotencyKeys').doc(keyDocId).set({
+      uid,
+      result,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      expiresAt: new Date(Date.now() + 24 * 3600_000),
+    })
+  }
+
+  // ── Anomaly detection: burst of reviews targeting same counterparty ───────────
+  // Queries up to 5 reviews from this user for this target. ≥4 triggers alert.
+  const burstSnap = await db.collection('reviews')
+    .where('reviewerId', '==', uid)
+    .where('targetId',   '==', input.targetId)
+    .limit(5)
+    .get()
+
+  if (burstSnap.size >= 4) {
+    logger.security('review_burst_anomaly', {
+      uid,
+      targetId:   input.targetId,
+      targetType: input.targetType,
+      count:      burstSnap.size,
+    })
+  }
+
   logger.info('review_submitted', {
     uid,
     reviewId,
@@ -146,7 +201,7 @@ export const submitReview = callable(async (data, context) => {
     rating:     input.rating,
   })
 
-  return { ok: true, reviewId }
+  return result
 })
 
 // ── openDispute ───────────────────────────────────────────────────────────────
@@ -176,7 +231,6 @@ export const openDispute = callable(async (data, context) => {
     appError('ORD_002', 'Cannot open dispute for this order status')
   }
 
-  // Check no existing open dispute
   const existingDispute = await db.collection('disputes')
     .where('orderId', '==', input.orderId)
     .where('status', 'in', ['open', 'under_review'])
@@ -201,14 +255,12 @@ export const openDispute = callable(async (data, context) => {
     updatedAt:     admin.firestore.FieldValue.serverTimestamp(),
   })
 
-  // Update order status + freeze escrow to prevent auto-release
   await db.collection('orders').doc(input.orderId).update({
     status:       'disputed',
     escrowFrozen: true,
     updatedAt:    admin.firestore.FieldValue.serverTimestamp(),
   })
 
-  // Create admin review task
   await db.collection('adminTasks').add({
     type:        'dispute_review',
     disputeId:   disputeRef.id,
@@ -219,10 +271,9 @@ export const openDispute = callable(async (data, context) => {
     status:      'pending',
     createdAt:   admin.firestore.FieldValue.serverTimestamp(),
     updatedAt:   admin.firestore.FieldValue.serverTimestamp(),
-    expiresAt:   new Date(Date.now() + 48 * 3600_000), // 48h SLA
+    expiresAt:   new Date(Date.now() + 48 * 3600_000),
   })
 
-  // Notify all admins
   const adminsSnap = await db.collection('users')
     .where('role', 'in', ['admin', 'superadmin'])
     .get()
