@@ -60,6 +60,12 @@ export const approveKyc = callable(async (data, context) => {
     decision:   input.decision,
   })
 
+  await auditLog('kyc_decision', adminId, {
+    providerId: input.providerId,
+    decision:   input.decision,
+    note:       input.note?.slice(0, 100) ?? null,
+  })
+
   // Notify provider
   const notifTitle = input.decision === 'approved'
     ? 'تم الموافقة على حسابك'

@@ -181,8 +181,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /services/{serviceId} {
-      // Restrict read to authenticated users only (not fully public)
-      allow read: if isAuth();
+      // Active services are visible to any authenticated user (marketplace browsing).
+      // Inactive (draft/paused) services are visible only to the owning provider and admins.
+      allow read: if isAuth() && (
+        resource.data.isActive == true ||
+        resource.data.providerId == request.auth.uid ||
+        isAdmin()
+      );
       // Create: caller must be the providerId they set; block system-controlled fields
       allow create: if isProvider()
         && request.resource.data.providerId == request.auth.uid
@@ -254,11 +259,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ── kycSubmissions — sensitive KYC documents, admin-only ─────────────────────
-    // kycDocumentUrls are stored here, NOT in providerProfiles, to prevent
-    // any authenticated user from reading sensitive identity document URLs.
+    // ── kycSubmissions — sensitive KYC documents ─────────────────────────────────
+    // kycDocumentUrls are stored here, NOT in providerProfiles.
+    // Providers can read their own submission (status + documentUrls are theirs).
+    // Only admins can read other providers' submissions.
+    // All writes go through Cloud Functions (Admin SDK) — no direct client writes.
     match /kycSubmissions/{userId} {
-      allow read:  if isAdmin();
+      allow read:  if isAdmin() || (isAuth() && request.auth.uid == userId);
       allow write: if false;  // Cloud Functions (Admin SDK) only
     }
 

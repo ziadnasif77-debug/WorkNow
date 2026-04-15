@@ -78,5 +78,5 @@ export {
   listJobs,
 } from './jobs'
 
-// ── Scheduled Jobs (Queue processor + Daily cleanup) ──────────────────────────
-export { processTaskQueue, dailyCleanup, hourlyCleanup } from './_shared/queue'
+// ── Scheduled Jobs (Queue processor + Daily cleanup + Weekly integrity) ───────
+export { processTaskQueue, dailyCleanup, hourlyCleanup, weeklyRatingIntegrityCheck } from './_shared/queue'

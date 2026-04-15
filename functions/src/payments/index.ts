@@ -172,6 +172,7 @@ export const tapWebhook = functions
       id:        string
       status:    string
       created?:  number   // Unix seconds — Tap sends this field
+      merchant?: { id?: string }
       metadata?: { order_id?: string }
     }
 
@@ -179,6 +180,22 @@ export const tapWebhook = functions
       logger.security('webhook_missing_event_id', { ip: req.ip })
       res.status(400).json({ error: 'Missing event id' })
       return
+    }
+
+    // ── Merchant/account binding validation ───────────────────────────────────
+    // Prevents accepting webhooks issued for a different Tap merchant account.
+    const expectedMerchantId = process.env['TAP_MERCHANT_ID']
+    if (expectedMerchantId) {
+      const receivedMerchantId = event.merchant?.id
+      if (!receivedMerchantId || receivedMerchantId !== expectedMerchantId) {
+        logger.security('webhook_merchant_mismatch', {
+          eventId:            event.id,
+          receivedMerchantId: receivedMerchantId ?? 'missing',
+          ip:                 req.ip,
+        })
+        res.status(401).json({ error: 'Merchant binding mismatch' })
+        return
+      }
     }
 
     // ── Timestamp validation: reject events outside ±5 minute window ──────────
@@ -214,6 +231,10 @@ export const tapWebhook = functions
         status:     event.status,
         receivedAt: admin.firestore.FieldValue.serverTimestamp(),
         ip:         req.ip ?? null,
+        // TTL: auto-delete after 7 days via daily cleanup job.
+        // Dedup window is effectively the 5-min timestamp tolerance;
+        // 7 days ensures safety against delayed or out-of-order retries.
+        expiresAt:  new Date(Date.now() + 7 * 24 * 3600_000),
       })
     })
 
