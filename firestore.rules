@@ -181,9 +181,22 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /services/{serviceId} {
-      allow read: if true;
-      allow create, update: if isProvider() &&
-        request.resource.data.providerId == request.auth.uid;
+      // Restrict read to authenticated users only (not fully public)
+      allow read: if isAuth();
+      // Create: caller must be the providerId they set; block system-controlled fields
+      allow create: if isProvider()
+        && request.resource.data.providerId == request.auth.uid
+        && !('avgRating'   in request.resource.data)
+        && !('totalOrders' in request.resource.data);
+      // Update: ownership verified on EXISTING doc; providerId must not change;
+      // only safe presentation fields may be touched.
+      allow update: if isProvider()
+        && resource.data.providerId == request.auth.uid
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+             'title', 'description', 'price', 'categoryId', 'imageUrls',
+             'isActive', 'duration', 'tags', 'updatedAt'
+           ]);
       allow delete: if isAdmin() ||
         (isProvider() && resource.data.providerId == request.auth.uid);
     }
@@ -241,6 +254,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── kycSubmissions — sensitive KYC documents, admin-only ─────────────────────
+    // kycDocumentUrls are stored here, NOT in providerProfiles, to prevent
+    // any authenticated user from reading sensitive identity document URLs.
+    match /kycSubmissions/{userId} {
+      allow read:  if isAdmin();
+      allow write: if false;  // Cloud Functions (Admin SDK) only
+    }
+
     // ── System collections — Admin SDK only, no client access ─────────────────────
     match /_auditLogs/{docId} {
       allow read: if isAdmin();
@@ -252,6 +273,13 @@ service cloud.firestore {
     }
 
     match /_taskQueue/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── _webhookEvents — replay protection store ──────────────────────────────────
+    // Written by tapWebhook Cloud Function via Admin SDK.
+    // No client access — prevents forged replay-protection bypass.
+    match /_webhookEvents/{eventId} {
       allow read, write: if false;
     }
 

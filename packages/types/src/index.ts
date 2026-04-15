@@ -127,7 +127,6 @@ export interface ProviderProfile {
   totalReviews: number
   totalCompletedOrders: number
   kycStatus: KycStatus
-  kycDocumentUrls: string[]
   subscriptionTier: SubscriptionTier
   boostExpiresAt?: Timestamp
   isActive: boolean
@@ -139,6 +138,19 @@ export interface ProviderProfile {
 export interface WorkingHours {
   [day: string]: { open: string; close: string; isOff: boolean }
   // day: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
+}
+
+// ── /kycSubmissions/{userId} — admin-only, never in providerProfiles ──────────
+export interface KycSubmission {
+  providerId:   string
+  documentUrls: string[]
+  status:       KycStatus
+  note:         string | null
+  submittedAt:  Timestamp | null
+  reviewedAt:   Timestamp | null
+  reviewedBy:   string | null     // adminId
+  createdAt:    Timestamp
+  updatedAt:    Timestamp
 }
 
 // ── /categories/{categoryId} ──────────────────────────────────────────────────
