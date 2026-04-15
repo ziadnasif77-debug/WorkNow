@@ -10,7 +10,7 @@ import {
   appError,
 } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
-import { logger } from '../_shared/monitoring'
+import { logger, updateFraudScore } from '../_shared/monitoring'
 import type { Order } from '@workfix/types'
 
 // ── submitReview ──────────────────────────────────────────────────────────────
@@ -20,6 +20,17 @@ export const submitReview = callable(async (data, context) => {
 
   // Dedicated rate limit: max 10 reviews per day per user
   await rateLimit(uid, 'review')
+
+  // Flagged account check — block before any further processing
+  const userDoc = await db.collection('users').doc(uid).get()
+  if (!userDoc.exists) {
+    appError('AUTH_001', 'Reviewer user record not found', 'not-found')
+  }
+  const userData = userDoc.data()!
+  if (userData['isFlagged'] === true) {
+    logger.security('review_flagged_user_blocked', { uid })
+    appError('AUTH_002', 'Your account is restricted from submitting reviews', 'permission-denied')
+  }
 
   const input = validate(z.object({
     orderId:        z.string().trim().min(1).max(128),
@@ -44,6 +55,7 @@ export const submitReview = callable(async (data, context) => {
   // Reviewer cannot review themselves
   if (input.targetId === uid) {
     logger.security('review_self_attempt', { uid, orderId: input.orderId })
+    void updateFraudScore(uid, 20, 'self_review')
     appError('AUTH_002', 'Cannot review yourself', 'permission-denied')
   }
 
@@ -77,6 +89,7 @@ export const submitReview = callable(async (data, context) => {
       customerId: order.customerId,
       providerId: order.providerId,
     })
+    void updateFraudScore(uid, 10, 'not_party')
     appError('AUTH_002', 'You are not a party to this order', 'permission-denied')
   }
 
@@ -98,15 +111,24 @@ export const submitReview = callable(async (data, context) => {
       suppliedTargetId: input.targetId,
       expectedTargetId,
     })
+    void updateFraudScore(uid, 10, 'invalid_target')
     appError('AUTH_002', 'Target does not match the order counterparty', 'permission-denied')
   }
 
-  // Get reviewer display name (fail fast before atomic transaction)
-  const userDoc = await db.collection('users').doc(uid).get()
-  if (!userDoc.exists) {
-    appError('AUTH_001', 'Reviewer user record not found', 'not-found')
+  // ── Daily per-target limit: max 1 review per target per 24 hours ─────────────
+  const oneDayAgo = new Date(Date.now() - 24 * 3600_000)
+  const recentSnap = await db.collection('reviews')
+    .where('reviewerId', '==', uid)
+    .where('targetId',   '==', input.targetId)
+    .where('createdAt',  '>=', oneDayAgo)
+    .limit(1)
+    .get()
+
+  if (!recentSnap.empty) {
+    logger.security('review_daily_limit_exceeded', { uid, targetId: input.targetId })
+    void updateFraudScore(uid, 5, 'daily_review_limit')
+    appError('ORD_003', 'You can only submit one review per target per 24 hours')
   }
-  const userData = userDoc.data()!
 
   // ── Atomic transaction: duplicate check + review write + rating update ────────
   // Deterministic doc ID eliminates TOCTOU: two concurrent calls for the same
@@ -119,6 +141,7 @@ export const submitReview = callable(async (data, context) => {
     const existing = await tx.get(reviewRef)
     if (existing.exists) {
       logger.security('review_duplicate_attempt', { uid, orderId: input.orderId })
+      void updateFraudScore(uid, 5, 'duplicate_review')
       throw new functions.https.HttpsError(
         'already-exists',
         'You have already reviewed this order',

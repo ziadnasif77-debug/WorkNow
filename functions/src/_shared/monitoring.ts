@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import * as functions from 'firebase-functions'
+import { getCorrelationId } from './helpers'
 
 export interface LogContext {
   uid?:       string
@@ -17,30 +18,32 @@ export interface LogContext {
 
 export const logger = {
   info: (message: string, ctx?: LogContext) =>
-    functions.logger.info(message, { severity: 'INFO', ...ctx }),
+    functions.logger.info(message, { severity: 'INFO', correlationId: getCorrelationId(), ...ctx }),
 
   warn: (message: string, ctx?: LogContext) =>
-    functions.logger.warn(message, { severity: 'WARNING', ...ctx }),
+    functions.logger.warn(message, { severity: 'WARNING', correlationId: getCorrelationId(), ...ctx }),
 
   error: (message: string, err?: unknown, ctx?: LogContext) => {
     const errObj = err instanceof Error
       ? { errorMessage: err.message, stack: err.stack }
       : { error: String(err) }
-    functions.logger.error(message, { severity: 'ERROR', ...errObj, ...ctx })
+    functions.logger.error(message, { severity: 'ERROR', correlationId: getCorrelationId(), ...errObj, ...ctx })
   },
 
   // Payment-specific — always log with high severity
   payment: (event: string, data: Record<string, unknown>) =>
     functions.logger.info(`[PAYMENT] ${event}`, {
-      severity: 'NOTICE',
-      paymentEvent: event,
+      severity:      'NOTICE',
+      correlationId: getCorrelationId(),
+      paymentEvent:  event,
       ...data,
     }),
 
   // Security events — always log
   security: (event: string, data: Record<string, unknown>) =>
     functions.logger.warn(`[SECURITY] ${event}`, {
-      severity: 'WARNING',
+      severity:      'WARNING',
+      correlationId: getCorrelationId(),
       securityEvent: event,
       ...data,
     }),
@@ -59,10 +62,52 @@ export function timer(label: string): () => number {
   }
 }
 
-// ── Audit log ─────────────────────────────────────────────────────────────────
-// Critical actions written to Firestore for compliance
+// ── Fraud signal scoring ──────────────────────────────────────────────────────
+// Accumulates a per-user fraud score (0–100). Auto-flags the account when
+// the score reaches FRAUD_SCORE_FLAG_THRESHOLD.
 
 import { db } from './helpers'
+
+const FRAUD_SCORE_FLAG_THRESHOLD = 70
+
+export async function updateFraudScore(
+  uid:    string,
+  delta:  number,
+  reason: string,
+): Promise<void> {
+  try {
+    const userRef = db.collection('users').doc(uid)
+    await db.runTransaction(async tx => {
+      const userSnap = await tx.get(userRef)
+      if (!userSnap.exists) return
+
+      const currentScore = (userSnap.data()!['fraudScore'] as number | undefined) ?? 0
+      const newScore      = Math.min(100, Math.max(0, currentScore + delta))
+
+      const update: Record<string, unknown> = {
+        fraudScore: newScore,
+        updatedAt:  new Date(),
+      }
+
+      // Auto-flag on first breach — do not clear flag automatically
+      if (newScore >= FRAUD_SCORE_FLAG_THRESHOLD && !userSnap.data()!['isFlagged']) {
+        update['isFlagged']  = true
+        update['flaggedAt']  = new Date()
+        update['flagReason'] = reason
+      }
+
+      tx.update(userRef, update)
+    })
+
+    logger.security('fraud_score_updated', { uid, delta, reason })
+  } catch (err) {
+    // Never break the main flow
+    logger.error('Failed to update fraud score', err, { uid, delta, reason })
+  }
+}
+
+// ── Audit log ─────────────────────────────────────────────────────────────────
+// Critical actions written to Firestore for compliance
 
 export async function auditLog(
   action: string,
