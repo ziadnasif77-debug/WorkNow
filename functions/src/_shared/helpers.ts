@@ -6,6 +6,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import type { ZodSchema } from 'zod'
 import type { UserRole, ApiError } from '@workfix/types'
+import { softAppCheck } from './appCheck'
 
 export const db = admin.firestore()
 export const auth = admin.auth()
@@ -76,6 +77,11 @@ export function callable<T, R>(handler: CallableHandler<T, R>) {
   return functions
     .region('me-central1') // Middle East region (closest to MENA)
     .https.onCall(async (data: T, context) => {
+      // App Check soft enforcement — logs missing tokens during rollout.
+      // Once all clients are on a version that sends App Check tokens,
+      // switch to requireAppCheck(context) for hard blocking.
+      softAppCheck(context, handler.name || 'anonymous')
+
       try {
         return await handler(data, context)
       } catch (err) {
