@@ -25,6 +25,8 @@ const LIMITS: Record<string, RateLimitConfig> = {
   kyc:      { windowMs: 86400_000, maxHits: 3, keyPrefix: 'kyc' },
   // General API — max 100 per minute per user
   api:      { windowMs: 60_000,   maxHits: 100, keyPrefix: 'api' },
+  // Review submission — max 10 per day per user
+  review:   { windowMs: 86400_000, maxHits: 10,  keyPrefix: 'rev' },
 }
 
 /**

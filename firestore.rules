@@ -47,10 +47,20 @@ service cloud.firestore {
     // ── providerProfiles ────────────────────────────────────────────────────────
     match /providerProfiles/{providerId} {
       allow read: if isAuth();
-      allow create: if isProvider() && isOwner(providerId);
+      allow create: if isProvider() && isOwner(providerId)
+        && request.resource.data.keys().hasOnly([
+             'name', 'photoUrl', 'bio', 'createdAt'
+           ])
+        && !('kycStatus'    in request.resource.data)
+        && !('avgRating'    in request.resource.data)
+        && !('totalReviews' in request.resource.data)
+        && !('isVerified'   in request.resource.data)
+        && !('role'         in request.resource.data);
       allow update: if (isOwner(providerId) &&
-        !('kycStatus' in request.resource.data.diff(resource.data).affectedKeys()) &&
-        !('avgRating' in request.resource.data.diff(resource.data).affectedKeys()))
+        !('kycStatus'    in request.resource.data.diff(resource.data).affectedKeys()) &&
+        !('avgRating'    in request.resource.data.diff(resource.data).affectedKeys()) &&
+        !('totalReviews' in request.resource.data.diff(resource.data).affectedKeys()) &&
+        !('isVerified'   in request.resource.data.diff(resource.data).affectedKeys()))
         || isAdmin();
       allow delete: if isAdmin();
     }
@@ -94,13 +104,21 @@ service cloud.firestore {
     match /conversations/{convId} {
       // TTL-based typing: clients write typingExpiresAt.{uid} = timestamp
       // (replaces the old boolean typingStatus — no delete write needed)
-      allow read, update: if isAuth() &&
+      allow read, update: if isAdmin() || (isAuth() &&
         (resource.data.customerId == request.auth.uid ||
-         resource.data.providerId == request.auth.uid) || isAdmin();
+         resource.data.providerId == request.auth.uid));
+      // FIX [MEDIUM]: Require that the order referenced in the conversation
+      // actually exists and that the creator is a party to that order.
+      // Prevents arbitrary conversation creation between unrelated users.
       allow create: if isAuth() && (
-        request.resource.data.customerId == request.auth.uid ||
-        request.resource.data.providerId == request.auth.uid
-      );
+        request.resource.data.customerId == request.auth.uid &&
+        request.resource.data.providerId != request.auth.uid &&
+        exists(/databases/$(database)/documents/orders/$(request.resource.data.orderId)) &&
+        get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.customerId
+          == request.auth.uid &&
+        get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.providerId
+          == request.resource.data.providerId
+      ) || isAdmin();
       allow delete: if false;
 
       match /messages/{msgId} {
@@ -136,18 +154,23 @@ service cloud.firestore {
     }
 
     // ── reviews ──────────────────────────────────────────────────────────────────
+    // All writes go through submitReview Cloud Function (Admin SDK only).
+    // Client direct-write is completely denied.
     match /reviews/{reviewId} {
       allow read: if isAuth();
-      allow create: if isAuth() &&
-        request.resource.data.reviewerId == request.auth.uid;
-      allow update, delete: if isAdmin();
+      allow create, update, delete: if false;
     }
 
     // ── disputes ─────────────────────────────────────────────────────────────────
     match /disputes/{disputeId} {
       allow read: if isAdmin() || isOrderParty(resource.data.orderId);
+      // FIX [MEDIUM]: Require that the dispute is tied to a real order the
+      // initiator is party to, and that the order is in a disputable state.
       allow create: if isAuth() &&
-        request.resource.data.initiatorId == request.auth.uid;
+        request.resource.data.initiatorId == request.auth.uid &&
+        isOrderParty(request.resource.data.orderId) &&
+        get(/databases/$(database)/documents/orders/$(request.resource.data.orderId))
+          .data.status in ['completed', 'in_progress'];
       allow update: if isAdmin();
       allow delete: if false;
     }
@@ -158,9 +181,27 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /services/{serviceId} {
-      allow read: if true;
-      allow create, update: if isProvider() &&
-        request.resource.data.providerId == request.auth.uid;
+      // Active services are visible to any authenticated user (marketplace browsing).
+      // Inactive (draft/paused) services are visible only to the owning provider and admins.
+      allow read: if isAuth() && (
+        resource.data.isActive == true ||
+        resource.data.providerId == request.auth.uid ||
+        isAdmin()
+      );
+      // Create: caller must be the providerId they set; block system-controlled fields
+      allow create: if isProvider()
+        && request.resource.data.providerId == request.auth.uid
+        && !('avgRating'   in request.resource.data)
+        && !('totalOrders' in request.resource.data);
+      // Update: ownership verified on EXISTING doc; providerId must not change;
+      // only safe presentation fields may be touched.
+      allow update: if isProvider()
+        && resource.data.providerId == request.auth.uid
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+             'title', 'description', 'price', 'categoryId', 'imageUrls',
+             'isActive', 'duration', 'tags', 'updatedAt'
+           ]);
       allow delete: if isAdmin() ||
         (isProvider() && resource.data.providerId == request.auth.uid);
     }
@@ -179,9 +220,9 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ── adminTasks ───────────────────────────────────────────────────────────────
+    // ── adminTasks — written by Cloud Functions only (Admin SDK) ─────────────────
     match /adminTasks/{taskId} {
-      allow read, write: if isAdmin();
+      allow read, write: if false;
     }
 
     // ── scheduledReleases ─────────────────────────────────────────────────────────
@@ -218,10 +259,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ── System collections — Admin SDK only, no client access ─────────────────────
+    // ── kycSubmissions — sensitive KYC documents ─────────────────────────────────
+    // kycDocumentUrls are stored here, NOT in providerProfiles.
+    // Providers can read their own submission (status + documentUrls are theirs).
+    // Only admins can read other providers' submissions.
+    // All writes go through Cloud Functions (Admin SDK) — no direct client writes.
+    match /kycSubmissions/{userId} {
+      allow read:  if isAdmin() || (isAuth() && request.auth.uid == userId);
+      allow write: if false;  // Cloud Functions (Admin SDK) only
+    }
+
+    // ── System collections — Admin SDK only, zero client access ──────────────────
+    // _auditLogs: compliance audit trail — no direct client read (query via CF)
     match /_auditLogs/{docId} {
-      allow read: if isAdmin();
-      allow write: if false;
+      allow read, write: if false;
     }
 
     match /_rateLimits/{docId} {
@@ -229,6 +280,21 @@ service cloud.firestore {
     }
 
     match /_taskQueue/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── _deadTasks — failed jobs dead-letter queue ────────────────────────────────
+    match /_deadTasks/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── _idempotencyKeys — review/payment dedup store ─────────────────────────────
+    match /_idempotencyKeys/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── _webhookEvents — replay protection store ──────────────────────────────────
+    match /_webhookEvents/{eventId} {
       allow read, write: if false;
     }
 

@@ -96,17 +96,29 @@ async function processTask(id: string, task: Task): Promise<void> {
     const attempts = task.attempts + 1
     const failed   = attempts >= task.maxAttempts
 
-    await ref.update({
-      status:   failed ? 'failed' : 'pending',
-      attempts,
-      error:    err instanceof Error ? err.message : String(err),
-      // Exponential backoff: 1min, 5min, 25min
-      runAfter: failed ? new Date() : new Date(Date.now() + Math.pow(5, attempts) * 60_000),
-      updatedAt: new Date() })
-
     if (failed) {
+      // Move to dead-letter queue — keeps _taskQueue clean, 30-day audit trail
+      const deadBatch = db.batch()
+      deadBatch.set(db.collection('_deadTasks').doc(id), {
+        ...task,
+        attempts,
+        status:    'failed',
+        error:     err instanceof Error ? err.message : String(err),
+        failedAt:  new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 3600_000),
+      })
+      deadBatch.delete(ref)
+      await deadBatch.commit()
       logger.error(`Task permanently failed: ${task.type}`, err, { taskId: id, attempts })
     } else {
+      await ref.update({
+        status:    'pending',
+        attempts,
+        error:     err instanceof Error ? err.message : String(err),
+        // Exponential backoff: 1min, 5min, 25min
+        runAfter:  new Date(Date.now() + Math.pow(5, attempts) * 60_000),
+        updatedAt: new Date(),
+      })
       logger.warn(`Task retrying: ${task.type}`, { taskId: id, attempts })
     }
   }
@@ -232,12 +244,118 @@ export const dailyCleanup = functions
     const { cleanupRateLimits } = await import('./ratelimit')
     await cleanupRateLimits()
     await enqueue('cleanup_expired_quotes', {})
-    logger.info('Daily cleanup completed')
     // GDPR: execute pending account deletions past grace period
     await processScheduledDeletions()
     // GDPR: expire old download URLs
     await expireOldDataExports()
+    // Security: purge expired webhook dedup records
+    await cleanupWebhookEvents()
+    // Dead-letter queue: purge expired failed task records
+    await cleanupDeadTasks()
+    logger.info('Daily cleanup completed')
   })
+
+// ── _deadTasks TTL cleanup ────────────────────────────────────────────────────
+
+export async function cleanupDeadTasks(): Promise<void> {
+  const now  = new Date()
+  const snap = await db.collection('_deadTasks')
+    .where('expiresAt', '<=', now)
+    .limit(500)
+    .get()
+
+  if (snap.empty) return
+
+  const batch = db.batch()
+  snap.docs.forEach(doc => batch.delete(doc.ref))
+  await batch.commit()
+  logger.info('Expired dead tasks purged', { count: snap.size })
+}
+
+// ── _webhookEvents TTL cleanup ─────────────────────────────────────────────────
+
+export async function cleanupWebhookEvents(): Promise<void> {
+  const now = new Date()
+  const snap = await db.collection('_webhookEvents')
+    .where('expiresAt', '<=', now)
+    .limit(500)
+    .get()
+
+  if (snap.empty) return
+
+  const batch = db.batch()
+  snap.docs.forEach(doc => batch.delete(doc.ref))
+  await batch.commit()
+  logger.info('Expired webhook events purged', { count: snap.size })
+}
+
+// ── Weekly rating integrity verification ──────────────────────────────────────
+// Recalculates avgRating and totalReviews from source-of-truth reviews
+// collection and corrects any drift caused by failed transactions or
+// direct Firestore writes that bypassed the submitReview function.
+
+export const weeklyRatingIntegrityCheck = functions
+  .region('me-central1')
+  .pubsub.schedule('every 168 hours')
+  .onRun(async () => {
+    await verifyRatingIntegrity()
+    logger.info('Weekly rating integrity check completed')
+  })
+
+export async function verifyRatingIntegrity(): Promise<void> {
+  // Process providers with at least one review.
+  // Cursor-based: run iteratively if > 100 providers need checking.
+  const profilesSnap = await db.collection('providerProfiles')
+    .where('totalReviews', '>', 0)
+    .limit(100)
+    .get()
+
+  if (profilesSnap.empty) return
+
+  let checkedCount = 0
+  let fixedCount   = 0
+
+  for (const profileDoc of profilesSnap.docs) {
+    const profile    = profileDoc.data()
+    const providerId = profileDoc.id
+
+    // Recalculate from the canonical reviews collection
+    const reviewsSnap = await db.collection('reviews')
+      .where('targetId',   '==', providerId)
+      .where('targetType', '==', 'provider')
+      .get()
+
+    const actualCount = reviewsSnap.size
+    const actualAvg   = actualCount > 0
+      ? reviewsSnap.docs.reduce((sum, d) => sum + ((d.data()['rating'] as number) ?? 0), 0) / actualCount
+      : 0
+    const roundedAvg  = Math.round(actualAvg * 10) / 10
+
+    const storedAvg   = (profile['avgRating']    as number) ?? 0
+    const storedCount = (profile['totalReviews'] as number) ?? 0
+
+    checkedCount++
+
+    if (storedAvg !== roundedAvg || storedCount !== actualCount) {
+      logger.security('rating_integrity_mismatch', {
+        providerId,
+        stored: { avgRating: storedAvg, totalReviews: storedCount },
+        actual: { avgRating: roundedAvg, totalReviews: actualCount },
+        drift:  { avgRating: Math.abs(storedAvg - roundedAvg), totalReviews: Math.abs(storedCount - actualCount) },
+      })
+
+      await profileDoc.ref.update({
+        avgRating:    roundedAvg,
+        totalReviews: actualCount,
+        updatedAt:    admin.firestore.FieldValue.serverTimestamp(),
+      })
+
+      fixedCount++
+    }
+  }
+
+  logger.info('Rating integrity verification complete', { checkedCount, fixedCount })
+}
 
 
 // ── Daily GDPR cleanup: execute pending account deletions ─────────────────────

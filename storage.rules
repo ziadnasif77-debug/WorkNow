@@ -10,8 +10,9 @@ service firebase.storage {
     function maxSizeMB(mb) {
       return request.resource.size < mb * 1024 * 1024;
     }
+    // Strict content-type whitelist — blocks polyglot files
     function isImage() {
-      return request.resource.contentType.matches('image/.*');
+      return request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp'];
     }
     function isDocument() {
       return request.resource.contentType in [
@@ -24,8 +25,8 @@ service firebase.storage {
 
     // ── avatars/{userId}/* ────────────────────────────────────────────────────
     match /avatars/{userId}/{fileName} {
-      allow read:  if true;                    // public
-      allow write: if isAuth()
+      allow read:   if true;                             // public CDN
+      allow write:  if isAuth()
         && uid() == userId
         && isImage()
         && maxSizeMB(5);
@@ -34,8 +35,8 @@ service firebase.storage {
 
     // ── kyc/{userId}/* ────────────────────────────────────────────────────────
     match /kyc/{userId}/{fileName} {
-      allow read:  if isAuth() && (uid() == userId || isAdmin());
-      allow write: if isAuth()
+      allow read:   if isAuth() && (uid() == userId || isAdmin());
+      allow write:  if isAuth()
         && uid() == userId
         && isDocument()
         && maxSizeMB(10);
@@ -43,20 +44,31 @@ service firebase.storage {
     }
 
     // ── orders/{orderId}/attachments/* ────────────────────────────────────────
+    // FIX [HIGH]: Previously allowed any authenticated user to write.
+    // Now enforces that only the two order parties (customer + provider) can
+    // read or write attachments — verified via Firestore order document.
     match /orders/{orderId}/attachments/{fileName} {
-      allow read:  if isAuth();               // parties + admin; enforced in app
-      allow write: if isAuth()
+      function isOrderParty() {
+        let order = firestore.get(
+          /databases/(default)/documents/orders/$(orderId)
+        ).data;
+        return uid() == order.customerId || uid() == order.providerId;
+      }
+      allow read:   if isAuth() && (isAdmin() || isOrderParty());
+      allow write:  if isAuth()
+        && isOrderParty()
         && isDocument()
         && maxSizeMB(10);
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || (isAuth() && isOrderParty());
     }
 
     // ── messages/{convId}/* ───────────────────────────────────────────────────
-    // Only the two parties in the conversation may read or upload files.
-    // isAuth() alone would let any logged-in user read/write any chat file.
+    // Only the two conversation parties may read or upload media files.
     match /messages/{convId}/{fileName} {
       function isConvMember() {
-        let conv = firestore.get(/databases/(default)/documents/conversations/$(convId)).data;
+        let conv = firestore.get(
+          /databases/(default)/documents/conversations/$(convId)
+        ).data;
         return uid() == conv.customerId || uid() == conv.providerId;
       }
       allow read:   if isAuth() && (isAdmin() || isConvMember());
@@ -69,8 +81,8 @@ service firebase.storage {
 
     // ── portfolio/{providerId}/* ──────────────────────────────────────────────
     match /portfolio/{providerId}/{fileName} {
-      allow read:  if true;
-      allow write: if isAuth()
+      allow read:   if true;                             // public marketplace
+      allow write:  if isAuth()
         && uid() == providerId
         && isImage()
         && maxSizeMB(10);

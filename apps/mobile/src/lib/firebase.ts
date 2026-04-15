@@ -19,6 +19,7 @@ import {
 import { getStorage }                                        from 'firebase/storage'
 import { getFunctions, connectFunctionsEmulator }            from 'firebase/functions'
 import { getFirebaseConfig }                                 from '@workfix/config'
+import { initAppCheck }                                      from './appCheck'
 import type { connectFirestoreEmulator as ConnectFirestoreEmulatorFn } from 'firebase/firestore'
 import type { connectAuthEmulator as ConnectAuthEmulatorFn } from 'firebase/auth'
 import type { connectStorageEmulator as ConnectStorageEmulatorFn } from 'firebase/storage'
@@ -84,6 +85,14 @@ if (__DEV__ && process.env['EXPO_PUBLIC_USE_EMULATOR'] === 'true') {
 
     if (__DEV__) console.info('🔥 Firebase Emulators connected')
   }
+}
+
+// ── App Check — must be initialised after the app instance is ready ──────────
+// App Check attaches a token to every Firebase request, proving this is a
+// genuine WorkNow binary running on an unmodified device.
+// initAppCheck() is idempotent — safe to call on hot reloads.
+if (isNewApp) {
+  initAppCheck()
 }
 
 // ── Backward-compat exports ───────────────────────────────────────────────────

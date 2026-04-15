@@ -4,3 +4,11 @@
 
 expo-env.d.ts
 # @end expo-cli
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Sentry auth token (keep sentry.properties committed, but not local overrides)
+# sentry.properties is committed with placeholder values — actual token via env var

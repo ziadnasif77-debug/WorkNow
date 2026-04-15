@@ -95,7 +95,7 @@ export const setProviderType = callable(async (data, context) => {
     verified: false,
   })
 
-  // Create provider profile
+  // Create provider profile — kycDocumentUrls live in /kycSubmissions, NOT here
   const profile: Omit<ProviderProfile, 'id'> = {
     type: input.type,
     ...(input.businessName !== undefined && { businessName: input.businessName }),
@@ -109,14 +109,27 @@ export const setProviderType = callable(async (data, context) => {
     totalReviews: 0,
     totalCompletedOrders: 0,
     kycStatus: 'pending',
-    kycDocumentUrls: [],
     subscriptionTier: 'free',
     isActive: false,  // inactive until KYC approved
     createdAt: serverTimestamp() as unknown as Timestamp,
     updatedAt: serverTimestamp() as unknown as Timestamp,
   }
 
-  await db.collection('providerProfiles').doc(uid).set(profile)
+  // Create both docs atomically: providerProfile (public) + kycSubmission (admin-only)
+  const batch = db.batch()
+  batch.set(db.collection('providerProfiles').doc(uid), profile)
+  batch.set(db.collection('kycSubmissions').doc(uid), {
+    providerId:    uid,
+    documentUrls:  [],
+    status:        'pending',
+    note:          null,
+    submittedAt:   null,
+    reviewedAt:    null,
+    reviewedBy:    null,
+    createdAt:     serverTimestamp(),
+    updatedAt:     serverTimestamp(),
+  })
+  await batch.commit()
 
   return { ok: true, message: 'Provider profile created. Awaiting KYC approval.' }
 })
@@ -137,18 +150,31 @@ export const uploadKyc = callable(async (data, context) => {
 
   const input = validate(uploadKycSchema, data)
 
-  await db.collection('providerProfiles').doc(uid).update({
-    kycDocumentUrls: input.documentUrls,
+  // Write sensitive document URLs to kycSubmissions only — NOT providerProfiles.
+  // providerProfiles is readable by any authenticated user; kycSubmissions is admin-only.
+  const batch = db.batch()
+
+  batch.set(db.collection('kycSubmissions').doc(uid), {
+    providerId:   uid,
+    documentUrls: input.documentUrls,
+    status:       'pending',
+    submittedAt:  serverTimestamp(),
+    updatedAt:    serverTimestamp(),
+  }, { merge: true })
+
+  // Update the public-facing status only (no URLs exposed)
+  batch.update(db.collection('providerProfiles').doc(uid), {
     kycStatus: 'pending',
     updatedAt: serverTimestamp(),
   })
 
-  // Notify admins (via a trigger or direct FCM — simplified here)
+  await batch.commit()
+
   await db.collection('adminTasks').add({
-    type: 'kyc_review',
+    type:       'kyc_review',
     providerId: uid,
-    documentUrls: input.documentUrls,
-    createdAt: serverTimestamp(),
+    // No documentUrls here — admin reads from kycSubmissions directly
+    createdAt:  serverTimestamp(),
   })
 
   return { ok: true, message: 'KYC documents submitted for review.' }
