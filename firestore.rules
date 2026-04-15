@@ -47,10 +47,20 @@ service cloud.firestore {
     // ── providerProfiles ────────────────────────────────────────────────────────
     match /providerProfiles/{providerId} {
       allow read: if isAuth();
-      allow create: if isProvider() && isOwner(providerId);
+      allow create: if isProvider() && isOwner(providerId)
+        && request.resource.data.keys().hasOnly([
+             'name', 'photoUrl', 'bio', 'createdAt'
+           ])
+        && !('kycStatus'    in request.resource.data)
+        && !('avgRating'    in request.resource.data)
+        && !('totalReviews' in request.resource.data)
+        && !('isVerified'   in request.resource.data)
+        && !('role'         in request.resource.data);
       allow update: if (isOwner(providerId) &&
-        !('kycStatus' in request.resource.data.diff(resource.data).affectedKeys()) &&
-        !('avgRating' in request.resource.data.diff(resource.data).affectedKeys()))
+        !('kycStatus'    in request.resource.data.diff(resource.data).affectedKeys()) &&
+        !('avgRating'    in request.resource.data.diff(resource.data).affectedKeys()) &&
+        !('totalReviews' in request.resource.data.diff(resource.data).affectedKeys()) &&
+        !('isVerified'   in request.resource.data.diff(resource.data).affectedKeys()))
         || isAdmin();
       allow delete: if isAdmin();
     }
@@ -144,11 +154,11 @@ service cloud.firestore {
     }
 
     // ── reviews ──────────────────────────────────────────────────────────────────
+    // All writes go through submitReview Cloud Function (Admin SDK only).
+    // Client direct-write is completely denied.
     match /reviews/{reviewId} {
       allow read: if isAuth();
-      allow create: if isAuth() &&
-        request.resource.data.reviewerId == request.auth.uid;
-      allow update, delete: if isAdmin();
+      allow create, update, delete: if false;
     }
 
     // ── disputes ─────────────────────────────────────────────────────────────────
