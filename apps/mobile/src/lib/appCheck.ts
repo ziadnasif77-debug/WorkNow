@@ -79,7 +79,7 @@ async function getNativeToken(rnfAppCheck: RNFAppCheck): Promise<AppCheckTokenRe
  * Returns the AppCheck instance (or null if initialization fails, which should
  * never happen in a properly configured production build).
  */
-export function initAppCheck(): AppCheck | null {
+export async function initAppCheck(): AppCheck | null {
   if (_appCheck) return _appCheck
 
   try {
@@ -149,3 +149,4 @@ export function initAppCheck(): AppCheck | null {
 export function getAppCheck(): AppCheck | null {
   return _appCheck
 }
+
