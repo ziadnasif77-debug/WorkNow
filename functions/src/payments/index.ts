@@ -5,12 +5,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import * as functions from 'firebase-functions'
+import * as admin from 'firebase-admin'
 import { z } from 'zod'
 import {
   callable, requireAuth, validate, db,
   serverTimestamp, appError,
 } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
+import { logger } from '../_shared/monitoring'
 import type { Order, Payment, Currency, Timestamp } from '@workfix/types'
 import { tapRequest, toTapSource } from '../_shared/tapClient'
 
@@ -161,17 +163,88 @@ export const tapWebhook = functions
     const { verified, body } = parseTapWebhook(req, webhookSecret)
 
     if (!verified) {
+      logger.security('webhook_invalid_signature', { ip: req.ip })
       res.status(401).json({ error: 'Invalid signature' })
       return
     }
 
     const event = body as {
-      id:       string
-      status:   string
+      id:        string
+      status:    string
+      created?:  number   // Unix seconds — Tap sends this field
+      merchant?: { id?: string }
       metadata?: { order_id?: string }
     }
 
-    functions.logger.info('Tap webhook received', { id: event.id, status: event.status })
+    if (!event.id || typeof event.id !== 'string') {
+      logger.security('webhook_missing_event_id', { ip: req.ip })
+      res.status(400).json({ error: 'Missing event id' })
+      return
+    }
+
+    // ── Merchant/account binding validation ───────────────────────────────────
+    // Prevents accepting webhooks issued for a different Tap merchant account.
+    const expectedMerchantId = process.env['TAP_MERCHANT_ID']
+    if (expectedMerchantId) {
+      const receivedMerchantId = event.merchant?.id
+      if (!receivedMerchantId || receivedMerchantId !== expectedMerchantId) {
+        logger.security('webhook_merchant_mismatch', {
+          eventId:            event.id,
+          receivedMerchantId: receivedMerchantId ?? 'missing',
+          ip:                 req.ip,
+        })
+        res.status(401).json({ error: 'Merchant binding mismatch' })
+        return
+      }
+    }
+
+    // ── Timestamp validation: reject events outside ±5 minute window ──────────
+    if (event.created) {
+      const eventMs  = event.created * 1000
+      const diffMs   = Math.abs(Date.now() - eventMs)
+      const FIVE_MIN = 5 * 60 * 1000
+      if (diffMs > FIVE_MIN) {
+        logger.security('webhook_timestamp_out_of_tolerance', {
+          eventId:         event.id,
+          eventCreated:    event.created,
+          diffMinutes:     Math.round(diffMs / 60000),
+          ip:              req.ip,
+        })
+        res.status(400).json({ error: 'Webhook timestamp out of tolerance' })
+        return
+      }
+    }
+
+    // ── Replay protection: atomically claim event ID ──────────────────────────
+    // _webhookEvents is admin-SDK-only (Firestore rules: allow read,write: if false)
+    const eventRef = db.collection('_webhookEvents').doc(event.id)
+    let alreadyProcessed = false
+
+    await db.runTransaction(async tx => {
+      const eventSnap = await tx.get(eventRef)
+      if (eventSnap.exists) {
+        alreadyProcessed = true
+        return
+      }
+      tx.set(eventRef, {
+        id:         event.id,
+        status:     event.status,
+        receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+        ip:         req.ip ?? null,
+        // TTL: auto-delete after 7 days via daily cleanup job.
+        // Dedup window is effectively the 5-min timestamp tolerance;
+        // 7 days ensures safety against delayed or out-of-order retries.
+        expiresAt:  new Date(Date.now() + 7 * 24 * 3600_000),
+      })
+    })
+
+    if (alreadyProcessed) {
+      logger.security('webhook_replay_detected', { eventId: event.id, ip: req.ip })
+      res.status(200).json({ received: true, duplicate: true })
+      return
+    }
+
+    logger.info('webhook_processing', { eventId: event.id, status: event.status })
 
     try {
       switch (event.status) {

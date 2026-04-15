@@ -10,7 +10,7 @@ import type { Dispute } from '@workfix/types'
 // ── approveKyc ────────────────────────────────────────────────────────────────
 
 export const approveKyc = callable(async (data, context) => {
-  requireAuth(context, ['admin', 'superadmin'])
+  const { uid: adminId } = requireAuth(context, ['admin', 'superadmin'])
 
   const input = validate(z.object({
     providerId: z.string().min(1),
@@ -18,18 +18,52 @@ export const approveKyc = callable(async (data, context) => {
     note:       z.string().max(500).optional(),
   }), data)
 
-  await db.collection('providerProfiles').doc(input.providerId).update({
-    kycStatus:  input.decision,
-    kycNote:    input.note,
-    isActive:   input.decision === 'approved',
+  const kycRef     = db.collection('kycSubmissions').doc(input.providerId)
+  const profileRef = db.collection('providerProfiles').doc(input.providerId)
+
+  // Verify provider exists
+  const kycSnap = await kycRef.get()
+  if (!kycSnap.exists) {
+    appError('GEN_004', 'KYC submission not found for this provider', 'not-found')
+  }
+
+  // Atomic update: kycSubmissions holds the sensitive decision audit trail;
+  // providerProfiles holds only the public-facing status + isActive flag.
+  const batch = db.batch()
+
+  batch.update(kycRef, {
+    status:     input.decision,
+    note:       input.note ?? null,
+    reviewedAt: serverTimestamp(),
+    reviewedBy: adminId,
     updatedAt:  serverTimestamp(),
   })
+
+  batch.update(profileRef, {
+    kycStatus: input.decision,
+    isActive:  input.decision === 'approved',
+    updatedAt: serverTimestamp(),
+  })
+
+  await batch.commit()
 
   // Update Custom Claims
   await auth.setCustomUserClaims(input.providerId, {
     role:        'provider',
     kycStatus:   input.decision,
     verified:    input.decision === 'approved',
+  })
+
+  logger.security('kyc_decision', {
+    adminId,
+    providerId: input.providerId,
+    decision:   input.decision,
+  })
+
+  await auditLog('kyc_decision', adminId, {
+    providerId: input.providerId,
+    decision:   input.decision,
+    note:       input.note?.slice(0, 100) ?? null,
   })
 
   // Notify provider

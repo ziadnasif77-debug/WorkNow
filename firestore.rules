@@ -181,9 +181,27 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /services/{serviceId} {
-      allow read: if true;
-      allow create, update: if isProvider() &&
-        request.resource.data.providerId == request.auth.uid;
+      // Active services are visible to any authenticated user (marketplace browsing).
+      // Inactive (draft/paused) services are visible only to the owning provider and admins.
+      allow read: if isAuth() && (
+        resource.data.isActive == true ||
+        resource.data.providerId == request.auth.uid ||
+        isAdmin()
+      );
+      // Create: caller must be the providerId they set; block system-controlled fields
+      allow create: if isProvider()
+        && request.resource.data.providerId == request.auth.uid
+        && !('avgRating'   in request.resource.data)
+        && !('totalOrders' in request.resource.data);
+      // Update: ownership verified on EXISTING doc; providerId must not change;
+      // only safe presentation fields may be touched.
+      allow update: if isProvider()
+        && resource.data.providerId == request.auth.uid
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+             'title', 'description', 'price', 'categoryId', 'imageUrls',
+             'isActive', 'duration', 'tags', 'updatedAt'
+           ]);
       allow delete: if isAdmin() ||
         (isProvider() && resource.data.providerId == request.auth.uid);
     }
@@ -241,6 +259,16 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── kycSubmissions — sensitive KYC documents ─────────────────────────────────
+    // kycDocumentUrls are stored here, NOT in providerProfiles.
+    // Providers can read their own submission (status + documentUrls are theirs).
+    // Only admins can read other providers' submissions.
+    // All writes go through Cloud Functions (Admin SDK) — no direct client writes.
+    match /kycSubmissions/{userId} {
+      allow read:  if isAdmin() || (isAuth() && request.auth.uid == userId);
+      allow write: if false;  // Cloud Functions (Admin SDK) only
+    }
+
     // ── System collections — Admin SDK only, no client access ─────────────────────
     match /_auditLogs/{docId} {
       allow read: if isAdmin();
@@ -252,6 +280,13 @@ service cloud.firestore {
     }
 
     match /_taskQueue/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── _webhookEvents — replay protection store ──────────────────────────────────
+    // Written by tapWebhook Cloud Function via Admin SDK.
+    // No client access — prevents forged replay-protection bypass.
+    match /_webhookEvents/{eventId} {
       allow read, write: if false;
     }
 
