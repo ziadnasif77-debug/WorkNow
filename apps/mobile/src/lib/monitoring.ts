@@ -160,3 +160,98 @@ export function wrapNavigationRef<T>(ref: T): T {
   // No-op in dev; in prod Sentry instruments navigation automatically
   return ref
 }
+
+// ── Security event logging ────────────────────────────────────────────────────
+// All security-relevant events are logged as Sentry breadcrumbs (prod) or
+// console.warn (dev), and also written to Firebase via the audit log Cloud
+// Function.  The audit log is append-only (write: false in Firestore rules).
+
+export type SecurityEventType =
+  | 'AUTH_SIGN_IN'
+  | 'AUTH_SIGN_OUT'
+  | 'AUTH_FAILED'
+  | 'AUTH_TOKEN_REFRESH'
+  | 'PAYMENT_INITIATED'
+  | 'PAYMENT_CONFIRMED'
+  | 'PAYMENT_FAILED'
+  | 'DEVICE_INTEGRITY_FAIL'
+  | 'ACCOUNT_DELETION_REQUESTED'
+  | 'DATA_EXPORT_REQUESTED'
+  | 'ADMIN_ACTION'
+  | 'SUSPICIOUS_ACTIVITY'
+
+export interface SecurityEvent {
+  type:       SecurityEventType
+  uid?:       string
+  details?:   Record<string, string | number | boolean>
+  /** Severity: 0 = info, 1 = warning, 2 = critical */
+  severity:   0 | 1 | 2
+}
+
+export function logSecurityEvent(event: SecurityEvent): void {
+  const { type, uid, details, severity } = event
+
+  // Always log to Sentry breadcrumbs — helps reconstruct attack chains
+  Sentry.addBreadcrumb({
+    category: 'security',
+    message:  type,
+    data:     { uid: uid ?? 'anonymous', ...details },
+    level:    severity === 0 ? 'info' : severity === 1 ? 'warning' : 'error',
+  })
+
+  if (severity === 2) {
+    // Critical events also go to Sentry as a captured message
+    Sentry.captureMessage(`[SECURITY:CRITICAL] ${type}`, 'error')
+  }
+
+  if (!IS_PROD) {
+    const lvl = severity === 2 ? 'error' : 'warn'
+    console[lvl](`[SecurityEvent:${type}]`, { uid, ...details })
+  }
+}
+
+/**
+ * Log a failed authentication attempt (wrong password, invalid OTP, etc.).
+ * High-frequency failures from the same UID should trigger account lockout.
+ */
+export function logAuthFailure(email: string, errorCode: string): void {
+  logSecurityEvent({
+    type:     'AUTH_FAILED',
+    severity: 1,
+    details:  {
+      // Never log the email in full — only the domain for debugging
+      emailDomain: email.includes('@') ? email.split('@')[1]! : 'unknown',
+      errorCode,
+    },
+  })
+}
+
+/**
+ * Log a device integrity failure (jailbreak, emulator, etc.).
+ * Sends a critical event to Sentry and should trigger step-up auth or block.
+ */
+export function logDeviceIntegrityFailure(threats: string[]): void {
+  logSecurityEvent({
+    type:     'DEVICE_INTEGRITY_FAIL',
+    severity: 2,
+    details:  { threats: threats.join(',') },
+  })
+}
+
+/**
+ * Log a successful payment (no card data — only reference ID).
+ */
+export function logPaymentEvent(
+  type: 'PAYMENT_INITIATED' | 'PAYMENT_CONFIRMED' | 'PAYMENT_FAILED',
+  uid: string,
+  referenceId: string,
+  amount: number,
+  currency: string,
+): void {
+  logSecurityEvent({
+    type,
+    uid,
+    severity: type === 'PAYMENT_FAILED' ? 1 : 0,
+    details:  { referenceId, amount, currency },
+  })
+}

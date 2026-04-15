@@ -35,7 +35,7 @@
     },
     "singleProjectMode": true,
     "pubsub": {
-      "port": 8085
+      "port": 8086
     },
     "remoteconfig": {
       "port": 7071
