@@ -220,9 +220,9 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ── adminTasks ───────────────────────────────────────────────────────────────
+    // ── adminTasks — written by Cloud Functions only (Admin SDK) ─────────────────
     match /adminTasks/{taskId} {
-      allow read, write: if isAdmin();
+      allow read, write: if false;
     }
 
     // ── scheduledReleases ─────────────────────────────────────────────────────────
@@ -269,10 +269,10 @@ service cloud.firestore {
       allow write: if false;  // Cloud Functions (Admin SDK) only
     }
 
-    // ── System collections — Admin SDK only, no client access ─────────────────────
+    // ── System collections — Admin SDK only, zero client access ──────────────────
+    // _auditLogs: compliance audit trail — no direct client read (query via CF)
     match /_auditLogs/{docId} {
-      allow read: if isAdmin();
-      allow write: if false;
+      allow read, write: if false;
     }
 
     match /_rateLimits/{docId} {
@@ -283,9 +283,17 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ── _deadTasks — failed jobs dead-letter queue ────────────────────────────────
+    match /_deadTasks/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── _idempotencyKeys — review/payment dedup store ─────────────────────────────
+    match /_idempotencyKeys/{docId} {
+      allow read, write: if false;
+    }
+
     // ── _webhookEvents — replay protection store ──────────────────────────────────
-    // Written by tapWebhook Cloud Function via Admin SDK.
-    // No client access — prevents forged replay-protection bypass.
     match /_webhookEvents/{eventId} {
       allow read, write: if false;
     }

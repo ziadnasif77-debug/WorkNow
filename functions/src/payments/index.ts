@@ -9,7 +9,7 @@ import * as admin from 'firebase-admin'
 import { z } from 'zod'
 import {
   callable, requireAuth, validate, db,
-  serverTimestamp, appError,
+  serverTimestamp, appError, addSecurityHeaders,
 } from '../_shared/helpers'
 import { rateLimit } from '../_shared/ratelimit'
 import { logger } from '../_shared/monitoring'
@@ -146,6 +146,8 @@ export const initiatePayment = callable(async (data, context) => {
 export const tapWebhook = functions
   .region('me-central1')
   .https.onRequest(async (req, res) => {
+    addSecurityHeaders(res)
+
     if (req.method !== 'POST') {
       res.status(405).send('Method Not Allowed')
       return
