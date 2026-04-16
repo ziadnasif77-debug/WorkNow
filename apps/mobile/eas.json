@@ -1,64 +1,69 @@
 {
-  "cli": {
-    "version": ">= 10.0.0",
-    "appVersionSource": "remote",
-    "requireCommit": true
-  },
-  "build": {
-    "base": {
-      "env": {
-        "EXPO_PUBLIC_ENV":          "development",
-        "EXPO_PUBLIC_USE_EMULATOR": "false"
-      }
-    },
-    "development": {
-      "extends":         "base",
-      "developmentClient": true,
-      "distribution":    "internal",
-      "channel":         "development",
-      "ios":     { "simulator": true },
-      "android": { "buildType": "apk" },
-      "env": {
-        "EXPO_PUBLIC_USE_EMULATOR": "true"
-      }
-    },
-    "preview": {
-      "extends":      "base",
-      "distribution": "internal",
-      "channel":      "preview",
-      "env": {
-        "EXPO_PUBLIC_ENV": "staging"
-      }
-    },
-    "production": {
-      "extends":      "base",
-      "distribution": "store",
-      "channel":      "production",
-      "autoIncrement": true,
-      "ios": {
-        "autoIncrement": "buildNumber"
-      },
-      "android": {
-        "buildType":    "app-bundle",
-        "autoIncrement": "versionCode"
-      },
-      "env": {
-        "EXPO_PUBLIC_ENV":          "production",
-        "EXPO_PUBLIC_USE_EMULATOR": "false"
-      }
-    }
-  },
-  "submit": {
-    "production": {
-      "ios": {
-        "appleId":     "your-apple-id@example.com",
-        "ascAppId":    "YOUR_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID"
-      },
-      "android": {
-        "serviceAccountKeyPath": "./service-account.json",
-        "track": "internal"
-      }
-    }
-  }
+    "cli":  {
+                "version":  "\u003e= 10.0.0",
+                "appVersionSource":  "remote",
+                "requireCommit":  true
+            },
+    "build":  {
+                  "base":  {
+                               "env":  {
+                                           "EXPO_PUBLIC_ENV":  "development",
+                                           "EXPO_PUBLIC_USE_EMULATOR":  "false"
+                                       }
+                           },
+                  "development":  {
+                                      "extends":  "base",
+                                      "developmentClient":  true,
+                                      "distribution":  "internal",
+                                      "channel":  "development",
+                                      "ios":  {
+                                                  "simulator":  true
+                                              },
+                                      "android":  {
+                                                      "buildType":  "apk"
+                                                  },
+                                      "env":  {
+                                                  "EXPO_PUBLIC_USE_EMULATOR":  "true"
+                                              },
+                                      "image":  "macos-ventura-13.6-xcode-15.2-1"
+                                  },
+                  "preview":  {
+                                  "extends":  "base",
+                                  "distribution":  "internal",
+                                  "channel":  "preview",
+                                  "env":  {
+                                              "EXPO_PUBLIC_ENV":  "staging"
+                                          }
+                              },
+                  "production":  {
+                                     "extends":  "base",
+                                     "distribution":  "store",
+                                     "channel":  "production",
+                                     "autoIncrement":  true,
+                                     "ios":  {
+                                                 "autoIncrement":  "buildNumber"
+                                             },
+                                     "android":  {
+                                                     "buildType":  "app-bundle",
+                                                     "autoIncrement":  "versionCode"
+                                                 },
+                                     "env":  {
+                                                 "EXPO_PUBLIC_ENV":  "production",
+                                                 "EXPO_PUBLIC_USE_EMULATOR":  "false"
+                                             }
+                                 }
+              },
+    "submit":  {
+                   "production":  {
+                                      "ios":  {
+                                                  "appleId":  "your-apple-id@example.com",
+                                                  "ascAppId":  "YOUR_APP_STORE_CONNECT_APP_ID",
+                                                  "appleTeamId":  "YOUR_APPLE_TEAM_ID"
+                                              },
+                                      "android":  {
+                                                      "serviceAccountKeyPath":  "./service-account.json",
+                                                      "track":  "internal"
+                                                  }
+                                  }
+               }
 }
