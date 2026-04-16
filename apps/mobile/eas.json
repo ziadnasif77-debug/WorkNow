@@ -24,8 +24,7 @@
                                                   },
                                       "env":  {
                                                   "EXPO_PUBLIC_USE_EMULATOR":  "true"
-                                              },
-                                      "image":  "macos-ventura-13.6-xcode-15.2-1"
+                                              }
                                   },
                   "preview":  {
                                   "extends":  "base",
