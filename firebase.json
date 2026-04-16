@@ -1,44 +1,44 @@
 {
-  "functions": {
-    "source": "functions",
-    "codebase": "default",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "**/*.test.ts"
-    ],
-    "runtime": "nodejs20"
-  },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
-  "storage": {
-    "rules": "storage.rules"
-  },
-  "emulators": {
-    "auth": {
-      "port": 9099
-    },
-    "functions": {
-      "port": 5001
-    },
-    "firestore": {
-      "port": 8080
-    },
-    "storage": {
-      "port": 9199
-    },
-    "ui": {
-      "enabled": true,
-      "port": 4000
-    },
-    "singleProjectMode": true,
-    "pubsub": {
-      "port": 8086
-    },
-    "remoteconfig": {
-      "port": 7071
-    }
-  }
+    "functions":  {
+                      "source":  "functions",
+                      "codebase":  "default",
+                      "ignore":  [
+                                     "node_modules",
+                                     ".git",
+                                     "**/*.test.ts"
+                                 ],
+                      "runtime":  "nodejs20"
+                  },
+    "firestore":  {
+                      "rules":  "firestore.rules",
+                      "indexes":  "firestore.indexes.json"
+                  },
+    "storage":  {
+                    "rules":  "storage.rules"
+                },
+    "emulators":  {
+                      "auth":  {
+                                   "port":  19099
+                               },
+                      "functions":  {
+                                        "port":  15001
+                                    },
+                      "firestore":  {
+                                        "port":  18080
+                                    },
+                      "storage":  {
+                                      "port":  19200
+                                  },
+                      "ui":  {
+                                 "enabled":  true,
+                                 "port":  14000
+                             },
+                      "singleProjectMode":  true,
+                      "pubsub":  {
+                                     "port":  18088
+                                 },
+                      "remoteconfig":  {
+                                           "port":  7071
+                                       }
+                  }
 }

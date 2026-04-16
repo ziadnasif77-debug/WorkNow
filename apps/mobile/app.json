@@ -24,7 +24,8 @@
         "NSLocationAlwaysUsageDescription": "WorkFix needs your location to find nearby service providers.",
         "NSCameraUsageDescription": "WorkFix needs camera access to capture photos for orders and KYC.",
         "NSPhotoLibraryUsageDescription": "WorkFix needs photo library access to attach images to orders.",
-        "NSMicrophoneUsageDescription": "WorkFix needs microphone access for voice messages."
+        "NSMicrophoneUsageDescription": "WorkFix needs microphone access for voice messages.",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "jsEngine": "hermes",
       "associatedDomains": [
@@ -41,13 +42,14 @@
       },
       "package": "app.workfix.mobile",
       "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO"
       ],
       "jsEngine": "hermes",
       "intentFilters": [
@@ -111,20 +113,6 @@
         "root": "src/app"
       },
       "eas": {}
-
-    },
-    "updates": {
-      "url": "https://u.expo.dev/7177c184-c126-44e9-a170-b20c0d4c4ae1",
-      "enabled": true,
-      "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 3000,
-      "requestHeaders": {
-        "expo-channel-name": "production"
-      }
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "main": "expo-router/entry"
+    }
   }
 }

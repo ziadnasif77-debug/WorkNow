@@ -1,10 +1,14 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "paths": {
-      "@workfix/types": ["../types/src/index.ts"]
-    }
-  },
-  "include": ["src"]
+    "extends":  "../../tsconfig.base.json",
+    "compilerOptions":  {
+                            "outDir":  "dist",
+                            "paths":  {
+                                          "@workfix/types":  [
+                                                                 "../types/src/index.ts"
+                                                             ]
+                                      }
+                        },
+    "include":  [
+                    "src"
+                ]
 }
