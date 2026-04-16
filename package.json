@@ -21,6 +21,7 @@
                     "clean":  "turbo clean \u0026\u0026 rm -rf node_modules"
                 },
     "devDependencies":  {
+                            "@expo/cli":  "^0.18.0",
                             "@typescript-eslint/eslint-plugin":  "^7.0.0",
                             "@typescript-eslint/parser":  "^7.0.0",
                             "eslint":  "^8.57.0",
@@ -45,7 +46,8 @@
                                                                  }
                                          },
                  "overrides":  {
-                                   "@xmldom/xmldom":  "0.8.10"
+                                   "@xmldom/xmldom":  "0.8.10",
+                                   "@expo/dom-webview":  "55.0.5"
                                }
              },
     "dependencies":  {
