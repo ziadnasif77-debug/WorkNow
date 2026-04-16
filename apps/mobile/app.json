@@ -1,133 +1,136 @@
 {
-  "expo": {
-    "name": "WorkFix",
-    "slug": "workfix",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#1D4ED8"
-    },
-    "sdkVersion": "54.0.33",
-    "scheme": "workfix",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "app.workfix.mobile",
-      "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "WorkFix needs your location to find nearby service providers.",
-        "NSLocationAlwaysUsageDescription": "WorkFix needs your location to find nearby service providers.",
-        "NSCameraUsageDescription": "WorkFix needs camera access to capture photos for orders and KYC.",
-        "NSPhotoLibraryUsageDescription": "WorkFix needs photo library access to attach images to orders.",
-        "NSMicrophoneUsageDescription": "WorkFix needs microphone access for voice messages.",
-        "ITSAppUsesNonExemptEncryption": false
-      },
-      "jsEngine": "hermes",
-      "associatedDomains": [
-        "applinks:workfix.app",
-        "applinks:workfix.app"
-      ],
-      "buildNumber": "1",
-      "icon": "./assets/icon.png"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "monochromeImage": "./assets/notification-icon.png",
-        "backgroundColor": "#2563EB"
-      },
-      "package": "app.workfix.mobile",
-      "permissions": [
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE",
-        "android.permission.RECORD_AUDIO"
-      ],
-      "jsEngine": "hermes",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "workfix.app"
-            },
-            {
-              "scheme": "workfix"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ],
-      "versionCode": 1
-    },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
-    },
-    "plugins": [
-      "expo-router",
-      "expo-font",
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "WorkFix needs your location to find nearby providers."
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#2563EB",
-          "sounds": []
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "WorkFix needs access to your photos to attach images to orders.",
-          "cameraPermission": "WorkFix needs camera access to take photos for orders."
-        }
-      ],
-      "expo-updates",
-      "@sentry/react-native",
-      "expo-secure-store"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "router": {
-        "origin": false,
-        "root": "src/app"
-      },
-      "eas": {
-        "projectId": "7177c184-c126-44e9-a170-b20c0d4c4ae1"
-      }
-    },
-    "updates": {
-      "url": "https://u.expo.dev/7177c184-c126-44e9-a170-b20c0d4c4ae1",
-      "enabled": false,
-      "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 3000,
-      "requestHeaders": {
-        "expo-channel-name": "production"
-      }
-    },
-    "main": "expo-router/entry",
-    "owner": "ziadnasif77"
-  }
+    "expo":  {
+                 "name":  "WorkFix",
+                 "slug":  "workfix",
+                 "version":  "1.0.0",
+                 "orientation":  "portrait",
+                 "icon":  "./assets/icon.png",
+                 "userInterfaceStyle":  "light",
+                 "splash":  {
+                                "image":  "./assets/splash.png",
+                                "resizeMode":  "contain",
+                                "backgroundColor":  "#1D4ED8"
+                            },
+                 "sdkVersion":  "54.0.33",
+                 "scheme":  "workfix",
+                 "assetBundlePatterns":  [
+                                             "**/*"
+                                         ],
+                 "ios":  {
+                             "supportsTablet":  false,
+                             "bundleIdentifier":  "app.workfix.mobile",
+                             "infoPlist":  {
+                                               "NSLocationWhenInUseUsageDescription":  "WorkFix needs your location to find nearby service providers.",
+                                               "NSLocationAlwaysUsageDescription":  "WorkFix needs your location to find nearby service providers.",
+                                               "NSCameraUsageDescription":  "WorkFix needs camera access to capture photos for orders and KYC.",
+                                               "NSPhotoLibraryUsageDescription":  "WorkFix needs photo library access to attach images to orders.",
+                                               "NSMicrophoneUsageDescription":  "WorkFix needs microphone access for voice messages.",
+                                               "ITSAppUsesNonExemptEncryption":  false
+                                           },
+                             "jsEngine":  "hermes",
+                             "associatedDomains":  [
+                                                       "applinks:workfix.app",
+                                                       "applinks:workfix.app"
+                                                   ],
+                             "buildNumber":  "1",
+                             "icon":  "./assets/icon.png"
+                         },
+                 "android":  {
+                                 "adaptiveIcon":  {
+                                                      "foregroundImage":  "./assets/adaptive-icon.png",
+                                                      "monochromeImage":  "./assets/notification-icon.png",
+                                                      "backgroundColor":  "#2563EB"
+                                                  },
+                                 "package":  "app.workfix.mobile",
+                                 "permissions":  [
+                                                     "android.permission.ACCESS_FINE_LOCATION",
+                                                     "android.permission.ACCESS_COARSE_LOCATION",
+                                                     "android.permission.CAMERA",
+                                                     "android.permission.READ_EXTERNAL_STORAGE",
+                                                     "android.permission.WRITE_EXTERNAL_STORAGE",
+                                                     "android.permission.RECEIVE_BOOT_COMPLETED",
+                                                     "android.permission.VIBRATE",
+                                                     "android.permission.RECORD_AUDIO"
+                                                 ],
+                                 "jsEngine":  "hermes",
+                                 "intentFilters":  [
+                                                       {
+                                                           "action":  "VIEW",
+                                                           "autoVerify":  true,
+                                                           "data":  [
+                                                                        {
+                                                                            "scheme":  "https",
+                                                                            "host":  "workfix.app"
+                                                                        },
+                                                                        {
+                                                                            "scheme":  "workfix"
+                                                                        }
+                                                                    ],
+                                                           "category":  [
+                                                                            "BROWSABLE",
+                                                                            "DEFAULT"
+                                                                        ]
+                                                       }
+                                                   ],
+                                 "versionCode":  1
+                             },
+                 "web":  {
+                             "favicon":  "./assets/favicon.png",
+                             "bundler":  "metro"
+                         },
+                 "plugins":  [
+                                 "expo-router",
+                                 "expo-font",
+                                 [
+                                     "expo-location",
+                                     {
+                                         "locationAlwaysAndWhenInUsePermission":  "WorkFix needs your location to find nearby providers."
+                                     }
+                                 ],
+                                 [
+                                     "expo-notifications",
+                                     {
+                                         "icon":  "./assets/notification-icon.png",
+                                         "color":  "#2563EB",
+                                         "sounds":  [
+
+                                                    ]
+                                     }
+                                 ],
+                                 [
+                                     "expo-image-picker",
+                                     {
+                                         "photosPermission":  "WorkFix needs access to your photos to attach images to orders.",
+                                         "cameraPermission":  "WorkFix needs camera access to take photos for orders."
+                                     }
+                                 ],
+                                 "expo-updates",
+                                 "@sentry/react-native",
+                                 "expo-secure-store",
+                                 "./plugins/withReactAppDependencyProvider"
+                             ],
+                 "experiments":  {
+                                     "typedRoutes":  true
+                                 },
+                 "extra":  {
+                               "router":  {
+                                              "origin":  false,
+                                              "root":  "src/app"
+                                          },
+                               "eas":  {
+                                           "projectId":  "7177c184-c126-44e9-a170-b20c0d4c4ae1"
+                                       }
+                           },
+                 "updates":  {
+                                 "url":  "https://u.expo.dev/7177c184-c126-44e9-a170-b20c0d4c4ae1",
+                                 "enabled":  false,
+                                 "checkAutomatically":  "ON_LOAD",
+                                 "fallbackToCacheTimeout":  3000,
+                                 "requestHeaders":  {
+                                                        "expo-channel-name":  "production"
+                                                    }
+                             },
+                 "main":  "expo-router/entry",
+                 "owner":  "ziadnasif77"
+             }
 }
