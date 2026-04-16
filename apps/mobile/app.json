@@ -100,7 +100,6 @@
         }
       ],
       "expo-updates",
-      "@sentry/react-native",
       "expo-secure-store"
     ],
     "experiments": {
