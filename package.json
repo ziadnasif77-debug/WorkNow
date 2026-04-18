@@ -46,7 +46,8 @@
                                                                  }
                                          },
                  "overrides":  {
-                                   "@xmldom/xmldom":  "0.8.10"
+                                   "@xmldom/xmldom":  "0.8.10",
+                                   "expo-linking":    "6.3.2"
                                }
              },
     "dependencies":  {
