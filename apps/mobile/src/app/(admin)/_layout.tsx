@@ -31,10 +31,10 @@ export default function AdminLayout() {
         tabBarActiveTintColor:   Colors.error,
         tabBarInactiveTintColor: Colors.gray400,
         tabBarStyle: {
-          borderTopColor:   Colors.border,
-          backgroundColor:  Colors.white,
-          height:           60,
-          paddingBottom:    8,
+          borderTopColor:  Colors.border,
+          backgroundColor: Colors.white,
+          height:          60,
+          paddingBottom:   8,
         },
       }}
     >
@@ -42,7 +42,7 @@ export default function AdminLayout() {
         name="index"
         options={{
           title: 'الرئيسية',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📊" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -64,6 +64,13 @@ export default function AdminLayout() {
         options={{
           title: 'المستخدمون',
           tabBarIcon: ({ focused }) => <TabIcon emoji="👥" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="reports"
+        options={{
+          title: 'التقارير',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="📊" focused={focused} />,
         }}
       />
     </Tabs>
