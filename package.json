@@ -46,8 +46,7 @@
                                                                  }
                                          },
                  "overrides":  {
-                                   "@xmldom/xmldom":  "0.8.10",
-                                   "@expo/dom-webview":  "55.0.5"
+                                   "@xmldom/xmldom":  "0.8.10"
                                }
              },
     "dependencies":  {
