@@ -1,16 +1,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Admin KYC Screen — review pending provider verifications
+// Documents are stored in kycSubmissions/{providerId} (Phase 7 security hardening)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState, useCallback } from 'react'
 import {
   View, Text, StyleSheet, FlatList, Image,
-  TouchableOpacity, ActivityIndicator, TextInput, Modal,
+  TouchableOpacity, ActivityIndicator, TextInput, Modal, ScrollView,
 } from 'react-native'
-import type { Timestamp} from 'firebase/firestore';
+import type { Timestamp } from 'firebase/firestore'
 import {
   getFirestore, collection, query, where,
-  orderBy, onSnapshot
+  orderBy, onSnapshot, getDoc, doc,
 } from 'firebase/firestore'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { Screen, Button } from '../../components/ui'
@@ -20,7 +21,7 @@ interface KycItem {
   id:           string
   displayName:  string
   email:        string
-  kycDocuments: string[]
+  kycDocuments: string[]   // document URLs from kycSubmissions collection
   kycStatus:    string
   createdAt:    Timestamp
 }
@@ -28,11 +29,11 @@ interface KycItem {
 type Decision = 'approved' | 'rejected' | 'resubmit'
 
 export default function AdminKycScreen() {
-  const [items,     setItems]     = useState<KycItem[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [selected,  setSelected]  = useState<KycItem | null>(null)
-  const [decision,  setDecision]  = useState<Decision>('approved')
-  const [note,      setNote]      = useState('')
+  const [items,      setItems]      = useState<KycItem[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [selected,   setSelected]   = useState<KycItem | null>(null)
+  const [decision,   setDecision]   = useState<Decision>('approved')
+  const [note,       setNote]       = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
 
@@ -43,10 +44,29 @@ export default function AdminKycScreen() {
       where('kycStatus', '==', 'pending'),
       orderBy('createdAt', 'asc'),
     )
-    const unsub = onSnapshot(q, snap => {
-      setItems(snap.docs.map(d => ({ id: d.id, ...d.data() } as KycItem)))
+
+    const unsub = onSnapshot(q, async snap => {
+      const profiles = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Omit<KycItem, 'kycDocuments'>[]
+
+      // Fetch document URLs from kycSubmissions for each provider
+      const withDocs = await Promise.all(
+        profiles.map(async profile => {
+          try {
+            const subSnap = await getDoc(doc(db, 'kycSubmissions', profile.id))
+            const docs: string[] = subSnap.exists()
+              ? (subSnap.data()['documentUrls'] ?? subSnap.data()['kycDocuments'] ?? [])
+              : []
+            return { ...profile, kycDocuments: docs } as KycItem
+          } catch {
+            return { ...profile, kycDocuments: [] } as KycItem
+          }
+        })
+      )
+
+      setItems(withDocs)
       setLoading(false)
     })
+
     return unsub
   }, [])
 
@@ -121,14 +141,21 @@ export default function AdminKycScreen() {
       {/* Decision Modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.overlay}>
-          <View style={styles.modal}>
+          <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modal}>
             <Text style={styles.modalTitle}>مراجعة KYC</Text>
             <Text style={styles.modalSub}>{selected?.displayName}</Text>
+            <Text style={styles.modalEmail}>{selected?.email}</Text>
 
             {/* Full documents */}
-            {(selected?.kycDocuments ?? []).map((url, i) => (
-              <Image key={i} source={{ uri: url }} style={styles.docFull} resizeMode="contain" />
-            ))}
+            {(selected?.kycDocuments ?? []).length === 0 ? (
+              <View style={styles.noDocs}>
+                <Text style={styles.noDocsText}>لا توجد مستندات مرفقة</Text>
+              </View>
+            ) : (
+              (selected?.kycDocuments ?? []).map((url, i) => (
+                <Image key={i} source={{ uri: url }} style={styles.docFull} resizeMode="contain" />
+              ))
+            )}
 
             {/* Decision buttons */}
             <Text style={styles.label}>القرار</Text>
@@ -172,7 +199,7 @@ export default function AdminKycScreen() {
                 style={{ flex: 1 }}
               />
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </Screen>
@@ -180,37 +207,41 @@ export default function AdminKycScreen() {
 }
 
 const styles = StyleSheet.create({
-  center:       { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  headerBar:    { padding: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border, backgroundColor: Colors.white },
-  title:        { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-  list:         { padding: Spacing.md, gap: Spacing.sm },
-  card:         { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, ...Shadow.sm },
-  cardRow:      { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  avatar:       { width: 44, height: 44, borderRadius: Radius.full, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  avatarText:   { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.primary },
-  info:         { flex: 1 },
-  name:         { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
-  email:        { fontSize: FontSize.sm, color: Colors.gray500 },
-  docsCount:    { fontSize: FontSize.xs, color: Colors.gray400, marginTop: 2 },
-  arrow:        { fontSize: FontSize.xl, color: Colors.gray400 },
-  docs:         { flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.sm },
-  docThumb:     { width: 60, height: 60, borderRadius: Radius.md, backgroundColor: Colors.gray100 },
-  empty:        { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyEmoji:   { fontSize: IconSize.xxxl },
-  emptyText:    { fontSize: FontSize.md, color: Colors.gray500, marginTop: Spacing.sm },
-  overlay:      { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modal:        { backgroundColor: Colors.white, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, maxHeight: '90%' },
-  modalTitle:   { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
-  modalSub:     { fontSize: FontSize.sm, color: Colors.gray500, marginBottom: Spacing.md },
-  docFull:      { width: '100%', height: 180, borderRadius: Radius.md, backgroundColor: Colors.gray100, marginBottom: Spacing.sm },
-  label:        { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray700, marginBottom: Spacing.xs },
-  decisionRow:  { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
-  decBtn:             { flex: 1, paddingVertical: Spacing.sm, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'center' },
-  decBtnApproved:     { backgroundColor: Colors.successLight, borderColor: Colors.success },
-  decBtnRejected:     { backgroundColor: Colors.errorLight,   borderColor: Colors.error },
-  decBtnResubmit:     { backgroundColor: Colors.warningLight, borderColor: Colors.warning },
-  decText:      { fontSize: FontSize.sm, color: Colors.gray600 },
-  decTextActive: { fontWeight: FontWeight.bold, color: Colors.black },
-  noteInput:    { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.sm, fontSize: FontSize.md, marginBottom: Spacing.md, minHeight: 70 },
-  modalActions: { flexDirection: 'row', gap: Spacing.sm },
+  center:         { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  headerBar:      { padding: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border, backgroundColor: Colors.white },
+  title:          { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
+  list:           { padding: Spacing.md, gap: Spacing.sm },
+  card:           { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, ...Shadow.sm },
+  cardRow:        { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  avatar:         { width: 44, height: 44, borderRadius: Radius.full, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
+  avatarText:     { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.primary },
+  info:           { flex: 1 },
+  name:           { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.black },
+  email:          { fontSize: FontSize.sm, color: Colors.gray500 },
+  docsCount:      { fontSize: FontSize.xs, color: Colors.gray400, marginTop: 2 },
+  arrow:          { fontSize: FontSize.xl, color: Colors.gray400 },
+  docs:           { flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.sm },
+  docThumb:       { width: 60, height: 60, borderRadius: Radius.md, backgroundColor: Colors.gray100 },
+  empty:          { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  emptyEmoji:     { fontSize: IconSize.xxxl },
+  emptyText:      { fontSize: FontSize.md, color: Colors.gray500, marginTop: Spacing.sm },
+  overlay:        { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalScroll:    { maxHeight: '92%' },
+  modal:          { backgroundColor: Colors.white, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, paddingBottom: Spacing.xxl },
+  modalTitle:     { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.black },
+  modalSub:       { fontSize: FontSize.md, color: Colors.gray700, marginTop: 2 },
+  modalEmail:     { fontSize: FontSize.sm, color: Colors.gray500, marginBottom: Spacing.md },
+  noDocs:         { backgroundColor: Colors.gray100, borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center', marginBottom: Spacing.md },
+  noDocsText:     { fontSize: FontSize.sm, color: Colors.gray500 },
+  docFull:        { width: '100%', height: 180, borderRadius: Radius.md, backgroundColor: Colors.gray100, marginBottom: Spacing.sm },
+  label:          { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.gray700, marginBottom: Spacing.xs },
+  decisionRow:    { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
+  decBtn:         { flex: 1, paddingVertical: Spacing.sm, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'center' },
+  decBtnApproved: { backgroundColor: Colors.successLight, borderColor: Colors.success },
+  decBtnRejected: { backgroundColor: Colors.errorLight,   borderColor: Colors.error },
+  decBtnResubmit: { backgroundColor: Colors.warningLight, borderColor: Colors.warning },
+  decText:        { fontSize: FontSize.sm, color: Colors.gray600 },
+  decTextActive:  { fontWeight: FontWeight.bold, color: Colors.black },
+  noteInput:      { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.sm, fontSize: FontSize.md, marginBottom: Spacing.md, minHeight: 70 },
+  modalActions:   { flexDirection: 'row', gap: Spacing.sm },
 })

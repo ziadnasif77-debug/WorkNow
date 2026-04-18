@@ -18,6 +18,8 @@ interface Stats {
   openDisputes:    number
   totalUsers:      number
   totalOrders:     number
+  pendingOrders:   number
+  flaggedUsers:    number
 }
 
 interface FinancialReport {
@@ -37,24 +39,30 @@ export default function AdminDashboard() {
   const load = useCallback(async () => {
     try {
       const db = getFirestore()
-      const [kycSnap, disputeSnap, usersSnap, ordersSnap] = await Promise.all([
+      const [kycSnap, disputeSnap, usersSnap, ordersSnap, pendingSnap, flaggedSnap] = await Promise.all([
         getCountFromServer(query(collection(db, 'providerProfiles'), where('kycStatus', '==', 'pending'))),
-        getCountFromServer(query(collection(db, 'disputes'), where('status', '==', 'open'))),
+        getCountFromServer(query(collection(db, 'disputes'), where('status', 'in', ['open', 'under_review']))),
         getCountFromServer(collection(db, 'users')),
         getCountFromServer(collection(db, 'orders')),
+        getCountFromServer(query(collection(db, 'orders'), where('status', '==', 'pending'))),
+        getCountFromServer(query(collection(db, 'users'), where('isFlagged', '==', true))),
       ])
 
       setStats({
-        pendingKyc:   kycSnap.data().count,
-        openDisputes: disputeSnap.data().count,
-        totalUsers:   usersSnap.data().count,
-        totalOrders:  ordersSnap.data().count,
+        pendingKyc:    kycSnap.data().count,
+        openDisputes:  disputeSnap.data().count,
+        totalUsers:    usersSnap.data().count,
+        totalOrders:   ordersSnap.data().count,
+        pendingOrders: pendingSnap.data().count,
+        flaggedUsers:  flaggedSnap.data().count,
       })
 
-      const fn = httpsCallable<{ period: string }, FinancialReport>(
+      const now   = new Date()
+      const from  = new Date(now.getFullYear(), now.getMonth(), 1)
+      const fn    = httpsCallable<{ from: string; to: string }, FinancialReport>(
         getFunctions(undefined, 'me-central1'), 'admin-getFinancialReport'
       )
-      const res = await fn({ period: 'month' })
+      const res = await fn({ from: from.toISOString(), to: now.toISOString() })
       setReport(res.data)
     } catch (e) {
       if (__DEV__) console.warn('[Admin] load error', e)
@@ -93,10 +101,12 @@ export default function AdminDashboard() {
         {/* Stats grid */}
         {stats && (
           <View style={styles.grid}>
-            <StatCard emoji="📋" label="KYC معلّق" value={stats.pendingKyc} urgent={stats.pendingKyc > 0} />
-            <StatCard emoji="⚖️" label="نزاعات مفتوحة" value={stats.openDisputes} urgent={stats.openDisputes > 0} />
+            <StatCard emoji="📋" label="KYC معلّق"          value={stats.pendingKyc}    urgent={stats.pendingKyc > 0} />
+            <StatCard emoji="⚖️" label="نزاعات مفتوحة"     value={stats.openDisputes}  urgent={stats.openDisputes > 0} />
             <StatCard emoji="👥" label="إجمالي المستخدمين" value={stats.totalUsers} />
-            <StatCard emoji="📦" label="إجمالي الطلبات" value={stats.totalOrders} />
+            <StatCard emoji="📦" label="إجمالي الطلبات"    value={stats.totalOrders} />
+            <StatCard emoji="⏳" label="طلبات معلّقة"      value={stats.pendingOrders} urgent={stats.pendingOrders > 5} />
+            <StatCard emoji="🚨" label="مستخدمون مُبلَّغون" value={stats.flaggedUsers}  urgent={stats.flaggedUsers > 0} />
           </View>
         )}
 
