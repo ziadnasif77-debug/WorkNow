@@ -13,8 +13,9 @@ import {
   type User as FirebaseUser,
   type ConfirmationResult,
 } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
-import { firebaseAuth, firebaseFunctions } from '../lib/firebase'
+import { firebaseAuth, firebaseFunctions, firestore } from '../lib/firebase'
 import { Analytics } from '../lib/analytics'
 import type { User, UserRole, CompleteProfilePayload } from '@workfix/types'
 
@@ -68,7 +69,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Get fresh token with custom claims
         const token = await fbUser.getIdTokenResult(true)
         const role = (token.claims['role'] as UserRole | undefined) ?? 'customer'
-        set({ firebaseUser: fbUser, role, isInitialized: true })
+
+        // Fetch user profile from Firestore
+        let appUser: User | null = null
+        try {
+          const snap = await getDoc(doc(firestore, 'users', fbUser.uid))
+          if (snap.exists()) appUser = { ...snap.data(), uid: fbUser.uid } as unknown as User
+        } catch { /* non-critical — app functions without it */ }
+
+        set({ firebaseUser: fbUser, appUser, role, isInitialized: true })
       } else {
         set({
           firebaseUser: null,

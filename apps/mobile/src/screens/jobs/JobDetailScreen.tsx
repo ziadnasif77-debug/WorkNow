@@ -77,7 +77,11 @@ export default function JobDetailScreen() {
           {job.applicationDeadline && (
             <InfoRow
               label={`📅 ${t('jobs.deadline')}`}
-              value={new Date(job.applicationDeadline.seconds * 1000).toLocaleDateString()}
+              value={
+                typeof (job.applicationDeadline as { seconds?: number }).seconds === 'number'
+                  ? new Date((job.applicationDeadline as { seconds: number }).seconds * 1000).toLocaleDateString()
+                  : new Date(job.applicationDeadline as unknown as string).toLocaleDateString()
+              }
             />
           )}
           {job.applicationsCount > 0 && (
