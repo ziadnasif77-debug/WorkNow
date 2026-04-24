@@ -1,56 +1,56 @@
 {
-    "name":  "workfix",
-    "version":  "0.1.0",
-    "private":  true,
-    "packageManager":  "pnpm@9.0.0",
-    "scripts":  {
-                    "build":  "turbo build",
-                    "dev":  "turbo dev",
-                    "lint":  "turbo lint",
-                    "typecheck":  "turbo typecheck",
-                    "test":  "turbo test",
-                    "build:functions":  "cd functions \u0026\u0026 pnpm build",
-                    "dev:setup":  "pnpm install --frozen-lockfile \u0026\u0026 pnpm turbo build --filter=@workfix/types --filter=@workfix/utils --filter=@workfix/config \u0026\u0026 pnpm build:functions",
-                    "dev:emulators":  "pnpm dev:setup \u0026\u0026 firebase emulators:start --import=./emulator-data --export-on-exit",
-                    "dev:mobile":  "cd apps/mobile \u0026\u0026 EXPO_PUBLIC_USE_EMULATOR=true pnpm start --lan --clear",
-                    "emulators":  "firebase emulators:start",
-                    "emulators:export":  "firebase emulators:export ./emulator-data",
-                    "deploy:dev":  "firebase deploy --project workfix-557e0",
-                    "deploy:prod":  "firebase deploy --project prod",
-                    "rules:test":  "cd functions \u0026\u0026 pnpm test:rules",
-                    "clean":  "turbo clean \u0026\u0026 rm -rf node_modules"
-                },
-    "devDependencies":  {
-                            "@expo/cli":  "^0.18.0",
-                            "@typescript-eslint/eslint-plugin":  "^7.0.0",
-                            "@typescript-eslint/parser":  "^7.0.0",
-                            "eslint":  "^8.57.0",
-                            "eslint-plugin-react":  "^7.34.0",
-                            "eslint-plugin-react-hooks":  "^4.6.2",
-                            "prettier":  "^3.2.0",
-                            "turbo":  "^2.0.0",
-                            "typescript":  "^5.9.3"
-                        },
-    "workspaces":  [
-                       "apps/*",
-                       "packages/*",
-                       "functions"
-                   ],
-    "pnpm":  {
-                 "peerDependencyRules":  {
-                                             "ignoreMissing":  [
-
-                                                               ],
-                                             "allowedVersions":  {
-                                                                     "@react-native-async-storage/async-storage":  "2"
-                                                                 }
-                                         },
-                 "overrides":  {
-                                   "@xmldom/xmldom":  "0.8.10",
-                                   "expo-linking":    "6.3.2"
-                               }
-             },
-    "dependencies":  {
-                         "@xmldom/xmldom":  "0.8.10"
-                     }
+    "name": "workfix",
+    "version": "0.1.0",
+    "private": true,
+    "packageManager": "pnpm@9.0.0",
+    "scripts": {
+        "build": "turbo build",
+        "dev": "turbo dev",
+        "lint": "turbo lint",
+        "typecheck": "turbo typecheck",
+        "test": "turbo test",
+        "build:functions": "cd functions && pnpm build",
+        "dev:setup": "pnpm install --frozen-lockfile && pnpm turbo build --filter=@workfix/types --filter=@workfix/utils --filter=@workfix/config && pnpm build:functions",
+        "dev:emulators": "pnpm dev:setup && firebase emulators:start --import=./emulator-data --export-on-exit",
+        "dev:mobile": "cd apps/mobile && EXPO_PUBLIC_USE_EMULATOR=true pnpm start --lan --clear",
+        "emulators": "firebase emulators:start",
+        "emulators:export": "firebase emulators:export ./emulator-data",
+        "deploy:dev": "firebase deploy --project workfix-557e0",
+        "deploy:prod": "firebase deploy --project prod",
+        "rules:test": "cd functions && pnpm test:rules",
+        "clean": "turbo clean && rm -rf node_modules"
+    },
+    "devDependencies": {
+        "@expo/cli": "^0.18.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "eslint": "^8.57.0",
+        "eslint-plugin-react": "^7.34.0",
+        "eslint-plugin-react-hooks": "^4.6.2",
+        "prettier": "^3.2.0",
+        "react-dom": "18.2.0",
+        "react-native-web": "~0.19.0",
+        "turbo": "^2.0.0",
+        "typescript": "^5.9.3"
+    },
+    "workspaces": [
+        "apps/*",
+        "packages/*",
+        "functions"
+    ],
+    "pnpm": {
+        "peerDependencyRules": {
+            "ignoreMissing": [],
+            "allowedVersions": {
+                "@react-native-async-storage/async-storage": "2"
+            }
+        },
+        "overrides": {
+            "@xmldom/xmldom": "0.8.10",
+            "expo-linking": "6.3.2"
+        }
+    },
+    "dependencies": {
+        "@xmldom/xmldom": "0.8.10"
+    }
 }
