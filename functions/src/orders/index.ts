@@ -8,7 +8,7 @@ import {
   appError } from '../_shared/helpers'
 import { rateLimit }        from '../_shared/ratelimit'
 import { isValidTransition, calcCommission, calcNetAmount } from '@workfix/utils'
-import { DEFAULT_COMMISSION_RATE, QUOTE_EXPIRY_HOURS } from '@workfix/config'
+import { DEFAULT_COMMISSION_RATE, QUOTE_EXPIRY_HOURS, MAX_QUOTES_PER_ORDER } from '@workfix/config'
 import type { Order, Quote, Timestamp, LocalizedString } from '@workfix/types'
 
 // ── createOrder ───────────────────────────────────────────────────────────────
@@ -88,6 +88,18 @@ export const submitQuote = callable(async (data, context) => {
   const order = orderDoc.data() as Order
   if (!['pending', 'quoted'].includes(order.status)) {
     appError('ORD_002', 'This order is no longer accepting quotes')
+  }
+
+  // Offer system control: max bids + no duplicate pending quote from same provider
+  const [allQuotesSnap, myQuoteSnap] = await Promise.all([
+    orderRef.collection('quotes').where('status', 'in', ['pending', 'accepted']).get(),
+    orderRef.collection('quotes').where('providerId', '==', uid).where('status', '==', 'pending').limit(1).get(),
+  ])
+  if (allQuotesSnap.size >= MAX_QUOTES_PER_ORDER) {
+    appError('ORD_005', 'This order has reached the maximum number of quotes')
+  }
+  if (!myQuoteSnap.empty) {
+    appError('ORD_002', 'You already have a pending quote for this order')
   }
 
   // Check KYC is approved

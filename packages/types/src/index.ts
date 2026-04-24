@@ -126,6 +126,8 @@ export interface ProviderProfile {
   avgRating: number
   totalReviews: number
   totalCompletedOrders: number
+  cancellationsAsProvider?: number   // orders cancelled after they were confirmed
+  reputationScore?: number           // composite: avgRating*0.6 + completionRate*0.3 + activity*0.1
   kycStatus: KycStatus
   subscriptionTier: SubscriptionTier
   boostExpiresAt?: Timestamp
