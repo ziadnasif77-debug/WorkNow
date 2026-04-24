@@ -375,7 +375,10 @@ export async function processScheduledDeletions(): Promise<void> {
   const { executeAccountDeletion } = await import('../user/accountDeletion')
 
   await Promise.allSettled(
-    pendingDeletions.docs.map(doc => executeAccountDeletion(doc.id))
+    pendingDeletions.docs.map(doc => {
+      const uid = (doc.data() as { uid?: string })['uid'] ?? doc.id
+      return executeAccountDeletion(uid)
+    })
   )
 }
 

@@ -81,6 +81,7 @@ export const sendMessage = callable(async (data, context) => {
   }
 
   const userDoc = await db.collection('users').doc(uid).get()
+  if (!userDoc.exists) appError('GEN_004', 'User profile not found', 'not-found')
   const userData = userDoc.data()!
 
   const msgRef = db
