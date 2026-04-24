@@ -2,10 +2,10 @@
 // Provider Wallet Screen — balance overview + request payout
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  Alert, Modal,
+  Alert, Modal, RefreshControl,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -21,16 +21,24 @@ export default function WalletScreen() {
   const router    = useRouter()
   const { user: _user } = useAuth()
   const {
-    wallet, walletLoading,
+    wallet, walletLoading, walletError,
     payoutLoading, payoutError,
-    loadWallet, requestPayout, clearErrors,
+    loadWallet, requestPayout, clearErrors, clearWalletError,
   } = usePaymentsStore()
 
   const [showPayoutModal, setShowPayoutModal] = useState(false)
   const [payoutAmount,    setPayoutAmount]    = useState('')
   const [amountErr,       setAmountErr]       = useState('')
+  const [refreshing,      setRefreshing]      = useState(false)
 
   useEffect(() => { void loadWallet() }, [])
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    clearWalletError()
+    await loadWallet()
+    setRefreshing(false)
+  }, [])
 
   const currency = wallet?.currency ?? 'SAR'
 
@@ -60,10 +68,20 @@ export default function WalletScreen() {
       {/* Header */}
       <ScreenHeader title={t('provider.wallet')} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
 
         {walletLoading ? (
           <LoadingState />
+        ) : walletError ? (
+          <View style={styles.error_wrap}>
+            <Text style={styles.error_emoji}>⚠️</Text>
+            <Text style={styles.error_text}>{walletError}</Text>
+            <Button label={t('common.retry')} onPress={onRefresh} />
+          </View>
         ) : (
           <>
             {/* ── Balance cards ─────────────────────────────────────────── */}
@@ -180,7 +198,10 @@ export default function WalletScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
+  content:     { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
+  error_wrap:  { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.md, paddingTop: Spacing.xxl },
+  error_emoji: { fontSize: 48 },
+  error_text:  { fontSize: FontSize.md, color: Colors.gray600, textAlign: 'center', lineHeight: 24 },
 
   balance_hero: {
     backgroundColor: Colors.primary, borderRadius: Radius.xl,

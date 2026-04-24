@@ -37,8 +37,12 @@ export function useImageUpload(folder = 'uploads') {
 
     if (result.canceled || !result.assets[0]) return null
 
-    const uri  = result.assets[0].uri
-    const uid  = firebaseAuth.currentUser?.uid ?? 'anon'
+    const uri = result.assets[0].uri
+    const uid = firebaseAuth.currentUser?.uid
+    if (!uid) {
+      setState(s => ({ ...s, error: 'يجب تسجيل الدخول أولاً' }))
+      return null
+    }
 
     setState({ isUploading: true, progress: 0, error: null })
     try {
@@ -67,7 +71,11 @@ export function useImageUpload(folder = 'uploads') {
     if (result.canceled || !result.assets[0]) return null
 
     const uri = result.assets[0].uri
-    const uid = firebaseAuth.currentUser?.uid ?? 'anon'
+    const uid = firebaseAuth.currentUser?.uid
+    if (!uid) {
+      setState(s => ({ ...s, error: 'يجب تسجيل الدخول أولاً' }))
+      return null
+    }
 
     setState({ isUploading: true, progress: 0, error: null })
     try {
