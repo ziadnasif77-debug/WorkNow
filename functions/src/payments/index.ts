@@ -130,6 +130,7 @@ export const initiatePayment = callable(async (data, context) => {
   await db.collection('orders').doc(input.orderId).update({
     paymentMethod:   input.method,
     escrowPaymentId: String(tapCharge['id']),
+    status:          'payment_pending',  // state machine: confirmed → payment_pending
     updatedAt:       serverTimestamp(),
   })
 
@@ -300,8 +301,8 @@ export const tapWebhook = functions
 
             tx.update(orderRef, {
               paymentStatus: 'captured',
-              // Only advance to in_progress if still in confirmed state
-              ...(orderData?.['status'] === 'confirmed' && { status: 'in_progress' }),
+              // Advance to in_progress from payment_pending (new state machine) or confirmed (legacy)
+              ...(['payment_pending', 'confirmed'].includes(orderData?.['status']) && { status: 'in_progress' }),
               updatedAt: serverTimestamp(),
             })
           })

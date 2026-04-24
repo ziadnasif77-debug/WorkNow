@@ -8,7 +8,7 @@ import {
   appError } from '../_shared/helpers'
 import { rateLimit }        from '../_shared/ratelimit'
 import { isValidTransition, calcCommission, calcNetAmount } from '@workfix/utils'
-import { DEFAULT_COMMISSION_RATE, QUOTE_EXPIRY_HOURS, MAX_QUOTES_PER_ORDER } from '@workfix/config'
+import { DEFAULT_COMMISSION_RATE, QUOTE_EXPIRY_HOURS, MAX_QUOTES_PER_ORDER, MAX_PROVIDER_QUOTES_PER_HOUR } from '@workfix/config'
 import type { Order, Quote, Timestamp, LocalizedString } from '@workfix/types'
 
 // ── createOrder ───────────────────────────────────────────────────────────────
@@ -90,16 +90,21 @@ export const submitQuote = callable(async (data, context) => {
     appError('ORD_002', 'This order is no longer accepting quotes')
   }
 
-  // Offer system control: max bids + no duplicate pending quote from same provider
-  const [allQuotesSnap, myQuoteSnap] = await Promise.all([
+  // Offer system control: max bids + no duplicate + per-provider hourly rate limit
+  const hourAgo = new Date(Date.now() - 3_600_000)
+  const [allQuotesSnap, myQuoteSnap, hourlySnap] = await Promise.all([
     orderRef.collection('quotes').where('status', 'in', ['pending', 'accepted']).get(),
     orderRef.collection('quotes').where('providerId', '==', uid).where('status', '==', 'pending').limit(1).get(),
+    db.collectionGroup('quotes').where('providerId', '==', uid).where('createdAt', '>=', hourAgo).get(),
   ])
   if (allQuotesSnap.size >= MAX_QUOTES_PER_ORDER) {
     appError('ORD_005', 'This order has reached the maximum number of quotes')
   }
   if (!myQuoteSnap.empty) {
     appError('ORD_002', 'You already have a pending quote for this order')
+  }
+  if (hourlySnap.size >= MAX_PROVIDER_QUOTES_PER_HOUR) {
+    appError('GEN_002', `Quote rate limit: max ${MAX_PROVIDER_QUOTES_PER_HOUR} quotes per hour`, 'resource-exhausted')
   }
 
   // Check KYC is approved

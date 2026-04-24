@@ -25,14 +25,15 @@ export type KycStatus = 'pending' | 'approved' | 'rejected' | 'resubmit'
 export type SubscriptionTier = 'free' | 'pro' | 'business'
 
 export type OrderStatus =
-  | 'pending'       // created, waiting for quotes
-  | 'quoted'        // at least one quote received
-  | 'confirmed'     // customer accepted quote + payment held
-  | 'in_progress'   // provider confirmed arrival
-  | 'completed'     // provider marked done
-  | 'closed'        // customer confirmed + payout released
-  | 'cancelled'     // cancelled by either party
-  | 'disputed'      // dispute opened
+  | 'pending'          // created, waiting for quotes
+  | 'quoted'           // at least one quote received (bidding phase)
+  | 'confirmed'        // customer accepted a quote
+  | 'payment_pending'  // payment initiated, awaiting gateway capture
+  | 'in_progress'      // payment captured, provider is working
+  | 'completed'        // provider marked done
+  | 'closed'           // customer confirmed + payout released
+  | 'cancelled'        // cancelled by either party
+  | 'disputed'         // dispute opened
 
 export type PaymentStatus = 'unpaid' | 'held' | 'captured' | 'refunded' | 'failed'
 export type PaymentMethod =

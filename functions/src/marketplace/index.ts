@@ -7,36 +7,56 @@ import { callable, requireAuth, validate, db, serverTimestamp, appError } from '
 import { rateLimit } from '../_shared/ratelimit'
 import { getSearchRanges, haversineKm } from '../_shared/search'
 import { encodeGeohash } from '@workfix/utils'
-import { GEO_PRECISION, PAGE_SIZE, RANK_WEIGHTS, NEW_PROVIDER_BOOST } from '@workfix/config'
+import { GEO_PRECISION, PAGE_SIZE } from '@workfix/config'
 import type { ProviderProfile } from '@workfix/types'
 
 // ── Ranking Engine ────────────────────────────────────────────────────────────
 
 type RankedProvider = ProviderProfile & { distanceKm: number; rankScore: number }
 
+// Independent signal weights (normal / radius-expanded)
+const W_NORMAL   = { proximity: 0.30, trust: 0.25, performance: 0.20, responsiveness: 0.15, activity: 0.10 }
+const W_EXPANDED = { proximity: 0.20, trust: 0.28, performance: 0.22, responsiveness: 0.18, activity: 0.12 }
+
+// Bayesian average: pulls low-count providers toward the global mean (4.0)
+// Prevents a 5⭐ provider with 2 reviews from ranking above a 4.7⭐ with 200 reviews
+function bayesianRating(rating: number, reviewCount: number): number {
+  const C = 10    // prior weight — needs 10+ reviews before rating is "trusted"
+  const m = 4.0   // global mean prior
+  return (C * m + reviewCount * rating) / (C + reviewCount)
+}
+
 function computeRankScore(
   profile: ProviderProfile & { distanceKm: number },
   radiusKm: number,
   now: Date,
+  radiusExpanded: boolean,
 ): number {
-  const normalizedDist   = Math.min(profile.distanceKm / radiusKm, 1)
-  const ratingScore      = (profile.avgRating ?? 0) / 5
-  const repScore         = ((profile.reputationScore ?? profile.avgRating) ?? 0) / 5
-  const completedOrders  = profile.totalCompletedOrders ?? 0
-  const completionNorm   = Math.min(completedOrders / 30, 1)
-  const isBoostActive    = !!(
-    profile.boostExpiresAt && (profile.boostExpiresAt as unknown as Date) > now
-  )
-  const isNewProvider    = completedOrders < 10
+  const W = radiusExpanded ? W_EXPANDED : W_NORMAL
 
-  return (
-    RANK_WEIGHTS.distance   * (1 - normalizedDist) +
-    RANK_WEIGHTS.rating     * ratingScore +
-    RANK_WEIGHTS.experience * completionNorm +
-    RANK_WEIGHTS.reputation * repScore +
-    (isBoostActive ? 0.15 : 0) +     // paid boost
-    (isNewProvider ? NEW_PROVIDER_BOOST : 0)  // cold-start lift
-  )
+  const completed       = profile.totalCompletedOrders ?? 0
+  const cancellations   = (profile as unknown as Record<string, unknown>)['cancellationsAsProvider'] as number ?? 0
+  const completionRate  = completed / Math.max(completed + cancellations, 1)
+
+  // Five independent, non-correlated signals
+  const proximityScore     = 1 - Math.min(profile.distanceKm / radiusKm, 1)
+  const trustScore         = bayesianRating(profile.avgRating ?? 0, profile.totalReviews ?? 0) / 5
+  const performanceScore   = completionRate
+  const responsivenessScore = 0.5   // placeholder until avgResponseTimeMs is tracked
+  const activityScore      = Math.min(completed / 30, 1)
+
+  const baseScore =
+    W.proximity     * proximityScore +
+    W.trust         * trustScore +
+    W.performance   * performanceScore +
+    W.responsiveness * responsivenessScore +
+    W.activity      * activityScore
+
+  // Boost and cold-start as multipliers — they amplify base score, not bypass it
+  const isBoostActive  = !!(profile.boostExpiresAt && (profile.boostExpiresAt as unknown as Date) > now)
+  const isNewProvider  = completed < 10
+
+  return baseScore * (isBoostActive ? 1.20 : 1.0) * (isNewProvider ? 1.10 : 1.0)
 }
 
 // ── searchProviders ───────────────────────────────────────────────────────────
@@ -53,11 +73,14 @@ const searchProvidersSchema = z.object({
   limit:      z.number().int().min(1).max(50).default(PAGE_SIZE),
 })
 
+const MAX_SEARCH_RADIUS_KM = 25  // hard cap: beyond this UX degrades
+
 async function fetchProviders(
   center: { latitude: number; longitude: number },
   radiusKm: number,
   categoryId: string | undefined,
   minRating: number | undefined,
+  radiusExpanded: boolean,
 ): Promise<RankedProvider[]> {
   const ranges = getSearchRanges(center, radiusKm)
   const now    = new Date()
@@ -92,7 +115,7 @@ async function fetchProviders(
         ...profile,
         id: doc.id,
         distanceKm: km,
-        rankScore: computeRankScore({ ...profile, distanceKm: km }, radiusKm, now),
+        rankScore: computeRankScore({ ...profile, distanceKm: km }, radiusKm, now, radiusExpanded),
       })
     }
   }
@@ -107,19 +130,17 @@ export const searchProviders = callable(async (data, context) => {
   const center = { latitude: input.lat, longitude: input.lng }
   const baseRadius = input.radiusKm ?? 20
 
-  let results = await fetchProviders(center, baseRadius, input.categoryId, input.minRating)
+  let radiusExpanded = false
+  let results = await fetchProviders(center, baseRadius, input.categoryId, input.minRating, false)
 
-  // Dynamic radius: if fewer than 3 results, expand by 1.5× (once)
-  if (results.length < 3 && baseRadius < 100) {
-    const expandedRadius = Math.min(baseRadius * 1.5, 100)
-    results = await fetchProviders(center, expandedRadius, input.categoryId, input.minRating)
-    // Re-score with expanded radius for fair comparison
-    const now = new Date()
-    results = results.map(p => ({
-      ...p,
-      rankScore: computeRankScore(p, expandedRadius, now),
-    }))
+  // Dynamic radius: if fewer than 3 results, expand once — capped at MAX_SEARCH_RADIUS_KM
+  if (results.length < 3 && baseRadius < MAX_SEARCH_RADIUS_KM) {
+    const expandedRadius = Math.min(baseRadius * 1.5, MAX_SEARCH_RADIUS_KM)
+    radiusExpanded = true
+    results = await fetchProviders(center, expandedRadius, input.categoryId, input.minRating, true)
   }
+
+  void radiusExpanded  // consumed via closure in fetchProviders
 
   // Sort
   switch (input.sortBy) {
