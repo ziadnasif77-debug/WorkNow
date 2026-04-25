@@ -73,29 +73,17 @@ service cloud.firestore {
       allow create: if isCustomer() &&
         request.resource.data.customerId == request.auth.uid &&
         request.resource.data.status == 'pending';
-      allow update: if isAdmin() ||
-        (isAuth() &&
-          resource.data.providerId == request.auth.uid &&
-          request.resource.data.status in ['confirmed','in_progress','completed'] &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['status', 'updatedAt'])) ||
-        (isAuth() &&
-          resource.data.customerId == request.auth.uid &&
-          request.resource.data.status in ['closed','cancelled','disputed'] &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['status', 'updatedAt']));
+      // All state transitions go through Cloud Functions (Admin SDK bypasses rules).
+      // Direct client writes are blocked to prevent state-machine bypass.
+      allow update: if isAdmin();
       allow delete: if false;
 
       match /quotes/{quoteId} {
         allow read: if isOrderParty(orderId) || isAdmin();
         allow create: if isProvider() &&
           request.resource.data.providerId == request.auth.uid;
-        allow update: if isAdmin() ||
-          (get(/databases/$(database)/documents/orders/$(orderId)).data.customerId
-             == request.auth.uid &&
-           request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['status', 'updatedAt']) &&
-           request.resource.data.status in ['accepted', 'rejected']);
+        // Quote accept/reject must go through acceptQuote Cloud Function.
+        allow update: if isAdmin();
         allow delete: if false;
       }
     }
@@ -295,6 +283,11 @@ service cloud.firestore {
 
     // ── _webhookEvents — replay protection store ──────────────────────────────────
     match /_webhookEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    // ── _payoutLocks — per-provider payout mutex (admin SDK only) ─────────────────
+    match /_payoutLocks/{uid} {
       allow read, write: if false;
     }
 
