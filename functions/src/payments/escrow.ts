@@ -75,11 +75,11 @@ export async function refundEscrowById(orderId: string, reason: string): Promise
     logger.info('Escrow already refunded', { orderId })
     return
   }
-  // Refuse to refund unless the escrow is actually held by Tap.
-  // Attempting a refund on an 'initiated' or 'captured' charge risks
-  // double-charging the customer if the original payment later succeeds.
-  if (order.paymentStatus !== 'held') {
-    logger.warn('Refund skipped — paymentStatus is not held', { orderId, paymentStatus: order.paymentStatus })
+  // Allow refund for both 'held' (authorized, not yet captured) and 'captured' charges.
+  // Both use Tap's /refunds endpoint. Skipping for any other status (e.g. 'initiated')
+  // prevents refunding money that was never actually taken.
+  if (!['held', 'captured'].includes(order.paymentStatus ?? '')) {
+    logger.warn('Refund skipped — paymentStatus is not refundable', { orderId, paymentStatus: order.paymentStatus })
     return
   }
 

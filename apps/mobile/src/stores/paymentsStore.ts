@@ -25,6 +25,7 @@ interface PaymentsState {
   // Wallet (provider)
   wallet:         WalletBalance | null
   walletLoading:  boolean
+  walletError:    string | null
 
   // Payout
   payoutLoading:  boolean
@@ -34,6 +35,7 @@ interface PaymentsState {
   // Actions
   initiatePayment:  (orderId: string, method: PaymentMethod, returnUrl?: string) => Promise<string | null>
   loadWallet:       () => Promise<void>
+  clearWalletError: () => void
   requestPayout:    (amount?: number) => Promise<void>
   clearErrors:         () => void
   reset:               () => void
@@ -48,6 +50,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
   tapChargeId:    null,
   wallet:         null,
   walletLoading:  false,
+  walletError:    null,
   payoutLoading:  false,
   payoutError:    null,
   lastPayoutId:   null,
@@ -80,7 +83,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
 
   // ── loadWallet ────────────────────────────────────────────────────────────
   loadWallet: async () => {
-    set({ walletLoading: true })
+    set({ walletLoading: true, walletError: null })
     try {
       const fn  = httpsCallable<Record<string, never>, WalletBalance & { ok: boolean }>(
         firebaseFunctions, 'getWalletBalance',
@@ -88,7 +91,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
       const res = await fn({})
       set({ wallet: res.data })
     } catch (err) {
-      console.error('Failed to load wallet', err)
+      set({ walletError: mapFirebaseError(err, 'تعذّر تحميل الرصيد. اسحب للأسفل للمحاولة مجدداً') })
     } finally {
       set({ walletLoading: false })
     }
@@ -117,7 +120,8 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
     }
   },
 
-  clearErrors: () => set({ initError: null, payoutError: null }),
+  clearErrors:      () => set({ initError: null, payoutError: null }),
+  clearWalletError: () => set({ walletError: null }),
 
   // ── createSubscription ───────────────────────────────────────────────────────
   createSubscription: async (tier, billing) => {

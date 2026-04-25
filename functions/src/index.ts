@@ -3,12 +3,15 @@
 // All functions are lazy-loaded to minimize cold start time
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as admin from 'firebase-admin'
+import * as firebaseAdmin from 'firebase-admin'
 
-admin.initializeApp()
+firebaseAdmin.initializeApp()
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-export { completeProfile, setProviderType, uploadKyc } from './auth'
+// Namespace export creates: auth-completeProfile, auth-setProviderType
+import { completeProfile, setProviderType, uploadKyc } from './auth'
+export const auth = { completeProfile, setProviderType }
+export { uploadKyc }  // called as 'uploadKyc' (no prefix)
 
 // ── Marketplace ───────────────────────────────────────────────────────────────
 export { searchProviders, getProviderProfile, updateProfile } from './marketplace'
@@ -42,7 +45,9 @@ export {
 export { registerFcmToken, updateNotificationPreferences } from './notifications'
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
-export { approveKyc, resolveDispute, banUser, getFinancialReport } from './admin'
+// Namespace export creates: admin-approveKyc, admin-banUser, admin-resolveDispute, admin-getFinancialReport
+import { approveKyc, resolveDispute, banUser, getFinancialReport } from './admin'
+export const admin = { approveKyc, resolveDispute, banUser, getFinancialReport }
 
 // ── Subscriptions ─────────────────────────────────────────────────────────────
 export { createSubscription, tapSubscriptionWebhook } from './subscriptions'

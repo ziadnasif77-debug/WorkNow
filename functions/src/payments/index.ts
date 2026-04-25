@@ -48,7 +48,8 @@ export const initiatePayment = callable(async (data, context) => {
   if (order.status !== 'confirmed') {
     appError('ORD_002', 'Order must be confirmed before payment')
   }
-  if (order.paymentStatus !== 'unpaid') {
+  // Allow retry if a previous payment attempt failed (C3)
+  if (!['unpaid', 'failed'].includes(order.paymentStatus ?? '')) {
     appError('PAY_001', 'Payment already initiated for this order')
   }
 
@@ -130,6 +131,7 @@ export const initiatePayment = callable(async (data, context) => {
   await db.collection('orders').doc(input.orderId).update({
     paymentMethod:   input.method,
     escrowPaymentId: String(tapCharge['id']),
+    status:          'payment_pending',  // state machine: confirmed → payment_pending
     updatedAt:       serverTimestamp(),
   })
 
@@ -185,7 +187,6 @@ export const tapWebhook = functions
     }
 
     // ── Merchant/account binding validation ───────────────────────────────────
-    // Prevents accepting webhooks issued for a different Tap merchant account.
     const expectedMerchantId = process.env['TAP_MERCHANT_ID']
     if (expectedMerchantId) {
       const receivedMerchantId = event.merchant?.id
@@ -200,50 +201,28 @@ export const tapWebhook = functions
       }
     }
 
-    // ── Timestamp validation: reject events outside ±5 minute window ──────────
-    if (event.created) {
-      const eventMs  = event.created * 1000
-      const diffMs   = Math.abs(Date.now() - eventMs)
-      const FIVE_MIN = 5 * 60 * 1000
-      if (diffMs > FIVE_MIN) {
-        logger.security('webhook_timestamp_out_of_tolerance', {
-          eventId:         event.id,
-          eventCreated:    event.created,
-          diffMinutes:     Math.round(diffMs / 60000),
-          ip:              req.ip,
-        })
-        res.status(400).json({ error: 'Webhook timestamp out of tolerance' })
-        return
-      }
-    }
-
-    // ── Replay protection: atomically claim event ID ──────────────────────────
-    // _webhookEvents is admin-SDK-only (Firestore rules: allow read,write: if false)
+    // ── Replay protection ─────────────────────────────────────────────────────
+    // Note: timestamp validation was intentionally removed. Tap sends event.created
+    // as the original charge creation time (not the delivery time), so a ±5min
+    // window would reject legitimate retries at 30min/2h/etc. The _webhookEvents
+    // dedup (below and inside each case's transaction) is the authoritative
+    // replay guard — it is sufficient on its own.
     const eventRef = db.collection('_webhookEvents').doc(event.id)
-    let alreadyProcessed = false
-
-    await db.runTransaction(async tx => {
-      const eventSnap = await tx.get(eventRef)
-      if (eventSnap.exists) {
-        alreadyProcessed = true
-        return
-      }
-      tx.set(eventRef, {
-        id:         event.id,
-        status:     event.status,
-        receivedAt: admin.firestore.FieldValue.serverTimestamp(),
-        ip:         req.ip ?? null,
-        // TTL: auto-delete after 7 days via daily cleanup job.
-        // Dedup window is effectively the 5-min timestamp tolerance;
-        // 7 days ensures safety against delayed or out-of-order retries.
-        expiresAt:  new Date(Date.now() + 7 * 24 * 3600_000),
-      })
-    })
-
-    if (alreadyProcessed) {
+    const quickSnap = await eventRef.get()
+    if (quickSnap.exists) {
       logger.security('webhook_replay_detected', { eventId: event.id, ip: req.ip })
       res.status(200).json({ received: true, duplicate: true })
       return
+    }
+
+    // Shared event claim payload
+    const eventClaim = {
+      id:         event.id,
+      status:     event.status,
+      receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+      ip:         req.ip ?? null,
+      // TTL: auto-delete after 7 days via daily cleanup job.
+      expiresAt:  new Date(Date.now() + 7 * 24 * 3600_000),
     }
 
     logger.info('webhook_processing', { eventId: event.id, status: event.status })
@@ -255,21 +234,19 @@ export const tapWebhook = functions
           const orderId = event.metadata?.order_id
           if (!orderId) break
 
+          const orderRef = db.collection('orders').doc(orderId)
           await db.runTransaction(async tx => {
-            const orderRef = db.collection('orders').doc(orderId)
-            const paymentQuery = await db.collection('payments')
-              .where('moyasarId', '==', event.id)  // field stores Tap charge ID
-              .limit(1).get()
-
-            if (!paymentQuery.empty) {
-              tx.update(paymentQuery.docs[0]!.ref, {
-                status: 'held', updatedAt: serverTimestamp(),
-              })
-            }
-            tx.update(orderRef, {
-              paymentStatus: 'held', updatedAt: serverTimestamp(),
-            })
+            const [claimSnap] = await Promise.all([tx.get(eventRef), tx.get(orderRef)])
+            if (claimSnap.exists) return  // duplicate caught by concurrent request
+            tx.set(eventRef, eventClaim)
+            tx.update(orderRef, { paymentStatus: 'held', updatedAt: serverTimestamp() })
           })
+
+          // Best-effort: update payment doc (derived data — order is source of truth)
+          const pq = await db.collection('payments').where('moyasarId', '==', event.id).limit(1).get()
+          if (!pq.empty) {
+            await pq.docs[0]!.ref.update({ status: 'held', updatedAt: serverTimestamp() })
+          }
           break
         }
 
@@ -277,46 +254,72 @@ export const tapWebhook = functions
           const orderId = event.metadata?.order_id
           if (!orderId) break
 
-          // Run inside a transaction so a duplicate webhook or concurrent
-          // refund cannot interleave between the read and the write (TOCTOU).
+          const orderRef = db.collection('orders').doc(orderId)
+
+          // C1: dedup claim + order state update in ONE transaction.
+          // If either fails, neither commits → no permanent payment loss.
           await db.runTransaction(async tx => {
-            const orderRef  = db.collection('orders').doc(orderId)
-            const orderSnap = await tx.get(orderRef)
+            const [claimSnap, orderSnap] = await Promise.all([
+              tx.get(eventRef),
+              tx.get(orderRef),
+            ])
+            if (claimSnap.exists) return  // duplicate
             const orderData = orderSnap.data()
 
-            // Idempotency guard — already captured, nothing to do
+            tx.set(eventRef, eventClaim)
+
+            // Idempotency: already captured → claim event but skip order update
             if (orderData?.['paymentStatus'] === 'captured') return
-
-            const pq = await db.collection('payments')
-              .where('moyasarId', '==', event.id).limit(1).get()
-
-            if (!pq.empty) {
-              tx.update(pq.docs[0]!.ref, {
-                status:      'captured',
-                capturedAt:  serverTimestamp(),
-                updatedAt:   serverTimestamp(),
-              })
-            }
 
             tx.update(orderRef, {
               paymentStatus: 'captured',
-              // Only advance to in_progress if still in confirmed state
-              ...(orderData?.['status'] === 'confirmed' && { status: 'in_progress' }),
+              ...(['payment_pending', 'confirmed'].includes(orderData?.['status'] ?? '') && { status: 'in_progress' }),
               updatedAt: serverTimestamp(),
             })
           })
+
+          // Best-effort payment doc update
+          const pq = await db.collection('payments').where('moyasarId', '==', event.id).limit(1).get()
+          if (!pq.empty) {
+            await pq.docs[0]!.ref.update({
+              status: 'captured', capturedAt: serverTimestamp(), updatedAt: serverTimestamp(),
+            })
+          }
           break
         }
 
         case 'DECLINED':
         case 'CANCELLED': {
-          const pq = await db.collection('payments')
-            .where('moyasarId', '==', event.id).limit(1).get()
+          const orderId = event.metadata?.order_id
 
-          if (!pq.empty) {
-            await pq.docs[0]!.ref.update({
-              status: 'failed', updatedAt: serverTimestamp(),
-            })
+          // C4: reset order back to 'confirmed' so customer can retry payment.
+          // C1: dedup claim + state reset in ONE transaction.
+          await db.runTransaction(async tx => {
+            const claimSnap = await tx.get(eventRef)
+            if (claimSnap.exists) return  // duplicate
+            tx.set(eventRef, eventClaim)
+
+            if (orderId) {
+              const orderRef = db.collection('orders').doc(orderId)
+              const orderSnap = await tx.get(orderRef)
+              const orderData = orderSnap.data()
+              // Only reset if the order is still in a payment-attempt state
+              if (['payment_pending', 'confirmed'].includes(orderData?.['status'] ?? '')) {
+                tx.update(orderRef, {
+                  status:        'confirmed',   // allow customer to retry
+                  paymentStatus: 'failed',      // C3: initiatePayment allows 'failed'
+                  updatedAt:     serverTimestamp(),
+                })
+              }
+            }
+          })
+
+          // Best-effort payment doc update
+          if (orderId) {
+            const pq = await db.collection('payments').where('moyasarId', '==', event.id).limit(1).get()
+            if (!pq.empty) {
+              await pq.docs[0]!.ref.update({ status: 'failed', updatedAt: serverTimestamp() })
+            }
           }
           break
         }
@@ -340,51 +343,87 @@ export const requestPayout = callable(async (data, context) => {
   await rateLimit(uid, 'payment')
   const input = validate(requestPayoutSchema, data)
 
-  const completedPayments = await db.collection('payments')
-    .where('providerId', '==', uid)
-    .where('status', '==', 'captured')
-    .get()
+  // C5: per-provider mutex prevents concurrent payout calls from both
+  // reading the same balance and triggering double transfers.
+  // The lock document is created inside a transaction so only one caller wins.
+  const lockRef = db.collection('_payoutLocks').doc(uid)
+  const payoutRef = db.collection('payouts').doc()
 
-  const totalBalance = completedPayments.docs.reduce(
-    (sum, doc) => sum + (doc.data() as Payment).netAmount, 0,
-  )
+  await db.runTransaction(async tx => {
+    const [lockSnap, profileSnap] = await Promise.all([
+      tx.get(lockRef),
+      tx.get(db.collection('providerProfiles').doc(uid)),
+    ])
 
-  const payoutAmount = input.amount ?? totalBalance
-  if (payoutAmount > totalBalance) {
-    appError('PAY_004', `Insufficient balance. Available: ${totalBalance}`)
-  }
-  if (payoutAmount < 10) {
-    appError('VAL_003', 'Minimum payout amount is 10 (local currency)')
-  }
+    if (lockSnap.exists) {
+      appError('PAY_005', 'A payout is already being processed. Please wait a moment and try again.')
+    }
+    if (!profileSnap.data()?.['bankIban']) {
+      appError('VAL_002', 'Please add your bank IBAN before requesting a payout')
+    }
 
-  // Get provider's IBAN
-  const profileDoc = await db.collection('providerProfiles').doc(uid).get()
-  const iban = profileDoc.data()?.['bankIban'] as string | undefined
-  if (!iban) {
-    appError('VAL_002', 'Please add your bank IBAN before requesting a payout')
-  }
-
-  // Tap Transfer (works for MENA + SEPA for NO/SE)
-  const apiKey = process.env['TAP_SECRET_KEY']
-  if (!apiKey) throw new Error('TAP_SECRET_KEY missing')
-
-  const transfer = await tapRequest('POST', '/transfers', {
-    amount:      Math.round(payoutAmount * 100),
-    currency:    completedPayments.docs[0]?.data()['currency'] ?? 'SAR',
-    description: `WorkFix payout for provider ${uid}`,
-    destination: { iban },
+    // Acquire mutex before balance check + Tap call
+    tx.set(lockRef, {
+      locked:   true,
+      lockedAt: admin.firestore.FieldValue.serverTimestamp(),
+      uid,
+    })
   })
 
-  await db.collection('payouts').add({
-    providerId:  uid,
-    amount:      payoutAmount,
-    tapId:       transfer['id'],
-    status:      'processing',
-    requestedAt: serverTimestamp(),
-    updatedAt:   serverTimestamp(),
-  })
+  try {
+    // Balance: sum all captured payments minus all non-failed payouts
+    const [capturedSnap, payoutsSnap, profileSnap] = await Promise.all([
+      db.collection('payments').where('providerId', '==', uid).where('status', '==', 'captured').get(),
+      db.collection('payouts').where('providerId', '==', uid)
+        .where('status', 'in', ['pending', 'processing', 'completed']).get(),
+      db.collection('providerProfiles').doc(uid).get(),
+    ])
 
-  return { ok: true, payoutId: transfer['id'], amount: payoutAmount }
+    const totalEarned = capturedSnap.docs.reduce(
+      (sum, doc) => sum + (doc.data() as Payment).netAmount, 0,
+    )
+    const totalPaidOut = payoutsSnap.docs.reduce(
+      (sum, doc) => sum + (doc.data()['amount'] as number), 0,
+    )
+    const availableBalance = totalEarned - totalPaidOut
+
+    const payoutAmount   = input.amount ?? availableBalance
+    const payoutCurrency = (capturedSnap.docs[0]?.data()['currency'] as string | undefined) ?? 'SAR'
+
+    if (payoutAmount > availableBalance) {
+      appError('PAY_004', `Insufficient balance. Available: ${availableBalance}`)
+    }
+    if (payoutAmount < 10) {
+      appError('VAL_003', 'Minimum payout amount is 10 (local currency)')
+    }
+
+    const iban = profileSnap.data()?.['bankIban'] as string | undefined
+    if (!iban) {
+      appError('VAL_002', 'Please add your bank IBAN before requesting a payout')
+    }
+
+    const transfer = await tapRequest('POST', '/transfers', {
+      amount:      Math.round(payoutAmount * 100),
+      currency:    payoutCurrency,
+      description: `WorkFix payout for provider ${uid}`,
+      destination: { iban },
+    })
+
+    await payoutRef.set({
+      providerId:  uid,
+      amount:      payoutAmount,
+      currency:    payoutCurrency,
+      tapId:       transfer['id'],
+      status:      'processing',
+      requestedAt: serverTimestamp(),
+      updatedAt:   serverTimestamp(),
+    })
+
+    return { ok: true, payoutId: transfer['id'], amount: payoutAmount }
+  } finally {
+    // Always release the lock, even if an error was thrown
+    await lockRef.delete().catch(() => { /* ignore cleanup errors */ })
+  }
 })
 
 // ── getWalletBalance ──────────────────────────────────────────────────────────
@@ -395,7 +434,8 @@ export const getWalletBalance = callable(async (_data, context) => {
   const [capturedSnap, heldSnap, payoutsSnap] = await Promise.all([
     db.collection('payments').where('providerId', '==', uid).where('status', '==', 'captured').get(),
     db.collection('payments').where('providerId', '==', uid).where('status', '==', 'held').get(),
-    db.collection('payouts').where('providerId', '==', uid).where('status', '==', 'processing').get(),
+    db.collection('payouts').where('providerId', '==', uid)
+      .where('status', 'in', ['pending', 'processing', 'completed']).get(),
   ])
 
   const totalEarned = capturedSnap.docs.reduce(
@@ -404,15 +444,15 @@ export const getWalletBalance = callable(async (_data, context) => {
   const pendingEarned = heldSnap.docs.reduce(
     (s, d) => s + (d.data() as Payment).netAmount, 0,
   )
-  const processingPayouts = payoutsSnap.docs.reduce(
+  const totalPaidOut = payoutsSnap.docs.reduce(
     (s, d) => s + (d.data()['amount'] as number), 0,
   )
 
   return {
     ok:                 true,
-    availableBalance:   Math.round((totalEarned - processingPayouts) * 100) / 100,
+    availableBalance:   Math.round((totalEarned - totalPaidOut) * 100) / 100,
     pendingBalance:     Math.round(pendingEarned * 100) / 100,
-    processingPayouts:  Math.round(processingPayouts * 100) / 100,
+    processingPayouts:  Math.round(totalPaidOut * 100) / 100,
     currency:           'SAR',
   }
 })

@@ -107,3 +107,20 @@ export const DEFAULT_SEARCH_RADIUS_KM = 20
 
 /** Pagination defaults */
 export const PAGE_SIZE = 20
+
+/** Max quotes allowed per order before it's closed to new bids */
+export const MAX_QUOTES_PER_ORDER = 8
+
+/** Max quotes a single provider can submit per hour (anti-spam) */
+export const MAX_PROVIDER_QUOTES_PER_HOUR = 20
+
+/** Ranking weights for provider search scoring */
+export const RANK_WEIGHTS = {
+  distance:   0.35,
+  rating:     0.30,
+  experience: 0.20,
+  reputation: 0.15,
+} as const
+
+/** New-provider cold-start bonus (added to rank score until 10 completed orders) */
+export const NEW_PROVIDER_BOOST = 0.08

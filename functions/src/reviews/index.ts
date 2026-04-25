@@ -176,10 +176,20 @@ export const submitReview = callable(async (data, context) => {
         const newCount     = ((profile['totalReviews'] as number) ?? 0) + 1
         const newAvg       = (currentTotal + input.rating) / newCount
 
+        const completed      = (profile['totalCompletedOrders'] as number) ?? 0
+        const cancellations  = (profile['cancellationsAsProvider'] as number) ?? 0
+        const completionRate = completed / Math.max(completed + cancellations, 1)
+        const activityScore  = Math.min(newCount / 50, 1)
+        // reputationScore on a 0–5 scale: rating*0.6 + completionRate*0.3 + activity*0.1
+        const reputationScore = Math.round(
+          (newAvg / 5 * 0.6 + completionRate * 0.3 + activityScore * 0.1) * 500,
+        ) / 100
+
         tx.update(profileRef, {
-          avgRating:    Math.round(newAvg * 10) / 10,
-          totalReviews: newCount,
-          updatedAt:    admin.firestore.FieldValue.serverTimestamp(),
+          avgRating:      Math.round(newAvg * 10) / 10,
+          totalReviews:   newCount,
+          reputationScore,
+          updatedAt:      admin.firestore.FieldValue.serverTimestamp(),
         })
       }
     }
@@ -321,6 +331,20 @@ export const openDispute = callable(async (data, context) => {
     orderId:     input.orderId,
     respondentId,
   })
+
+  // Auto-flagging: if respondent has 3+ disputes they are respondent in → flag
+  const respondentDisputeSnap = await db.collection('disputes')
+    .where('respondentId', '==', respondentId)
+    .get()
+
+  if (respondentDisputeSnap.size >= 3) {
+    void updateFraudScore(respondentId, 30, 'repeated_disputes')
+    logger.security('auto_flag_repeated_disputes', {
+      respondentId,
+      disputeCount: respondentDisputeSnap.size,
+      latestDisputeId: disputeRef.id,
+    })
+  }
 
   return { ok: true, disputeId: disputeRef.id }
 })

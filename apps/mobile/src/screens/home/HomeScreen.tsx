@@ -167,7 +167,17 @@ export default function HomeScreen() {
               <CategoryChip
                 label={t('common.all')}
                 selected={activeCatId === null}
-                onPress={() => onCategoryPress(activeCatId ?? '')}
+                onPress={() => {
+                  if (activeCatId === null) return
+                  setActiveCatId(null)
+                  if (location.lat && location.lng) {
+                    void searchProviders({
+                      lat: location.lat, lng: location.lng,
+                      radiusKm: 20, limit: 20, sortBy: 'distance',
+                      query: searchText || undefined,
+                    })
+                  }
+                }}
               />
               {categories.map(cat => (
                 <CategoryChip

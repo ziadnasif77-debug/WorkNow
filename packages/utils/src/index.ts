@@ -148,14 +148,15 @@ function formatRelative(date: Date, locale: string): string {
  * Key = current status, Value = allowed next statuses
  */
 export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  pending:     ['quoted', 'cancelled'],
-  quoted:      ['confirmed', 'cancelled'],
-  confirmed:   ['in_progress', 'cancelled', 'disputed'],
-  in_progress: ['completed', 'disputed'],
-  completed:   ['closed', 'disputed'],
-  closed:      [],
-  cancelled:   [],
-  disputed:    ['closed', 'cancelled'],
+  pending:         ['quoted', 'cancelled'],
+  quoted:          ['confirmed', 'cancelled'],
+  confirmed:       ['payment_pending', 'cancelled'],
+  payment_pending: ['in_progress', 'cancelled'],
+  in_progress:     ['completed', 'disputed'],
+  completed:       ['closed', 'disputed'],
+  closed:          [],
+  cancelled:       [],
+  disputed:        ['closed', 'cancelled'],
 }
 
 /** Check if a status transition is valid */
@@ -169,14 +170,15 @@ export function getOrderStatusLabel(
   lang: 'ar' | 'en' = 'ar',
 ): string {
   const labels: Record<OrderStatus, { ar: string; en: string }> = {
-    pending:     { ar: 'بانتظار العروض', en: 'Pending' },
-    quoted:      { ar: 'تلقّى عرض سعر', en: 'Quoted' },
-    confirmed:   { ar: 'مؤكَّد', en: 'Confirmed' },
-    in_progress: { ar: 'جارٍ التنفيذ', en: 'In Progress' },
-    completed:   { ar: 'منتهٍ', en: 'Completed' },
-    closed:      { ar: 'مغلق', en: 'Closed' },
-    cancelled:   { ar: 'ملغى', en: 'Cancelled' },
-    disputed:    { ar: 'نزاع مفتوح', en: 'Disputed' },
+    pending:         { ar: 'بانتظار العروض', en: 'Pending' },
+    quoted:          { ar: 'تلقّى عرض سعر', en: 'Quoted' },
+    confirmed:       { ar: 'تم قبول العرض', en: 'Offer Accepted' },
+    payment_pending: { ar: 'بانتظار الدفع', en: 'Payment Pending' },
+    in_progress:     { ar: 'جارٍ التنفيذ', en: 'In Progress' },
+    completed:       { ar: 'منتهٍ', en: 'Completed' },
+    closed:          { ar: 'مغلق', en: 'Closed' },
+    cancelled:       { ar: 'ملغى', en: 'Cancelled' },
+    disputed:        { ar: 'نزاع مفتوح', en: 'Disputed' },
   }
   return labels[status][lang]
 }

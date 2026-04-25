@@ -15,11 +15,19 @@ export default function PaymentSuccessScreen() {
   const { t }       = useTranslation()
   const router      = useRouter()
   const insets      = useSafeAreaInsets()
-  const { orderId } = useLocalSearchParams<{ orderId: string }>()
+  const { orderId, amount, currency } = useLocalSearchParams<{
+    orderId:  string
+    amount?:  string
+    currency?: string
+  }>()
 
   // Fire payment complete event once
   React.useEffect(() => {
-    if (orderId) void Analytics.paymentComplete(orderId, 0, 'SAR')
+    if (orderId) void Analytics.paymentComplete(
+      orderId,
+      parseFloat(amount ?? '0'),
+      (currency ?? 'SAR') as import('@workfix/types').Currency,
+    )
   }, [])
 
   // Entrance animation

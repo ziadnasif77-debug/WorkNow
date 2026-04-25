@@ -283,12 +283,12 @@ export async function anonymiseFinancialRecords(uid: string): Promise<void> {
   }
 
   // Anonymise reviews authored by user
-  const reviews = await db.collection('reviews').where('authorId', '==', uid).get()
+  const reviews = await db.collection('reviews').where('reviewerId', '==', uid).get()
   for (const doc of reviews.docs) {
     batch.update(doc.ref, {
-      authorName:   '[Deleted User]',
-      authorAvatar: null,
-      updatedAt:    admin.firestore.FieldValue.serverTimestamp(),
+      reviewerName:      '[Deleted User]',
+      reviewerAvatarUrl: null,
+      updatedAt:         admin.firestore.FieldValue.serverTimestamp(),
     })
     batchCount++
     if (batchCount >= batchLimit) await flushBatch()
@@ -306,8 +306,8 @@ async function hardDeletePersonalData(uid: string): Promise<void> {
   // Messages (full delete — not financial records)
   const messages = await db.collection('messages').where('senderId', '==', uid).limit(500).get()
 
-  // Notifications
-  const notifs = await db.collection('notifications').doc(uid).collection('items').limit(500).get()
+  // Notifications (stored as subcollection under users/{uid}/notifications)
+  const notifs = await db.collection('users').doc(uid).collection('notifications').limit(500).get()
 
   // Provider profile (contains PII — delete)
   // Orders themselves are anonymised, not deleted (financial)
@@ -353,7 +353,7 @@ async function getBlockers(uid: string, role: string): Promise<string[]> {
       .where('status', 'in', ['confirmed', 'in_progress', 'quoted'])
       .limit(1).get(),
     db.collection('disputes')
-      .where('customerId', '==', uid)
+      .where('initiatorId', '==', uid)
       .where('status', '==', 'open')
       .limit(1).get(),
     role === 'provider'

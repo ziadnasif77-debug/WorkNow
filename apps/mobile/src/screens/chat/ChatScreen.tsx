@@ -50,6 +50,7 @@ export default function ChatScreen() {
     void (async () => {
       try {
         const cId = await openConversation(orderId)
+        if (!cId) { setInitError('تعذّر فتح المحادثة'); return }
         setConvId(cId)
         subscribeMessages(cId, myUid)
       } catch {
@@ -57,7 +58,10 @@ export default function ChatScreen() {
       }
     })()
 
-    return () => unsubscribeAll()
+    return () => {
+      if (typingRef.current) clearTimeout(typingRef.current)
+      unsubscribeAll()
+    }
   }, [orderId, myUid])
 
   // ── Auto-scroll to bottom on new messages ────────────────────────────────

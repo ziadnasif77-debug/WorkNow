@@ -103,6 +103,13 @@ export const onOrderStatusChanged = functions
           await refundEscrowById(after.id, after.cancelReason ?? 'cancelled')
             .catch(err => logger.error('Escrow refund failed in trigger', err, { orderId }))
         }
+        // Track provider cancellations for reputation scoring
+        if (after.providerId && before.status === 'in_progress') {
+          await db.collection('providerProfiles').doc(after.providerId).update({
+            cancellationsAsProvider: admin.firestore.FieldValue.increment(1),
+            updatedAt: serverTimestamp(),
+          }).catch(() => { /* profile may not exist yet */ })
+        }
         // Notify both parties
         notifications.push({
           userId: after.customerId,

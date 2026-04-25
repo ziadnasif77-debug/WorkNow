@@ -2,13 +2,14 @@
 // Orders Functions — full lifecycle: create → quote → confirm → complete
 // ─────────────────────────────────────────────────────────────────────────────
 
+import * as admin from 'firebase-admin'
 import { z } from 'zod'
 import {
   callable, requireAuth, validate, db, serverTimestamp,
   appError } from '../_shared/helpers'
 import { rateLimit }        from '../_shared/ratelimit'
 import { isValidTransition, calcCommission, calcNetAmount } from '@workfix/utils'
-import { DEFAULT_COMMISSION_RATE, QUOTE_EXPIRY_HOURS } from '@workfix/config'
+import { DEFAULT_COMMISSION_RATE, QUOTE_EXPIRY_HOURS, MAX_QUOTES_PER_ORDER, MAX_PROVIDER_QUOTES_PER_HOUR } from '@workfix/config'
 import type { Order, Quote, Timestamp, LocalizedString } from '@workfix/types'
 
 // ── createOrder ───────────────────────────────────────────────────────────────
@@ -90,14 +91,25 @@ export const submitQuote = callable(async (data, context) => {
     appError('ORD_002', 'This order is no longer accepting quotes')
   }
 
+  // Per-provider hourly rate limit (anti-spam, checked outside transaction)
+  const hourAgo = new Date(Date.now() - 3_600_000)
+  const hourlySnap = await db.collectionGroup('quotes')
+    .where('providerId', '==', uid)
+    .where('createdAt', '>=', hourAgo)
+    .get()
+  if (hourlySnap.size >= MAX_PROVIDER_QUOTES_PER_HOUR) {
+    appError('GEN_002', `Quote rate limit: max ${MAX_PROVIDER_QUOTES_PER_HOUR} quotes per hour`, 'resource-exhausted')
+  }
+
   // Check KYC is approved
-  const profileDoc = await db.collection('providerProfiles').doc(uid).get()
+  const [profileDoc, providerDoc] = await Promise.all([
+    db.collection('providerProfiles').doc(uid).get(),
+    db.collection('users').doc(uid).get(),
+  ])
   const profile = profileDoc.data()
   if (!profile || profile['kycStatus'] !== 'approved') {
     appError('AUTH_004', 'Your KYC must be approved before accepting orders', 'permission-denied')
   }
-
-  const providerDoc = await db.collection('users').doc(uid).get()
   const providerData = providerDoc.data()!
 
   const quoteRef = orderRef.collection('quotes').doc()
@@ -117,12 +129,36 @@ export const submitQuote = callable(async (data, context) => {
     expiresAt:                expiresAt as unknown as Timestamp,
     createdAt:                serverTimestamp() as unknown as Timestamp }
 
-  await quoteRef.set({ ...quote, id: quoteRef.id })
+  // C6: max-quotes cap + duplicate check inside transaction.
+  // quoteCount and quoteProviders on the order doc are locked via tx.get(),
+  // so concurrent submits cannot both pass the cap — only one wins.
+  await db.runTransaction(async tx => {
+    const freshOrder = await tx.get(orderRef)
+    if (!freshOrder.exists) appError('ORD_001', 'Order not found', 'not-found')
 
-  // Update order status to quoted
-  await orderRef.update({
-    status: 'quoted',
-    updatedAt: serverTimestamp() })
+    const od = freshOrder.data() as Record<string, unknown>
+    if (!['pending', 'quoted'].includes(od['status'] as string)) {
+      appError('ORD_002', 'This order is no longer accepting quotes')
+    }
+
+    const quoteCount    = (od['quoteCount'] as number | undefined) ?? 0
+    const quoteProviders = (od['quoteProviders'] as string[] | undefined) ?? []
+
+    if (quoteCount >= MAX_QUOTES_PER_ORDER) {
+      appError('ORD_005', 'This order has reached the maximum number of quotes')
+    }
+    if (quoteProviders.includes(uid)) {
+      appError('ORD_002', 'You already have a pending quote for this order')
+    }
+
+    tx.set(quoteRef, { ...quote, id: quoteRef.id })
+    tx.update(orderRef, {
+      status:        'quoted',
+      quoteCount:    admin.firestore.FieldValue.increment(1),
+      quoteProviders: admin.firestore.FieldValue.arrayUnion(uid),
+      updatedAt:     serverTimestamp(),
+    })
+  })
 
   return { ok: true, quoteId: quoteRef.id }
 })

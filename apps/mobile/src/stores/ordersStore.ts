@@ -134,9 +134,12 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
         if (snap.exists()) set({ activeOrder: { ...snap.data(), id: snap.id } as Order })
       })
       const unsubQuotes = onSnapshot(
-        query(quotesRef, orderBy('createdAt', 'desc')), snap => {
+        query(quotesRef, orderBy('createdAt', 'desc')),
+        snap => {
           set({ activeQuotes: snap.docs.map(d => ({ ...d.data(), id: d.id } as Quote)) })
-        })
+        },
+        () => { /* permission error — order detail still loads without quotes */ },
+      )
 
       // Combine both unsubscribers
       set({ _unsubDetail: () => { unsubOrder(); unsubQuotes() } })

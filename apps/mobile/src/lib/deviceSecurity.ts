@@ -13,7 +13,7 @@
 
 import { Platform } from 'react-native'
 import * as Device from 'expo-device'
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -233,9 +233,9 @@ export function hardendReleaseMode(): void {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const noop = (): void => undefined
     // Override console methods that leak implementation details
-    ;(console as Record<string, unknown>)['log']   = noop
-    ;(console as Record<string, unknown>)['debug'] = noop
-    ;(console as Record<string, unknown>)['trace'] = noop
+    ;(console as unknown as Record<string, unknown>)['log']   = noop
+    ;(console as unknown as Record<string, unknown>)['debug'] = noop
+    ;(console as unknown as Record<string, unknown>)['trace'] = noop
     // Keep warn/error/info for legitimate monitoring (Sentry hooks these)
   }
 }

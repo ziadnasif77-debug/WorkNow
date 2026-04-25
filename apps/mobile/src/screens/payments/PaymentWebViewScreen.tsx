@@ -22,12 +22,23 @@ export default function PaymentWebViewScreen() {
   const { t }    = useTranslation()
   const router   = useRouter()
   const insets   = useSafeAreaInsets()
-  const { url, orderId } = useLocalSearchParams<{ url: string; orderId: string }>()
+  const { url, orderId, amount, currency } = useLocalSearchParams<{
+    url:       string
+    orderId:   string
+    amount?:   string
+    currency?: string
+  }>()
 
   const [isLoading,  setIsLoading]  = useState(true)
   const [loadError,  setLoadError]  = useState(false)
   const [progress,   setProgress]   = useState(0)
   const webviewRef = useRef<WebView>(null)
+
+  // 30-second timeout — if Tap API hangs, show error state
+  React.useEffect(() => {
+    const timer = setTimeout(() => { if (isLoading) setLoadError(true) }, 30_000)
+    return () => clearTimeout(timer)
+  }, [isLoading])
 
   function handleNavigation(event: WebViewNavigation): boolean {
     const navUrl = event.url
@@ -64,7 +75,7 @@ export default function PaymentWebViewScreen() {
   function handleSuccess() {
     router.replace({
       pathname: '/orders/payment-success',
-      params: { orderId },
+      params: { orderId, amount, currency },
     })
   }
 

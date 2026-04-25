@@ -14,14 +14,15 @@ import type { OrderStatus, Quote } from '@workfix/types'
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<OrderStatus, { bg: string; text: string }> = {
-  pending:     { bg: Colors.warningLight, text: Colors.warningDark },
-  quoted:      { bg: Colors.infoLight,    text: Colors.infoDark },
-  confirmed:   { bg: Colors.successLight, text: Colors.successDark },
-  in_progress: { bg: Colors.purpleLight,  text: Colors.purpleDark },
-  completed:   { bg: Colors.successLight, text: Colors.successDark },
-  closed:      { bg: Colors.gray100,      text: Colors.gray600 },
-  cancelled:   { bg: Colors.errorLight,   text: Colors.errorBold },
-  disputed:    { bg: Colors.errorLight,   text: Colors.errorBold } }
+  pending:         { bg: Colors.warningLight, text: Colors.warningDark },
+  quoted:          { bg: Colors.infoLight,    text: Colors.infoDark },
+  confirmed:       { bg: Colors.successLight, text: Colors.successDark },
+  payment_pending: { bg: Colors.orangeLight,  text: '#C2410C' },
+  in_progress:     { bg: Colors.purpleLight,  text: Colors.purpleDark },
+  completed:       { bg: Colors.successLight, text: Colors.successDark },
+  closed:          { bg: Colors.gray100,      text: Colors.gray600 },
+  cancelled:       { bg: Colors.errorLight,   text: Colors.errorBold },
+  disputed:        { bg: Colors.errorLight,   text: Colors.errorBold } }
 
 interface StatusBadgeProps {
   status: OrderStatus

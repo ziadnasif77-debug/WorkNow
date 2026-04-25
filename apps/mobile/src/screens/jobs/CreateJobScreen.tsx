@@ -43,7 +43,7 @@ export default function CreateJobScreen() {
     }
 
     try {
-      await createJob({
+      const jobId = await createJob({
         title:        title.trim(),
         description:  description.trim(),
         jobType,
@@ -54,7 +54,7 @@ export default function CreateJobScreen() {
         websiteUrl:   websiteUrl.trim() || undefined,
       })
       Alert.alert(t('jobs.jobPublished'), '', [
-        { text: t('common.done'), onPress: () => router.back() },
+        { text: t('common.done'), onPress: () => router.replace({ pathname: '/jobs/[id]', params: { id: jobId } }) },
       ])
     } catch {
       // error displayed from store

@@ -171,11 +171,12 @@ export function enforceHTTPSGlobally(): void {
   const OrigXHR = globalThis.XMLHttpRequest
   if (OrigXHR) {
     class SecureXHR extends OrigXHR {
-      override open(method: string, url: string, ...rest: Parameters<OrigXHR['open']>['2'][]) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      override open(method: string, url: string, ...rest: any[]): void {
         if (typeof url === 'string' && url.startsWith('http://')) {
           throw new SecurityError(`Blocked plaintext HTTP XHR to: ${url.split('?')[0]}`)
         }
-        // @ts-expect-error — spread rest args to base class
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         super.open(method, url, ...rest)
       }
     }

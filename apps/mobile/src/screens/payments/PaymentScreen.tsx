@@ -71,7 +71,10 @@ export default function PaymentScreen() {
     try {
       if (selectedMethod === 'cash') {
         await initiatePayment(orderId, 'cash')
-        router.replace({ pathname: '/orders/[id]', params: { id: orderId } })
+        router.replace({
+          pathname: '/orders/payment-success',
+          params: { orderId, amount: String(total), currency: curr },
+        })
         return
       }
 
@@ -82,10 +85,10 @@ export default function PaymentScreen() {
       )
 
       if (redirectUrl) {
-        // Open Tap checkout WebView
         router.push({
           pathname: '/orders/payment-webview',
-          params: { url: redirectUrl, orderId } })
+          params: { url: redirectUrl, orderId, amount: String(total), currency: curr },
+        })
       }
     } catch { /* error from store */ }
   }
