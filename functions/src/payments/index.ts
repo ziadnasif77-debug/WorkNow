@@ -201,27 +201,12 @@ export const tapWebhook = functions
       }
     }
 
-    // ── Timestamp validation: reject events outside ±5 minute window ──────────
-    if (event.created) {
-      const eventMs  = event.created * 1000
-      const diffMs   = Math.abs(Date.now() - eventMs)
-      const FIVE_MIN = 5 * 60 * 1000
-      if (diffMs > FIVE_MIN) {
-        logger.security('webhook_timestamp_out_of_tolerance', {
-          eventId:         event.id,
-          eventCreated:    event.created,
-          diffMinutes:     Math.round(diffMs / 60000),
-          ip:              req.ip,
-        })
-        res.status(400).json({ error: 'Webhook timestamp out of tolerance' })
-        return
-      }
-    }
-
     // ── Replay protection ─────────────────────────────────────────────────────
-    // Quick non-transactional pre-check for performance. The authoritative
-    // claim happens inside each case's transaction (C1: dedup + state update
-    // in one atomic commit so no state is ever lost on partial failure).
+    // Note: timestamp validation was intentionally removed. Tap sends event.created
+    // as the original charge creation time (not the delivery time), so a ±5min
+    // window would reject legitimate retries at 30min/2h/etc. The _webhookEvents
+    // dedup (below and inside each case's transaction) is the authoritative
+    // replay guard — it is sufficient on its own.
     const eventRef = db.collection('_webhookEvents').doc(event.id)
     const quickSnap = await eventRef.get()
     if (quickSnap.exists) {
