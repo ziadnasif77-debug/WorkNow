@@ -4,7 +4,7 @@
 
 // NativeWind v4: must be imported explicitly so Metro includes it in the
 // dependency graph (lazy load) instead of injecting before the runtime starts.
-import '../../../global.css'
+import '../../global.css'
 
 import React, { useEffect, useCallback } from 'react'
 import { Stack } from 'expo-router'
