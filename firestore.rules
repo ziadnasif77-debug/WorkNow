@@ -257,6 +257,24 @@ service cloud.firestore {
       allow write: if false;  // Cloud Functions (Admin SDK) only
     }
 
+    // ── jobs — job postings created by providers ──────────────────────────────────
+    // Any authenticated user can browse jobs.
+    // All writes (create, update, close) go through Cloud Functions only.
+    match /jobs/{jobId} {
+      allow read:  if isAuth();
+      allow write: if false;
+    }
+
+    // ── jobApplications — applications submitted by users ─────────────────────────
+    // Applicant sees their own applications; provider sees applications for their jobs.
+    // All writes go through Cloud Functions only.
+    match /jobApplications/{appId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.applicantId == request.auth.uid) ||
+        (isAuth() && resource.data.providerId  == request.auth.uid);
+      allow write: if false;
+    }
+
     // ── System collections — Admin SDK only, zero client access ──────────────────
     // _auditLogs: compliance audit trail — no direct client read (query via CF)
     match /_auditLogs/{docId} {
