@@ -18,11 +18,13 @@ import { OfflineBanner }    from '../components/OfflineBanner'
 import '../lib/i18n'
 
 // ── Onboarding persistence (same MMKV pattern as OnboardingScreen) ────────────
-import type { MMKV as MMKVType } from 'react-native-mmkv'
-let _onboardingStorage: { getBoolean: (k: string) => boolean | undefined }
+// react-native-mmkv is not available in Expo Go — the try/catch provides a
+// safe in-memory fallback so the app loads without crashing.
+type MMKVLike = { getBoolean: (k: string) => boolean | undefined }
+let _onboardingStorage: MMKVLike
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { MMKV } = require('react-native-mmkv') as { MMKV: typeof MMKVType }
+  const { MMKV } = require('react-native-mmkv') as { MMKV: new (opts: { id: string }) => MMKVLike }
   const _mmkv = new MMKV({ id: 'app' })
   _onboardingStorage = { getBoolean: (k) => _mmkv.getBoolean(k) }
 } catch {

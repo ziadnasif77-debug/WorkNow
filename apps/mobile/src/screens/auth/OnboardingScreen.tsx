@@ -9,16 +9,16 @@ import {
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import type { MMKV as MMKVType } from 'react-native-mmkv'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import { Button } from '../../components/ui'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
-let storage: { getBoolean: (k: string) => boolean | undefined; set: (k: string, v: boolean) => void }
+type MMKVLike = { getBoolean: (k: string) => boolean | undefined; set: (k: string, v: boolean) => void }
+let storage: MMKVLike
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { MMKV } = require('react-native-mmkv') as { MMKV: typeof MMKVType }
+  const { MMKV } = require('react-native-mmkv') as { MMKV: new (opts: { id: string }) => MMKVLike }
   const _mmkv = new MMKV({ id: 'app' })
   storage = { getBoolean: (k) => _mmkv.getBoolean(k), set: (k, v) => _mmkv.set(k, v) }
 } catch {

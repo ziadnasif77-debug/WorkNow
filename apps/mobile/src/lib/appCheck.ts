@@ -18,8 +18,14 @@ import {
   initializeAppCheck,
   CustomProvider,
   type AppCheck,
-  type AppCheckTokenResult,
 } from 'firebase/app-check'
+
+// AppCheckToken is the shape CustomProvider.getToken must return.
+// It lives in @firebase/app-check-types but is not re-exported from firebase/app-check.
+interface AppCheckToken {
+  readonly token: string
+  readonly expireTimeMillis: number
+}
 import { Platform } from 'react-native'
 
 let _appCheck: AppCheck | null = null
@@ -38,7 +44,7 @@ interface RNFAppCheck {
     }): void
   }
   getToken(forceRefresh?: boolean): Promise<{ token: string; expirationTime: string }>
-  addTokenChangedListener(listener: (token: AppCheckTokenResult) => void): () => void
+  addTokenChangedListener(listener: (token: AppCheckToken) => void): () => void
 }
 
 function tryLoadNativeAppCheck(): RNFAppCheck | null {
@@ -62,7 +68,7 @@ function setDebugToken(): void {
 
 // ── getToken implementation ───────────────────────────────────────────────────
 
-async function getNativeToken(rnfAppCheck: RNFAppCheck): Promise<AppCheckTokenResult> {
+async function getNativeToken(rnfAppCheck: RNFAppCheck): Promise<AppCheckToken> {
   const result = await rnfAppCheck.getToken(false)
   return {
     token:             result.token,
@@ -79,7 +85,7 @@ async function getNativeToken(rnfAppCheck: RNFAppCheck): Promise<AppCheckTokenRe
  * Returns the AppCheck instance (or null if initialization fails, which should
  * never happen in a properly configured production build).
  */
-export async function initAppCheck(): AppCheck | null {
+export async function initAppCheck(): Promise<AppCheck | null> {
   if (_appCheck) return _appCheck
 
   try {
