@@ -5,18 +5,19 @@
 //   1. HTTPS-only requests (blocks http:// in production)
 //   2. Domain whitelist — only known endpoints may be called from the app
 //   3. Security headers on every outgoing request
-//   4. Certificate fingerprint pinning for Tap Payments API
-//      (defence-in-depth against compromised CAs)
-//   5. Request sanitisation — strips credentials from error logs
+//   4. Request sanitisation — strips credentials from error logs
 //
 // Architecture note:
 //   All Tap Payments API calls are made from Cloud Functions (server-side),
-//   NOT from the mobile app directly.  This means TLS + pinning for Tap is
-//   enforced at the server boundary, and the mobile app only communicates
-//   with Firebase endpoints (Auth, Firestore, Functions, Storage).
+//   NOT from the mobile app directly.  TLS for Tap is enforced at the server
+//   boundary; the mobile app communicates only with Firebase endpoints.
 //
-//   Certificate pinning here targets the Firebase Functions endpoint and any
-//   future direct API calls added to the mobile app.
+// Certificate pinning:
+//   JavaScript cannot inspect TLS certificates — pinning must be done at the
+//   native layer:
+//     Android: res/xml/network_security_config.xml  (via Expo config plugin)
+//     iOS:     Info.plist NSAppTransportSecurity + native NSURLSession config
+//   The HTTPS enforcement + domain whitelist below provide the JS-layer defence.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Domain whitelist ──────────────────────────────────────────────────────────
@@ -47,40 +48,14 @@ const ALLOWED_HOSTS = new Set([
   // App Check
   'firebaseappcheck.googleapis.com',
 
-  // Sentry (error reporting)
-  'o0.ingest.sentry.io',   // replace with your actual Sentry DSN host
+  // Sentry (error reporting) — de.sentry.io = EU data residency
+  'o4511288321245184.ingest.de.sentry.io',
   'sentry.io',
 
   // Expo Updates / EAS
   'u.expo.dev',
   'api.expo.dev',
 ])
-
-// ── Certificate fingerprints (SHA-256) ────────────────────────────────────────
-//
-// Pin the leaf certificate fingerprints for Firebase's primary hosts.
-// When a pinned certificate rotates you MUST ship a new app build with the
-// updated fingerprint BEFORE the old certificate expires.
-//
-// To obtain current fingerprints:
-//   openssl s_client -connect identitytoolkit.googleapis.com:443 </dev/null 2>/dev/null \
-//     | openssl x509 -fingerprint -sha256 -noout
-//
-// NOTE: These are EXAMPLE placeholders — replace with real fingerprints from
-//       your target Firebase project before deploying to production.
-
-const PINNED_CERTIFICATES: Record<string, string[]> = {
-  'identitytoolkit.googleapis.com': [
-    // Primary cert — update when rotating
-    'sha256/PLACEHOLDER_REPLACE_WITH_REAL_FINGERPRINT_FROM_OPENSSL',
-    // Backup cert (next rotation)
-    'sha256/PLACEHOLDER_BACKUP_CERT_FINGERPRINT',
-  ],
-  'firestore.googleapis.com': [
-    'sha256/PLACEHOLDER_REPLACE_WITH_REAL_FINGERPRINT_FROM_OPENSSL',
-    'sha256/PLACEHOLDER_BACKUP_CERT_FINGERPRINT',
-  ],
-}
 
 // ── Secure fetch wrapper ──────────────────────────────────────────────────────
 

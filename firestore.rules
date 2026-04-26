@@ -95,9 +95,6 @@ service cloud.firestore {
       allow read, update: if isAdmin() || (isAuth() &&
         (resource.data.customerId == request.auth.uid ||
          resource.data.providerId == request.auth.uid));
-      // FIX [MEDIUM]: Require that the order referenced in the conversation
-      // actually exists and that the creator is a party to that order.
-      // Prevents arbitrary conversation creation between unrelated users.
       allow create: if isAuth() && (
         request.resource.data.customerId == request.auth.uid &&
         request.resource.data.providerId != request.auth.uid &&
@@ -152,8 +149,6 @@ service cloud.firestore {
     // ── disputes ─────────────────────────────────────────────────────────────────
     match /disputes/{disputeId} {
       allow read: if isAdmin() || isOrderParty(resource.data.orderId);
-      // FIX [MEDIUM]: Require that the dispute is tied to a real order the
-      // initiator is party to, and that the order is in a disputable state.
       allow create: if isAuth() &&
         request.resource.data.initiatorId == request.auth.uid &&
         isOrderParty(request.resource.data.orderId) &&

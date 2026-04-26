@@ -62,7 +62,7 @@ export function initSentry(): void {
 
   const dsn = process.env['EXPO_PUBLIC_SENTRY_DSN']
   if (!dsn) {
-    console.warn('[Monitoring] EXPO_PUBLIC_SENTRY_DSN not set — Sentry disabled')
+    if (__DEV__) console.warn('[Monitoring] EXPO_PUBLIC_SENTRY_DSN not set — Sentry disabled')
     return
   }
 
