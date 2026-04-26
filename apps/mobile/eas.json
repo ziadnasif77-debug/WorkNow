@@ -17,10 +17,12 @@
                                       "distribution":  "internal",
                                       "channel":  "development",
                                       "ios":  {
-                                                  "simulator":  true
+                                                  "simulator":  true,
+                                                  "image": "macos-sequoia-15.2-xcode-16.2"
                                               },
                                       "android":  {
-                                                      "buildType":  "apk"
+                                                      "buildType":  "apk",
+                                                      "image": "ubuntu-22.04-jdk-17-ndk-r26b"
                                                   },
                                       "env":  {
                                                   "EXPO_PUBLIC_USE_EMULATOR":  "true"
