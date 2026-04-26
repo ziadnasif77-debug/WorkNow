@@ -111,7 +111,9 @@
         "origin": false,
         "root": "src/app"
       },
-      "eas": {},
+      "eas": {
+        "projectId": "7177c184-c126-44e9-a170-b20c0d4c4ae1"
+      },
       "privacyPolicyUrl": "https://workfix.app/privacy",
       "termsOfServiceUrl": "https://workfix.app/terms"
     }
