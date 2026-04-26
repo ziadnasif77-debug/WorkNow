@@ -10,9 +10,6 @@ import { useNotifications } from '../hooks/useNotifications'
 import { ErrorBoundary }    from '../components/ErrorBoundary'
 import { initSentry, setMonitoringUser, logDeviceIntegrityFailure } from '../lib/monitoring'
 import { initFeatureFlags } from '../lib/featureFlags'
-import { initAppCheck }     from '../lib/appCheck'
-import { hardendReleaseMode, checkDeviceIntegrity } from '../lib/deviceSecurity'
-import { enforceHTTPSGlobally } from '../lib/networkSecurity'
 import { Colors }           from '../constants/theme'
 import { OfflineBanner }    from '../components/OfflineBanner'
 import '../lib/i18n'
@@ -32,20 +29,27 @@ function AuthenticatedLayout() {
   const segments       = useSegments()
   const onboardingChecked = useRef(false)
 
-  // Security hardening + monitoring + feature flags — run once at boot
+  // Monitoring + feature flags — run once at boot
   useEffect(() => {
-    if (!__DEV__) {
-      hardendReleaseMode()
-      enforceHTTPSGlobally()
-    }
     initSentry()
-    void initAppCheck()
     void initFeatureFlags()
-    void checkDeviceIntegrity().then(result => {
-      if (!result.isSecure && !__DEV__) {
-        logDeviceIntegrityFailure(result.threats)
-      }
-    })
+
+    // Security hardening — deferred and lazy-loaded to avoid module-init
+    // native calls crashing Expo Go before the TurboModule registry is ready
+    if (!__DEV__) {
+      void import('../lib/deviceSecurity').then(({ hardendReleaseMode, checkDeviceIntegrity }) => {
+        hardendReleaseMode()
+        void checkDeviceIntegrity().then(result => {
+          if (!result.isSecure) logDeviceIntegrityFailure(result.threats)
+        })
+      })
+      void import('../lib/networkSecurity').then(({ enforceHTTPSGlobally }) => {
+        enforceHTTPSGlobally()
+      })
+      void import('../lib/appCheck').then(({ initAppCheck }) => {
+        void initAppCheck()
+      })
+    }
   }, [])
 
   const stableInit = useCallback(() => initialize(), [initialize])
