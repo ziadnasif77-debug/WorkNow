@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Root layout — initializes Firebase auth listener and routes accordingly
-// ─────────────────────────────────────────────────────────────────────────────
-
 import React, { useEffect, useCallback } from 'react'
 import { Stack } from 'expo-router'
 import { useRouter, useSegments } from 'expo-router'
@@ -17,9 +13,6 @@ import { Colors }           from '../constants/theme'
 import { OfflineBanner }    from '../components/OfflineBanner'
 import '../lib/i18n'
 
-// ── Onboarding persistence (same MMKV pattern as OnboardingScreen) ────────────
-// react-native-mmkv is not available in Expo Go — the try/catch provides a
-// safe in-memory fallback so the app loads without crashing.
 type MMKVLike = { getBoolean: (k: string) => boolean | undefined }
 let _onboardingStorage: MMKVLike
 try {
@@ -34,14 +27,6 @@ function hasSeenOnboarding(): boolean {
   return _onboardingStorage.getBoolean('onboarding_done') === true
 }
 
-// Initialize monitoring + feature flags at module load (before first render)
-initSentry()
-void initFeatureFlags()
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Root layout
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function RootLayout() {
   return <AuthenticatedLayout />
 }
@@ -54,30 +39,31 @@ function AuthenticatedLayout() {
   const router         = useRouter()
   const segments       = useSegments()
 
-  // Start auth listener — stable ref with useCallback
+  // Initialize monitoring and feature flags after runtime is ready
+  useEffect(() => {
+    initSentry()
+    void initFeatureFlags()
+  }, [])
+
   const stableInit = useCallback(() => initialize(), [initialize])
   useEffect(() => {
     const unsubscribe = stableInit()
     return unsubscribe
   }, [stableInit])
 
-  // Set monitoring context when user signs in
   useEffect(() => {
     if (firebaseUser?.uid && role) {
       setMonitoringUser(firebaseUser.uid, role)
     }
   }, [firebaseUser?.uid, role])
 
-  // Wire FCM + in-app notifications
   useNotifications()
 
-  // Route guard — runs after auth state is known
   useEffect(() => {
     if (!isInitialized) return
     const seg0 = segments[0]
 
     if (!firebaseUser) {
-      // First-ever launch → show onboarding once
       if (seg0 !== 'onboarding' && seg0 !== 'auth') {
         if (!hasSeenOnboarding()) {
           router.replace('/onboarding')
@@ -97,7 +83,6 @@ function AuthenticatedLayout() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser, isInitialized, segments])
 
-  // Show spinner while resolving auth state
   if (!isInitialized) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.background }}>

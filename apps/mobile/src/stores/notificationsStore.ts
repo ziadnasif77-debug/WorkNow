@@ -20,15 +20,19 @@ import type { AppNotification } from '@workfix/types'
 // ── Expo Notifications global handler config ──────────────────────────────────
 import type { NotificationBehavior } from 'expo-notifications'
 
-// setNotificationHandler is a no-op on web — guard to avoid Invariant Violation
+// Defer setNotificationHandler until after the native runtime is ready.
+// Calling it synchronously at module load time crashes Expo Go because the
+// TurboModule registry isn't fully initialized during bundle evaluation.
 if (Platform.OS !== 'web') {
-  ExpoNotifications.setNotificationHandler({
-    handleNotification: async (): Promise<NotificationBehavior> => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge:  true,
-    }),
-  })
+  setTimeout(() => {
+    ExpoNotifications.setNotificationHandler({
+      handleNotification: async (): Promise<NotificationBehavior> => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge:  true,
+      }),
+    })
+  }, 0)
 }
 
 interface NotificationsState {
