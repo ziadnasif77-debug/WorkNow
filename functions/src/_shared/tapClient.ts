@@ -34,7 +34,8 @@ export async function tapRequest(
 
   const data = await res.json() as Record<string, unknown>
   if (!res.ok) {
-    console.error('Tap Payments API error', { path, status: res.status, data })
+    // Log only path + status — never log full response (may contain card/PII data)
+    console.error('Tap Payments API error', { path, status: res.status })
     throw new Error(`Tap error: ${String(data['message'] ?? 'Unknown')}`)
   }
   return data

@@ -1,31 +1,23 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useRef } from 'react'
 import { Stack } from 'expo-router'
 import { useRouter, useSegments } from 'expo-router'
 import { ActivityIndicator, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import AsyncStorage               from '@react-native-async-storage/async-storage'
 import { useAuthStore }     from '../stores/authStore'
 import { useNotifications } from '../hooks/useNotifications'
 import { ErrorBoundary }    from '../components/ErrorBoundary'
-import { initSentry, setMonitoringUser } from '../lib/monitoring'
+import { initSentry, setMonitoringUser, logDeviceIntegrityFailure } from '../lib/monitoring'
 import { initFeatureFlags } from '../lib/featureFlags'
+import { initAppCheck }     from '../lib/appCheck'
+import { hardendReleaseMode, checkDeviceIntegrity } from '../lib/deviceSecurity'
+import { enforceHTTPSGlobally } from '../lib/networkSecurity'
 import { Colors }           from '../constants/theme'
 import { OfflineBanner }    from '../components/OfflineBanner'
 import '../lib/i18n'
 
-type MMKVLike = { getBoolean: (k: string) => boolean | undefined }
-let _onboardingStorage: MMKVLike
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { MMKV } = require('react-native-mmkv') as { MMKV: new (opts: { id: string }) => MMKVLike }
-  const _mmkv = new MMKV({ id: 'app' })
-  _onboardingStorage = { getBoolean: (k) => _mmkv.getBoolean(k) }
-} catch {
-  _onboardingStorage = { getBoolean: () => undefined }
-}
-function hasSeenOnboarding(): boolean {
-  return _onboardingStorage.getBoolean('onboarding_done') === true
-}
+const ONBOARDING_KEY = 'onboarding_done'
 
 export default function RootLayout() {
   return <AuthenticatedLayout />
@@ -38,11 +30,22 @@ function AuthenticatedLayout() {
   const isInitialized  = useAuthStore(s => s.isInitialized)
   const router         = useRouter()
   const segments       = useSegments()
+  const onboardingChecked = useRef(false)
 
-  // Initialize monitoring and feature flags after runtime is ready
+  // Security hardening + monitoring + feature flags — run once at boot
   useEffect(() => {
+    if (!__DEV__) {
+      hardendReleaseMode()
+      enforceHTTPSGlobally()
+    }
     initSentry()
+    void initAppCheck()
     void initFeatureFlags()
+    void checkDeviceIntegrity().then(result => {
+      if (!result.isSecure && !__DEV__) {
+        logDeviceIntegrityFailure(result.threats)
+      }
+    })
   }, [])
 
   const stableInit = useCallback(() => initialize(), [initialize])
@@ -65,11 +68,15 @@ function AuthenticatedLayout() {
 
     if (!firebaseUser) {
       if (seg0 !== 'onboarding' && seg0 !== 'auth') {
-        if (!hasSeenOnboarding()) {
-          router.replace('/onboarding')
-        } else {
-          router.replace('/auth/login')
-        }
+        if (onboardingChecked.current) return
+        onboardingChecked.current = true
+        void AsyncStorage.getItem(ONBOARDING_KEY).then(val => {
+          if (val === 'true') {
+            router.replace('/auth/login')
+          } else {
+            router.replace('/onboarding')
+          }
+        })
       }
     } else {
       if (seg0 === 'auth' || seg0 === 'onboarding') {
