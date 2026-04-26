@@ -48,8 +48,8 @@ const ALLOWED_HOSTS = new Set([
   // App Check
   'firebaseappcheck.googleapis.com',
 
-  // Sentry (error reporting)
-  'o0.ingest.sentry.io',   // replace with your actual Sentry DSN host
+  // Sentry (error reporting) — de.sentry.io = EU data residency
+  'o4511288321245184.ingest.de.sentry.io',
   'sentry.io',
 
   // Expo Updates / EAS
