@@ -44,9 +44,6 @@ service firebase.storage {
     }
 
     // ── orders/{orderId}/attachments/* ────────────────────────────────────────
-    // FIX [HIGH]: Previously allowed any authenticated user to write.
-    // Now enforces that only the two order parties (customer + provider) can
-    // read or write attachments — verified via Firestore order document.
     match /orders/{orderId}/attachments/{fileName} {
       function isOrderParty() {
         let order = firestore.get(

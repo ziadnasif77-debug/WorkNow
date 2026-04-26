@@ -7,8 +7,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useAuthStore }     from '../stores/authStore'
 import { useNotifications } from '../hooks/useNotifications'
 import { ErrorBoundary }    from '../components/ErrorBoundary'
-import { initSentry, setMonitoringUser } from '../lib/monitoring'
+import { initSentry, setMonitoringUser, logDeviceIntegrityFailure } from '../lib/monitoring'
 import { initFeatureFlags } from '../lib/featureFlags'
+import { initAppCheck }     from '../lib/appCheck'
+import { hardendReleaseMode, checkDeviceIntegrity } from '../lib/deviceSecurity'
+import { enforceHTTPSGlobally } from '../lib/networkSecurity'
 import { Colors }           from '../constants/theme'
 import { OfflineBanner }    from '../components/OfflineBanner'
 import '../lib/i18n'
@@ -39,10 +42,20 @@ function AuthenticatedLayout() {
   const router         = useRouter()
   const segments       = useSegments()
 
-  // Initialize monitoring and feature flags after runtime is ready
+  // Security hardening + monitoring + feature flags — run once at boot
   useEffect(() => {
+    if (!__DEV__) {
+      hardendReleaseMode()
+      enforceHTTPSGlobally()
+    }
     initSentry()
+    void initAppCheck()
     void initFeatureFlags()
+    void checkDeviceIntegrity().then(result => {
+      if (!result.isSecure && !__DEV__) {
+        logDeviceIntegrityFailure(result.threats)
+      }
+    })
   }, [])
 
   const stableInit = useCallback(() => initialize(), [initialize])

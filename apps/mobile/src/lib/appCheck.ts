@@ -135,7 +135,7 @@ export async function initAppCheck(): Promise<AppCheck | null> {
     // ── Fallback: reCAPTCHA Enterprise (web / unsupported platforms) ──────────
     const siteKey = process.env['EXPO_PUBLIC_RECAPTCHA_SITE_KEY']
     if (!siteKey) {
-      console.warn('[AppCheck] EXPO_PUBLIC_RECAPTCHA_SITE_KEY not set — App Check disabled')
+      if (__DEV__) console.warn('[AppCheck] EXPO_PUBLIC_RECAPTCHA_SITE_KEY not set — App Check disabled')
       return null
     }
 
@@ -146,7 +146,7 @@ export async function initAppCheck(): Promise<AppCheck | null> {
     })
     return _appCheck
   } catch (err) {
-    console.warn('[AppCheck] Initialization failed:', err)
+    if (__DEV__) console.warn('[AppCheck] Initialization failed:', err)
     return null
   }
 }
