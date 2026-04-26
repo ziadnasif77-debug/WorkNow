@@ -1369,11 +1369,13 @@ const EXTRA_SV = {
 
 const savedLang = (storage.getString('lang') ?? 'ar') as SupportedLocale
 
-// Always sync RTL with the persisted language on every module load.
-// This ensures RTL is correctly applied even if the native state didn't
-// survive an Expo Go reload or a cold start after a direction switch.
-I18nManager.allowRTL(true)
-I18nManager.forceRTL(isRtlLocale(savedLang))
+// Defer RTL sync to after the TurboModule registry is ready.
+// Calling I18nManager synchronously at module-init time crashes Expo Go
+// because PlatformConstants isn't registered yet at that point.
+setTimeout(() => {
+  I18nManager.allowRTL(true)
+  I18nManager.forceRTL(isRtlLocale(savedLang))
+}, 0)
 
 // Deep merge: combine base translations with EXTRA_ namespaces
 // Uses spread per-namespace to avoid shallow-overwrite problem
