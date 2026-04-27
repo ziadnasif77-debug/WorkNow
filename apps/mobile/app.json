@@ -34,6 +34,7 @@
       "icon": "./assets/icon.png"
     },
     "android": {
+      "kotlinVersion": "2.0.21",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "monochromeImage": "./assets/notification-icon.png",
