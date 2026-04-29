@@ -16,6 +16,29 @@ jest.mock('react-native-reanimated', () =>
   require('react-native-reanimated/mock'),
 )
 
+// react-native-maps mock (native module not available in jest)
+jest.mock('react-native-maps', () => {
+  const React = require('react')
+  const { View } = require('react-native')
+  const MockMapView = (props) => React.createElement(View, props)
+  const MockMarker = (props) => React.createElement(View, props)
+  MockMapView.Animated = MockMapView
+  return {
+    __esModule: true,
+    default: MockMapView,
+    Marker: MockMarker,
+    PROVIDER_GOOGLE: 'google',
+    PROVIDER_DEFAULT: null,
+  }
+})
+
+// expo-image mock
+jest.mock('expo-image', () => {
+  const React = require('react')
+  const { Image } = require('react-native')
+  return { Image: (props) => React.createElement(Image, props) }
+})
+
 // MMKV mock (native module not available in jest)
 jest.mock('react-native-mmkv', () => {
   const store = new Map()

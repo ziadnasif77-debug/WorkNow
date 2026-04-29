@@ -23,6 +23,7 @@ module.exports = {
       '|expo[^/]*' +
       '|@expo[^/]*' +
       '|react-native-reanimated' +
+      '|react-native-maps' +
       '|react-native-mmkv' +
       '|react-native-gesture-handler' +
       '|react-native-safe-area-context' +

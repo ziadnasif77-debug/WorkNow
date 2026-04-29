@@ -13,6 +13,7 @@ import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import * as ImagePicker from 'expo-image-picker'
+import { MapLocationPicker } from '../../components/MapLocationPicker'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { useOrdersStore } from '../../stores/ordersStore'
@@ -192,19 +193,27 @@ export default function CreateOrderScreen() {
             <Text style={styles.step_title}>{t('orders.locationStep')}</Text>
             <Text style={styles.step_sub}>{t('orders.locationStepSub')}</Text>
 
-            {/* Location detected */}
-            <View style={styles.location_detected}>
-              <Text style={styles.location_icon}>📍</Text>
-              <View style={styles.location_info}>
-                <Text style={styles.location_city}>{location.city}</Text>
-                <Text style={styles.location_coords}>
-                  {location.lat?.toFixed(4)}, {location.lng?.toFixed(4)}
-                </Text>
+            {/* Interactive map picker */}
+            {location.lat && location.lng ? (
+              <MapLocationPicker
+                initialLat={location.lat}
+                initialLng={location.lng}
+                onConfirm={(lat, lng) => {
+                  location.setManual?.(lat, lng)
+                }}
+                style={{ marginBottom: Spacing.md }}
+              />
+            ) : (
+              <View style={styles.location_detected}>
+                <Text style={styles.location_icon}>📍</Text>
+                <View style={styles.location_info}>
+                  <Text style={styles.location_city}>{location.city}</Text>
+                </View>
+                <TouchableOpacity onPress={location.refresh}>
+                  <Text style={styles.location_refresh}>🔄</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity onPress={location.refresh}>
-                <Text style={styles.location_refresh}>🔄</Text>
-              </TouchableOpacity>
-            </View>
+            )}
 
             <Input
               label={t('orders.addressLabel')}
