@@ -74,7 +74,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
       })
       return res.data.redirectUrl ?? null
     } catch (err) {
-      set({ initError: mapFirebaseError(err, 'فشل بدء عملية الدفع') })
+      set({ initError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ isInitiating: false })
@@ -91,7 +91,7 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
       const res = await fn({})
       set({ wallet: res.data })
     } catch (err) {
-      set({ walletError: mapFirebaseError(err, 'تعذّر تحميل الرصيد. اسحب للأسفل للمحاولة مجدداً') })
+      set({ walletError: mapFirebaseError(err) })
     } finally {
       set({ walletLoading: false })
     }

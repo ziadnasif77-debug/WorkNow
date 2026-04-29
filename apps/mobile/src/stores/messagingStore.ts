@@ -13,6 +13,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore'
 import { firebaseFunctions, firestore } from '../lib/firebase'
+import { mapFirebaseError } from '../lib/firebaseErrorMap'
 import type { Conversation, Message } from '@workfix/types'
 
 const TYPING_TTL_MS     = 5000   // typing indicator expires after 5 s of silence
@@ -200,8 +201,7 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
       )
       await fn({ conversationId: convId, text, mediaUrl, mediaType })
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'فشل إرسال الرسالة'
-      set({ sendError: msg })
+      set({ sendError: mapFirebaseError(err) })
     } finally {
       set({ sendLoading: false })
     }

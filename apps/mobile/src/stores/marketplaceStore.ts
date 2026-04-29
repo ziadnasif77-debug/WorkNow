@@ -6,6 +6,7 @@ import { create } from 'zustand'
 import { httpsCallable } from 'firebase/functions'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { firebaseFunctions, firestore } from '../lib/firebase'
+import { mapFirebaseError } from '../lib/firebaseErrorMap'
 import type {
   ProviderProfile, Category, SearchProvidersPayload,
   SearchProvidersResult,
@@ -94,7 +95,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
         hasMore:    res.data.hasMore,
       })
     } catch (err) {
-      set({ searchError: 'فشل البحث. تحقق من اتصالك.' })
+      set({ searchError: mapFirebaseError(err) })
     } finally {
       set({ searchLoading: false })
     }

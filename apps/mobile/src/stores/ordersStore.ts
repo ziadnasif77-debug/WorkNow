@@ -144,7 +144,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       // Combine both unsubscribers
       set({ _unsubDetail: () => { unsubOrder(); unsubQuotes() } })
     } catch (err) {
-      set({ actionError: err instanceof Error ? err.message : 'فشل تحميل الطلب' })
+      set({ actionError: mapFirebaseError(err) })
     } finally {
       set({ orderLoading: false })
     }
@@ -160,7 +160,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       const res = await fn(payload)
       return res.data.orderId
     } catch (err) {
-      set({ actionError: mapFirebaseError(err, 'فشل إنشاء الطلب') })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -224,7 +224,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       )
       await fn(payload)
     } catch (err) {
-      set({ actionError: mapFirebaseError(err, 'فشل الإلغاء') })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
@@ -272,7 +272,7 @@ export const useOrdersStore = create<OrdersState>((set, get) => ({
       )
       await fn({ orderId })
     } catch (err) {
-      set({ actionError: mapFirebaseError(err, 'فشل تحديث الطلب') })
+      set({ actionError: mapFirebaseError(err) })
       throw err
     } finally {
       set({ actionLoading: false })
