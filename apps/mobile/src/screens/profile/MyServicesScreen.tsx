@@ -13,7 +13,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore'
 import { firestore, firebaseAuth } from '../../lib/firebase'
 import { formatPrice } from '@workfix/utils'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Badge, Card, EmptyState, LoadingState, SegmentControl } from '../../components/ui'
+import { Badge, Card, EmptyState, SkeletonList, SegmentControl } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import MyJobsScreen from '../jobs/MyJobsScreen'
 
@@ -65,7 +65,7 @@ export default function MyServicesScreen() {
       {/* Services tab */}
       {activeTab === 'services' && (
         loading ? (
-          <LoadingState />
+          <SkeletonList count={5} />
         ) : (
           <FlatList
             data={services}

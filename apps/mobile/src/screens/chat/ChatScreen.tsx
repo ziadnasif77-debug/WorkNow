@@ -5,7 +5,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TextInput,
-  TouchableOpacity, Image, KeyboardAvoidingView,
+  TouchableOpacity, KeyboardAvoidingView,
   Platform, ActivityIndicator, Alert,
   ActionSheetIOS,
 } from 'react-native'
@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { useMessagingStore } from '../../stores/messagingStore'
 import { useAuth } from '../../hooks/useAuth'
 import { useImageUpload } from '../../hooks/useImageUpload'
+import { Image } from 'expo-image'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { LoadingState } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'

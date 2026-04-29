@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useJobsStore } from '../../stores/jobsStore'
-import { Badge, Card, EmptyState, LoadingState, TabHeader } from '../../components/ui'
+import { Badge, Card, EmptyState, SkeletonList, TabHeader } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import type { Job } from '@workfix/types'
 
@@ -82,7 +82,7 @@ export default function JobsListScreen() {
         }
         ListEmptyComponent={
           jobsLoading
-            ? <LoadingState />
+            ? <SkeletonList count={5} />
             : <EmptyState emoji="💼" title={t('jobs.noJobs')} subtitle={t('jobs.noJobsDesc')} />
         }
         renderItem={({ item }) => (

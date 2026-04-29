@@ -3,7 +3,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { firebaseAuth, firestore } from '../../lib/firebase'

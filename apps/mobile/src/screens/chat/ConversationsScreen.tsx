@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useMessagingStore } from '../../stores/messagingStore'
 import { useAuth } from '../../hooks/useAuth'
-import { EmptyState, LoadingState, TabHeader } from '../../components/ui'
+import { EmptyState, SkeletonList, TabHeader } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
 import type { Conversation } from '@workfix/types'
@@ -32,7 +32,7 @@ export default function ConversationsScreen() {
       <TabHeader title={t('tabs.messages')} />
 
       {convsLoading ? (
-        <LoadingState />
+        <SkeletonList count={8} hasAvatar />
       ) : (
         <FlatList
           data={conversations}

@@ -4,8 +4,9 @@
 
 import React, { useEffect } from 'react'
 import {
-  View, Text, StyleSheet, ScrollView, Image, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useMarketplaceStore } from '../../stores/marketplaceStore'

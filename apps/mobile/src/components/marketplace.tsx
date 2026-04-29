@@ -4,9 +4,10 @@
 
 import React from 'react'
 import {
-  View, Text, Image, StyleSheet, TouchableOpacity,
+  View, Text, StyleSheet, TouchableOpacity,
   type ViewStyle,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, AvatarSize, IconSize } from '../constants/theme'
 import { formatPrice } from '@workfix/utils'
 import type { Currency } from '@workfix/types'

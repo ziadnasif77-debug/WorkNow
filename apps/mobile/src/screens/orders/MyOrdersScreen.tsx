@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useOrdersStore } from '../../stores/ordersStore'
 import { useAuth } from '../../hooks/useAuth'
 import { StatusBadge } from '../../components/orders'
-import { Button, Card, Chip, EmptyState, LoadingState, TabHeader } from '../../components/ui'
+import { Button, Card, Chip, EmptyState, SkeletonList, TabHeader } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
 import type { Order, OrderStatus } from '@workfix/types'
@@ -76,7 +76,7 @@ export default function MyOrdersScreen() {
 
       {/* Orders list */}
       {ordersLoading ? (
-        <LoadingState />
+        <SkeletonList count={6} />
       ) : (
         <FlatList
           data={filtered}

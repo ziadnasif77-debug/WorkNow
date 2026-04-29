@@ -5,9 +5,10 @@
 
 import React, { useEffect, useState, useCallback } from 'react'
 import {
-  View, Text, StyleSheet, FlatList, Image,
+  View, Text, StyleSheet, FlatList,
   TouchableOpacity, ActivityIndicator, TextInput, Modal, ScrollView,
 } from 'react-native'
+import { Image } from 'expo-image'
 import type { Timestamp } from 'firebase/firestore'
 import {
   getFirestore, collection, query, where,

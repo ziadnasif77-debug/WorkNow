@@ -5,8 +5,9 @@
 import React, { useState } from 'react'
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Alert, Image,
+  Alert,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import * as ImagePicker from 'expo-image-picker'

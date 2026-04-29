@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useJobsStore } from '../../stores/jobsStore'
 import { useAuthStore } from '../../stores/authStore'
-import { Badge, Button, Card, EmptyState, LoadingState } from '../../components/ui'
+import { Badge, Button, Card, EmptyState, SkeletonList } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import type { Job } from '@workfix/types'
 
@@ -61,7 +61,7 @@ export default function MyJobsScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           myJobsLoading
-            ? <LoadingState />
+            ? <SkeletonList count={4} />
             : <EmptyState emoji="💼" title={t('jobs.noJobs')} subtitle={t('jobs.noJobsDesc')} />
         }
         renderItem={({ item }) => {

@@ -8,7 +8,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useJobsStore } from '../../stores/jobsStore'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Badge, Button, Card, EmptyState, LoadingState } from '../../components/ui'
+import { Badge, Button, Card, EmptyState, SkeletonList } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import type { JobApplication } from '@workfix/types'
 
@@ -39,7 +39,7 @@ export default function JobApplicationsScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           jobApplicationsLoading
-            ? <LoadingState />
+            ? <SkeletonList count={4} hasAvatar />
             : <EmptyState emoji="📭" title={t('jobs.noApplications')} subtitle="" />
         }
         renderItem={({ item }) => (

@@ -3,13 +3,14 @@
 // Source of truth: apps/mobile/src/constants/theme.ts + DESIGN.md
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
-  View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image,
+  View, Text, TextInput, TouchableOpacity, ActivityIndicator,
   ScrollView, KeyboardAvoidingView, Platform,
-  StyleSheet,
+  StyleSheet, Animated,
   type ViewStyle, type TextStyle, type TextInputProps, type ImageSourcePropType,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   Colors, Spacing, Radius, FontSize, FontWeight, Shadow, IconSize, AvatarSize,
@@ -802,6 +803,72 @@ export function LoadingState({ style }: { style?: ViewStyle }) {
     <ActivityIndicator color={Colors.primary} style={[{ marginTop: Spacing.xxl }, style]} />
   )
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SKELETON CARD  (shimmer placeholder — replaces spinners in list screens)
+// Usage: <SkeletonCard lines={3} hasAvatar />
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface SkeletonCardProps {
+  lines?:     number   // number of text placeholder lines (default 2)
+  hasAvatar?: boolean  // show a circular avatar placeholder on the left
+  style?:     ViewStyle
+}
+
+export function SkeletonCard({ lines = 2, hasAvatar = false, style }: SkeletonCardProps) {
+  const anim = useRef(new Animated.Value(0.3)).current
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(anim, { toValue: 1,   duration: 700, useNativeDriver: true }),
+        Animated.timing(anim, { toValue: 0.3, duration: 700, useNativeDriver: true }),
+      ]),
+    )
+    loop.start()
+    return () => loop.stop()
+  }, [])
+
+  const shimmer = { opacity: anim }
+
+  return (
+    <Animated.View style={[sk.card, shimmer, style]}>
+      <View style={sk.row}>
+        {hasAvatar && <View style={sk.avatar} />}
+        <View style={sk.lines}>
+          <View style={[sk.line, sk.line_title]} />
+          {Array.from({ length: lines - 1 }).map((_, i) => (
+            <View
+              key={i}
+              style={[sk.line, i === lines - 2 && sk.line_short]}
+            />
+          ))}
+        </View>
+      </View>
+    </Animated.View>
+  )
+}
+
+export function SkeletonList({ count = 5, hasAvatar = false }: { count?: number; hasAvatar?: boolean }) {
+  return (
+    <View style={sk.list}>
+      {Array.from({ length: count }).map((_, i) => (
+        <SkeletonCard key={i} hasAvatar={hasAvatar} style={i > 0 ? { marginTop: Spacing.md } : undefined} />
+      ))}
+    </View>
+  )
+}
+
+const sk = StyleSheet.create({
+  list:       { padding: Spacing.md },
+  card:       { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, ...Shadow.sm },
+  row:        { flexDirection: 'row', gap: Spacing.md, alignItems: 'flex-start' },
+  avatar:     { width: 44, height: 44, borderRadius: Radius.full, backgroundColor: Colors.gray200, flexShrink: 0 },
+  lines:      { flex: 1, gap: Spacing.sm },
+  line:       { height: 14, backgroundColor: Colors.gray200, borderRadius: Radius.sm },
+  line_title: { width: '65%', height: 16 },
+  line_short: { width: '45%' },
+})
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TAB HEADER  (safe-area header for root tab screens — no back button)

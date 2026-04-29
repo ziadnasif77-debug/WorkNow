@@ -5,7 +5,8 @@
 import React, { useState } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Alert, Image, Linking, Platform } from 'react-native'
+  TouchableOpacity, Alert, Linking, Platform } from 'react-native'
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

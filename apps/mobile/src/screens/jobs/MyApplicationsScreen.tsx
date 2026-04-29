@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useJobsStore } from '../../stores/jobsStore'
 import { useAuthStore } from '../../stores/authStore'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { Badge, Card, EmptyState, LoadingState } from '../../components/ui'
+import { Badge, Card, EmptyState, SkeletonList } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import type { JobApplication } from '@workfix/types'
 
@@ -40,7 +40,7 @@ export default function MyApplicationsScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           myApplicationsLoading
-            ? <LoadingState />
+            ? <SkeletonList count={4} hasAvatar />
             : <EmptyState emoji="📬" title={t('jobs.noApplications')} subtitle="" />
         }
         renderItem={({ item }) => (
