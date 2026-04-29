@@ -51,11 +51,11 @@ export default function ChatScreen() {
     void (async () => {
       try {
         const cId = await openConversation(orderId)
-        if (!cId) { setInitError('تعذّر فتح المحادثة'); return }
+        if (!cId) { setInitError(t('chat.openError')); return }
         setConvId(cId)
         subscribeMessages(cId, myUid)
       } catch {
-        setInitError('تعذّر فتح المحادثة')
+        setInitError(t('chat.openError'))
       }
     })()
 

@@ -755,6 +755,7 @@ const EXTRA_AR = {
     noConversations: 'لا محادثات بعد', noConversationsDesc: 'ستبدأ المحادثات بعد قبول عرض سعر',
     startConversation: 'ابدأ المحادثة مع المزوّد', takePhoto: 'التقط صورة',
     typing: 'يكتب...', placeholder: 'اكتب رسالة...', yes: 'نعم',
+    openError: 'تعذّر فتح المحادثة',
   },
   common: {
     all: 'الكل', back: 'رجوع', cancel: 'إلغاء', done: 'تم', error: 'خطأ',
@@ -902,6 +903,14 @@ const EXTRA_AR = {
     carpentry: 'نجارة', painting: 'دهانات',
     moving: 'نقل عفش', appliances: 'صيانة أجهزة',
   },
+  days: {
+    sun: 'الأحد', mon: 'الاثنين', tue: 'الثلاثاء',
+    wed: 'الأربعاء', thu: 'الخميس', fri: 'الجمعة', sat: 'السبت',
+  },
+  jobs: {
+    noServices: 'لا خدمات بعد', noServicesDesc: 'أضف خدماتك لتظهر للعملاء',
+    active: 'نشط', inactive: 'متوقف',
+  },
 }
 
 
@@ -928,6 +937,7 @@ const EXTRA_EN = {
     noConversations: 'No conversations yet',
     noConversationsDesc: 'Conversations start after accepting a quote',
     startConversation: 'Start conversation with provider', takePhoto: 'Take Photo',
+    openError: 'Failed to open conversation',
   },
   common: { all: 'All', there: 'there' },
   errors: {
@@ -1064,6 +1074,14 @@ const EXTRA_EN = {
     carpentry: 'Carpentry', painting: 'Painting',
     moving: 'Moving', appliances: 'Appliances',
   },
+  days: {
+    sun: 'Sunday', mon: 'Monday', tue: 'Tuesday',
+    wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday',
+  },
+  jobs: {
+    noServices: 'No services yet', noServicesDesc: 'Add your services to appear to customers',
+    active: 'Active', inactive: 'Inactive',
+  },
 }
 
 const EXTRA_NO = {
@@ -1089,6 +1107,7 @@ const EXTRA_NO = {
     noConversations: 'Ingen samtaler ennå',
     noConversationsDesc: 'Samtaler starter etter at du godtar et tilbud',
     startConversation: 'Start samtale med leverandør', takePhoto: 'Ta bilde',
+    openError: 'Kunne ikke åpne samtalen',
   },
   common: { all: 'Alle', there: 'der' },
   errors: {
@@ -1227,6 +1246,14 @@ const EXTRA_NO = {
     carpentry: 'Snekker', painting: 'Maling',
     moving: 'Flytting', appliances: 'Hvitevarer',
   },
+  days: {
+    sun: 'Søndag', mon: 'Mandag', tue: 'Tirsdag',
+    wed: 'Onsdag', thu: 'Torsdag', fri: 'Fredag', sat: 'Lørdag',
+  },
+  jobs: {
+    noServices: 'Ingen tjenester ennå', noServicesDesc: 'Legg til tjenestene dine for å vises for kunder',
+    active: 'Aktiv', inactive: 'Inaktiv',
+  },
 }
 
 const EXTRA_SV = {
@@ -1252,6 +1279,7 @@ const EXTRA_SV = {
     noConversations: 'Inga konversationer ännu',
     noConversationsDesc: 'Konversationer startar efter att du godkänt en offert',
     startConversation: 'Starta konversation med leverantör', takePhoto: 'Ta foto',
+    openError: 'Kunde inte öppna konversationen',
   },
   common: { all: 'Alla', there: 'där' },
   errors: {
@@ -1388,6 +1416,14 @@ const EXTRA_SV = {
     cleaning: 'Städning', ac: 'Klimat & ventilation',
     carpentry: 'Snickeri', painting: 'Målning',
     moving: 'Flytt', appliances: 'Vitvaror',
+  },
+  days: {
+    sun: 'Söndag', mon: 'Måndag', tue: 'Tisdag',
+    wed: 'Onsdag', thu: 'Torsdag', fri: 'Fredag', sat: 'Lördag',
+  },
+  jobs: {
+    noServices: 'Inga tjänster ännu', noServicesDesc: 'Lägg till dina tjänster för att visas för kunder',
+    active: 'Aktiv', inactive: 'Inaktiv',
   },
 }
 

@@ -9,6 +9,7 @@ import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTranslation } from 'react-i18next'
 import { Colors, Spacing, FontSize, FontWeight, IconSize } from '../constants/theme'
 
 interface ScreenHeaderProps {
@@ -20,10 +21,11 @@ interface ScreenHeaderProps {
 export function ScreenHeader({ title, onBack, rightEl }: ScreenHeaderProps) {
   const router  = useRouter()
   const insets  = useSafeAreaInsets()
+  const { t }   = useTranslation()
 
   return (
     <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
-      <TouchableOpacity onPress={onBack ?? (() => router.back())} style={styles.back} accessibilityLabel="رجوع" accessibilityRole="button">
+      <TouchableOpacity onPress={onBack ?? (() => router.back())} style={styles.back} accessibilityLabel={t('common.back')} accessibilityRole="button">
         <Text style={styles.back_icon}>←</Text>
       </TouchableOpacity>
       <Text style={styles.title} numberOfLines={1}>{title}</Text>

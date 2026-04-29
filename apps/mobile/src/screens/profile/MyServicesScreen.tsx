@@ -76,14 +76,14 @@ export default function MyServicesScreen() {
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
-              <EmptyState emoji="🔧" title="لا خدمات بعد" subtitle="أضف خدماتك لتظهر للعملاء" />
+              <EmptyState emoji="🔧" title={t('jobs.noServices')} subtitle={t('jobs.noServicesDesc')} />
             }
             renderItem={({ item }) => (
               <Card>
                 <View style={styles.service_top}>
-                  <Text style={styles.service_name}>{item.name.ar}</Text>
+                  <Text style={styles.service_name}>{item.name[lang] ?? item.name.ar}</Text>
                   <Badge
-                    label={item.isActive ? 'نشط' : 'متوقف'}
+                    label={item.isActive ? t('jobs.active') : t('jobs.inactive')}
                     variant={item.isActive ? 'success' : 'neutral'}
                   />
                 </View>
