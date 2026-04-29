@@ -11,10 +11,32 @@ if (typeof global.TextEncoder === 'undefined') {
   global.TextDecoder = TextDecoder
 }
 
+// ── setImmediate polyfill ─────────────────────────────────────────────────────
+// jsdom doesn't include setImmediate; React Native's InteractionManager uses it
+// (called from Animated.loop via createInteractionHandle).
+if (typeof global.setImmediate === 'undefined') {
+  global.setImmediate = (fn, ...args) => global.setTimeout(fn, 0, ...args)
+  global.clearImmediate = (id) => global.clearTimeout(id)
+}
+
 // Reanimated mock (prevents "Reanimated not found" errors in tests)
 jest.mock('react-native-reanimated', () =>
   require('react-native-reanimated/mock'),
 )
+
+// react-native-safe-area-context mock (useSafeAreaInsets requires SafeAreaProvider in tests)
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react')
+  const insets = { top: 0, right: 0, bottom: 0, left: 0 }
+  return {
+    SafeAreaProvider:   ({ children }) => children,
+    SafeAreaView:       ({ children }) => children,
+    useSafeAreaInsets:  () => insets,
+    useSafeAreaFrame:   () => ({ x: 0, y: 0, width: 390, height: 844 }),
+    SafeAreaInsetsContext: React.createContext(insets),
+    initialWindowMetrics: { insets, frame: { x: 0, y: 0, width: 390, height: 844 } },
+  }
+})
 
 // react-native-maps mock (native module not available in jest)
 jest.mock('react-native-maps', () => {
@@ -51,6 +73,27 @@ jest.mock('react-native-mmkv', () => {
     })),
   }
 })
+
+// expo-notifications mock (native module ExpoPushTokenManager not available in jest)
+jest.mock('expo-notifications', () => ({
+  getPermissionsAsync:       jest.fn(() => Promise.resolve({ status: 'granted' })),
+  requestPermissionsAsync:   jest.fn(() => Promise.resolve({ status: 'granted' })),
+  getExpoPushTokenAsync:     jest.fn(() => Promise.resolve({ data: 'ExponentPushToken[mock]' })),
+  getDevicePushTokenAsync:   jest.fn(() => Promise.resolve({ type: 'expo', data: 'mock-token' })),
+  scheduleNotificationAsync: jest.fn(() => Promise.resolve('notification-id')),
+  cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
+  cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
+  dismissAllNotificationsAsync: jest.fn(() => Promise.resolve()),
+  getBadgeCountAsync:        jest.fn(() => Promise.resolve(0)),
+  setBadgeCountAsync:        jest.fn(() => Promise.resolve(true)),
+  addNotificationReceivedListener:         jest.fn(() => ({ remove: jest.fn() })),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  addPushTokenListener:                    jest.fn(() => ({ remove: jest.fn() })),
+  removeNotificationSubscription:          jest.fn(),
+  setNotificationHandler:                  jest.fn(),
+  AndroidImportance: { MAX: 5, HIGH: 4, DEFAULT: 3, LOW: 2, MIN: 1 },
+  IosAuthorizationStatus: { AUTHORIZED: 2, PROVISIONAL: 3 },
+}))
 
 // expo-updates mock
 jest.mock('expo-updates', () => ({
@@ -110,7 +153,7 @@ jest.mock('./src/lib/firebase', () => ({
   firebaseApp:       {},
 }))
 
-// @react-native-firebase/analytics mock
+// @react-native-firebase/analytics mock (virtual: package not in node_modules)
 jest.mock('@react-native-firebase/analytics', () => () => ({
   logEvent:            jest.fn(() => Promise.resolve()),
   setUserId:           jest.fn(() => Promise.resolve()),
@@ -120,9 +163,9 @@ jest.mock('@react-native-firebase/analytics', () => () => ({
   logLogin:            jest.fn(() => Promise.resolve()),
   logSignUp:           jest.fn(() => Promise.resolve()),
   resetAnalyticsData:  jest.fn(() => Promise.resolve()),
-}))
+}), { virtual: true })
 
-// @react-native-firebase/crashlytics mock
+// @react-native-firebase/crashlytics mock (virtual: package not in node_modules)
 jest.mock('@react-native-firebase/crashlytics', () => () => ({
   recordError:         jest.fn(),
   log:                 jest.fn(),
@@ -130,12 +173,12 @@ jest.mock('@react-native-firebase/crashlytics', () => () => ({
   setAttribute:        jest.fn(() => Promise.resolve()),
   crash:               jest.fn(),
   checkForUnsentReports: jest.fn(() => Promise.resolve()),
-}))
+}), { virtual: true })
 
-// @react-native-firebase/app mock
+// @react-native-firebase/app mock (virtual: package not in node_modules)
 jest.mock('@react-native-firebase/app', () => ({
   default: { apps: [] },
-}))
+}), { virtual: true })
 
 // ── Fetch polyfill (firebase/functions uses fetch at module load time) ─────────
 // jsdom provides fetch in newer versions, but add a fallback for pnpm/node compat

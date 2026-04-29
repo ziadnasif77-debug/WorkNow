@@ -15,9 +15,12 @@ module.exports = {
     '\\.(png|jpg|jpeg|gif|svg|ttf|woff|woff2)$': '<rootDir>/__mocks__/fileMock.js',
     // Explicit alias for constants (relative import from components/ui)
     '^(\.{1,2}/)+constants/theme$': '<rootDir>/src/constants/theme.ts',
+    // jest-expo setup.js reads .default from NativeModules, but the real module uses
+    // module.exports without a default — supply a shim that has both.
+    '^react-native/Libraries/BatchedBridge/NativeModules$': '<rootDir>/__mocks__/NativeModules.js',
   },
   transformIgnorePatterns: [
-    '../../node_modules/.pnpm/(?!(' +
+    '/node_modules/(?!(' +
       '(jest-)?react-native[^/]*' +
       '|@react-native[^/]*' +
       '|expo[^/]*' +
@@ -35,6 +38,7 @@ module.exports = {
       '|@react-native-async-storage/' +
       '|@react-native-community/' +
     '))',
+    '/node_modules/react-native-reanimated/plugin/',
   ],
   collectCoverageFrom: [
     'src/screens/**/*.{ts,tsx}',
