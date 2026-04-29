@@ -27,7 +27,8 @@ import { formatDate } from '@workfix/utils'
 type Step = 1 | 2 | 3
 
 export default function CreateOrderScreen() {
-  const { t }       = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language as import('@workfix/types').SupportedLocale
   const router      = useRouter()
   const { providerId: _providerId, serviceId } = useLocalSearchParams<{ providerId?: string; serviceId?: string }>()
   const { createOrder, actionLoading, actionError, clearError } = useOrdersStore()
@@ -260,7 +261,7 @@ export default function CreateOrderScreen() {
               >
                 <Text style={styles.date_picker_icon}>🗓</Text>
                 <Text style={styles.date_picker_text}>
-                  {formatDate(scheduledAt, 'ar', 'datetime')}
+                  {formatDate(scheduledAt, lang, 'datetime')}
                 </Text>
                 <Text style={styles.date_picker_arrow}>›</Text>
               </TouchableOpacity>
@@ -293,7 +294,7 @@ export default function CreateOrderScreen() {
                 <Text style={styles.summary_key}>{t('orders.scheduleLabel')}</Text>
                 <Text style={styles.summary_val}>
                   {isScheduled
-                    ? formatDate(scheduledAt, 'ar', 'datetime')
+                    ? formatDate(scheduledAt, lang, 'datetime')
                     : t('orders.scheduleNow')
                   }
                 </Text>

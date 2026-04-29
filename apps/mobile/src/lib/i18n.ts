@@ -896,6 +896,12 @@ const EXTRA_AR = {
   a11y: {
     loading: 'جارٍ التحميل',
   },
+  categories: {
+    plumbing: 'سباكة', electrical: 'كهرباء',
+    cleaning: 'تنظيف', ac: 'تكييف',
+    carpentry: 'نجارة', painting: 'دهانات',
+    moving: 'نقل عفش', appliances: 'صيانة أجهزة',
+  },
 }
 
 
@@ -1051,6 +1057,12 @@ const EXTRA_EN = {
   },
   a11y: {
     loading: 'Loading',
+  },
+  categories: {
+    plumbing: 'Plumbing', electrical: 'Electrical',
+    cleaning: 'Cleaning', ac: 'AC & HVAC',
+    carpentry: 'Carpentry', painting: 'Painting',
+    moving: 'Moving', appliances: 'Appliances',
   },
 }
 
@@ -1209,6 +1221,12 @@ const EXTRA_NO = {
   a11y: {
     loading: 'Laster',
   },
+  categories: {
+    plumbing: 'Rørlegger', electrical: 'Elektriker',
+    cleaning: 'Rengjøring', ac: 'Klima & ventilasjon',
+    carpentry: 'Snekker', painting: 'Maling',
+    moving: 'Flytting', appliances: 'Hvitevarer',
+  },
 }
 
 const EXTRA_SV = {
@@ -1364,6 +1382,12 @@ const EXTRA_SV = {
   },
   a11y: {
     loading: 'Laddar',
+  },
+  categories: {
+    plumbing: 'VVS', electrical: 'Elektriker',
+    cleaning: 'Städning', ac: 'Klimat & ventilation',
+    carpentry: 'Snickeri', painting: 'Målning',
+    moving: 'Flytt', appliances: 'Vitvaror',
   },
 }
 

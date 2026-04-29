@@ -21,7 +21,8 @@ import { formatDate } from '@workfix/utils'
 import type { Message } from '@workfix/types'
 
 export default function ChatScreen() {
-  const { t }    = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language as import('@workfix/types').SupportedLocale
   const router   = useRouter()
   const { id: orderId } = useLocalSearchParams<{ id: string }>()
   const { user } = useAuth()
@@ -196,7 +197,7 @@ export default function ChatScreen() {
                   <View style={styles.date_separator}>
                     <View style={styles.date_line} />
                     <Text style={styles.date_label}>
-                      {formatDate(msg.sentAt, 'ar', 'date')}
+                      {formatDate(msg.sentAt, lang, 'date')}
                     </Text>
                     <View style={styles.date_line} />
                   </View>
@@ -205,6 +206,7 @@ export default function ChatScreen() {
                   message={msg}
                   isMine={isMine}
                   showAvatar={showAvatar}
+                  lang={lang}
                 />
               </View>
             )
@@ -278,11 +280,12 @@ export default function ChatScreen() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MessageBubble({
-  message, isMine, showAvatar,
+  message, isMine, showAvatar, lang,
 }: {
   message:    Message
   isMine:     boolean
   showAvatar: boolean
+  lang:       import('@workfix/types').SupportedLocale
 }) {
   const isImage = message.mediaType === 'image' && message.mediaUrl
 
@@ -325,7 +328,7 @@ function MessageBubble({
         {/* Time + read receipt */}
         <View style={[styles.bubble_meta, isMine && styles.bubble_meta_mine]}>
           <Text style={styles.bubble_time}>
-            {formatDate(message.sentAt, 'ar', 'time')}
+            {formatDate(message.sentAt, lang, 'time')}
           </Text>
           {isMine && (
             <Text style={[styles.read_receipt, message.isRead && styles.read_receipt_read]}>

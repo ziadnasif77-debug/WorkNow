@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Alert, Linking,
+  TouchableOpacity, Alert, Linking, Modal, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native'
 import { httpsCallable } from 'firebase/functions'
 import { firebaseFunctions } from '../../lib/firebase'
@@ -21,7 +21,8 @@ import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from 
 import { formatDate, formatPrice } from '@workfix/utils'
 
 export default function OrderDetailScreen() {
-  const { t }    = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language as import('@workfix/types').SupportedLocale
   const router   = useRouter()
   const { id }   = useLocalSearchParams<{ id: string }>()
   const { isCustomer, isProvider, user } = useAuth()
@@ -31,8 +32,8 @@ export default function OrderDetailScreen() {
     markComplete, clearError,
   } = useOrdersStore()
 
-  const [_showCancelModal, setShowCancelModal] = useState(false)
-  const [cancelReason,     _setCancelReason]   = useState('')
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelReason,    setCancelReason]    = useState('')
   const [invoiceLoading,  setInvoiceLoading]  = useState(false)
 
   useEffect(() => {
@@ -111,11 +112,12 @@ export default function OrderDetailScreen() {
     ])
   }
 
-  async function _handleCancel() {
+  async function handleCancel() {
     if (cancelReason.trim().length < 5) return
     try {
       await cancelOrder({ orderId: o.id, reason: cancelReason.trim() })
       setShowCancelModal(false)
+      setCancelReason('')
       router.back()
     } catch { /* error from store */ }
   }
@@ -165,20 +167,20 @@ export default function OrderDetailScreen() {
           <InfoRow label={t('orders.addressLabel')}     value={o.address}      style={styles.info_row} />
           <InfoRow
             label={t('orders.createdAt')}
-            value={formatDate(o.createdAt, 'ar', 'datetime')}
+            value={formatDate(o.createdAt, lang, 'datetime')}
             style={styles.info_row}
           />
           {o.isScheduled && o.scheduledAt && (
             <InfoRow
               label={t('orders.scheduledAt')}
-              value={formatDate(o.scheduledAt, 'ar', 'datetime')}
+              value={formatDate(o.scheduledAt, lang, 'datetime')}
               style={styles.info_row}
             />
           )}
           {o.finalPrice != null && (
             <InfoRow
               label={t('orders.price')}
-              value={formatPrice(o.finalPrice, o.currency ?? 'SAR', 'ar')}
+              value={formatPrice(o.finalPrice, o.currency ?? 'SAR', lang)}
               style={styles.info_row}
               valueStyle={{ fontWeight: FontWeight.bold, color: Colors.primary, fontSize: FontSize.md }}
             />
@@ -198,7 +200,7 @@ export default function OrderDetailScreen() {
                 <Text style={styles.payment_label}>{t(`payment.status_${o.paymentStatus}`)}</Text>
                 {o.finalPrice && (
                   <Text style={styles.payment_amount}>
-                    {formatPrice(o.finalPrice, o.currency ?? 'SAR', 'ar')}
+                    {formatPrice(o.finalPrice, o.currency ?? 'SAR', lang)}
                   </Text>
                 )}
               </View>
@@ -238,6 +240,42 @@ export default function OrderDetailScreen() {
 
         <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* ── Cancel Order Modal ───────────────────────────────────────── */}
+      <Modal visible={showCancelModal} transparent animationType="slide" onRequestClose={() => setShowCancelModal(false)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modal_overlay}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setShowCancelModal(false)} />
+          <View style={styles.modal_sheet}>
+            <Text style={styles.modal_title}>{t('common.cancel')} {t('orders.title').toLowerCase()}</Text>
+            <Text style={styles.modal_desc}>{t('orders.rejectQuoteConfirm')}</Text>
+            <TextInput
+              style={styles.modal_input}
+              placeholder={t('orders.descriptionHint')}
+              placeholderTextColor={Colors.gray400}
+              value={cancelReason}
+              onChangeText={setCancelReason}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+            <View style={styles.modal_actions}>
+              <Button
+                label={t('common.cancel')}
+                onPress={() => { setShowCancelModal(false); setCancelReason('') }}
+                variant="ghost"
+                style={{ flex: 1 }}
+              />
+              <Button
+                label={t('orders.rejectQuote')}
+                onPress={handleCancel}
+                isLoading={actionLoading}
+                style={{ flex: 1, backgroundColor: Colors.error }}
+                disabled={cancelReason.trim().length < 5}
+              />
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* ── Sticky action bar ─────────────────────────────────────────── */}
       <FooterCTA style={styles.action_bar}>
@@ -334,4 +372,17 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.border,
   },
   chat_icon: { fontSize: IconSize.md },
+
+  modal_overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  modal_sheet: {
+    backgroundColor: Colors.white, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
+    padding: Spacing.lg, gap: Spacing.md,
+  },
+  modal_title:   { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.black },
+  modal_desc:    { fontSize: FontSize.md, color: Colors.gray500 },
+  modal_input:   {
+    borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md,
+    padding: Spacing.md, minHeight: 80, fontSize: FontSize.md, color: Colors.black,
+  },
+  modal_actions: { flexDirection: 'row', gap: Spacing.md },
 })

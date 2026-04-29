@@ -26,7 +26,8 @@ interface Stats {
 }
 
 export default function ProviderStatsScreen() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language as import('@workfix/types').SupportedLocale
   const uid   = firebaseAuth.currentUser?.uid
 
   const [stats,   setStats]   = useState<Stats | null>(null)
@@ -87,7 +88,7 @@ export default function ProviderStatsScreen() {
           <Text style={styles.section_label}>{t('stats.thisMonth')}</Text>
           <View style={styles.cards_row}>
             <StatCard emoji="📋" label={t('stats.orders')}   value={String(stats.thisMonthOrders)} />
-            <StatCard emoji="💰" label={t('stats.earnings')} value={formatPrice(stats.thisMonthEarnings, 'SAR', 'ar')} />
+            <StatCard emoji="💰" label={t('stats.earnings')} value={formatPrice(stats.thisMonthEarnings, 'SAR', lang)} />
           </View>
 
           {/* All time */}
@@ -104,7 +105,7 @@ export default function ProviderStatsScreen() {
           {/* Total earnings */}
           <View style={styles.earnings_card}>
             <Text style={styles.earnings_label}>{t('stats.totalEarnings')}</Text>
-            <Text style={styles.earnings_value}>{formatPrice(stats.totalEarnings, 'SAR', 'ar')}</Text>
+            <Text style={styles.earnings_value}>{formatPrice(stats.totalEarnings, 'SAR', lang)}</Text>
             <Text style={styles.earnings_note}>{t('stats.afterCommission')}</Text>
           </View>
         </ScrollView>

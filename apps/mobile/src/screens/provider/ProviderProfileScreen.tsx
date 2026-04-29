@@ -18,7 +18,8 @@ import { formatDate } from '@workfix/utils'
 import type { Review } from '@workfix/types'
 
 export default function ProviderProfileScreen() {
-  const { t }  = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language as import('@workfix/types').SupportedLocale
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const { selectedProvider, profileLoading, getProviderProfile } = useMarketplaceStore()
@@ -127,7 +128,7 @@ export default function ProviderProfileScreen() {
           {reviews.length === 0 ? (
             <Text style={styles.no_reviews}>{t('provider.noReviews')}</Text>
           ) : (
-            reviews.map(r => <ReviewCard key={r.id} review={r} />)
+            reviews.map(r => <ReviewCard key={r.id} review={r} lang={lang} />)
           )}
         </Card>
       </ScrollView>
@@ -156,7 +157,7 @@ export default function ProviderProfileScreen() {
   )
 }
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({ review, lang }: { review: Review; lang: import('@workfix/types').SupportedLocale }) {
   return (
     <View style={reviewStyles.card}>
       <View style={reviewStyles.header}>
@@ -164,7 +165,7 @@ function ReviewCard({ review }: { review: Review }) {
         <View style={reviewStyles.meta}>
           <Text style={reviewStyles.name}>{review.reviewerName}</Text>
           <Text style={reviewStyles.date}>
-            {formatDate(review.createdAt, 'ar', 'relative')}
+            {formatDate(review.createdAt, lang, 'relative')}
           </Text>
         </View>
         <StarRating rating={review.rating} showCount={false} size="sm" />

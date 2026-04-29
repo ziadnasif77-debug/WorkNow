@@ -16,7 +16,8 @@ import { formatDate } from '@workfix/utils'
 import type { Conversation } from '@workfix/types'
 
 export default function ConversationsScreen() {
-  const { t }    = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language as import('@workfix/types').SupportedLocale
   const router   = useRouter()
   const { user } = useAuth()
   const { conversations, convsLoading, subscribeConversations, unsubscribeAll } = useMessagingStore()
@@ -52,6 +53,7 @@ export default function ConversationsScreen() {
             <ConversationRow
               conv={item}
               myUid={user?.uid ?? ''}
+              lang={lang}
               onPress={() => router.push({
                 pathname: '/chat/[id]',
                 params: { id: item.orderId } })}
@@ -64,9 +66,10 @@ export default function ConversationsScreen() {
 }
 
 function ConversationRow({
-  conv, myUid, onPress }: {
+  conv, myUid, lang, onPress }: {
   conv:    Conversation
   myUid:   string
+  lang:    import('@workfix/types').SupportedLocale
   onPress: () => void
 }) {
   const unread     = conv.unreadCount?.[myUid] ?? 0
@@ -89,7 +92,7 @@ function ConversationRow({
             {`#${conv.orderId.slice(-6).toUpperCase()}`}
           </Text>
           <Text style={styles.conv_time}>
-            {formatDate(conv.lastMessageAt, 'ar', 'relative')}
+            {formatDate(conv.lastMessageAt, lang, 'relative')}
           </Text>
         </View>
         <View style={styles.conv_bottom}>

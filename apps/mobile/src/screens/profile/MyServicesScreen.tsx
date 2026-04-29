@@ -29,7 +29,8 @@ interface Service {
 type Tab = 'services' | 'jobs'
 
 export default function MyServicesScreen() {
-  const { t }    = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language as import('@workfix/types').SupportedLocale
   const _router  = useRouter()
   const uid      = firebaseAuth.currentUser?.uid
 
@@ -90,7 +91,7 @@ export default function MyServicesScreen() {
                   <Text style={styles.service_desc} numberOfLines={2}>{item.description}</Text>
                 )}
                 <Text style={styles.service_price}>
-                  {formatPrice(item.basePrice, item.currency as never, 'ar')}+
+                  {formatPrice(item.basePrice, item.currency as never, lang)}+
                 </Text>
               </Card>
             )}

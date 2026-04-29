@@ -107,7 +107,8 @@ export default function MyOrdersScreen() {
 }
 
 const OrderCard = React.memo(function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language as import('@workfix/types').SupportedLocale
 
   return (
     <Card onPress={onPress}>
@@ -115,7 +116,7 @@ const OrderCard = React.memo(function OrderCard({ order, onPress }: { order: Ord
         <View style={styles.order_id_wrap}>
           <Text style={styles.order_id}>#{order.id.slice(-6).toUpperCase()}</Text>
           <Text style={styles.order_date}>
-            {formatDate(order.createdAt, 'ar', 'relative')}
+            {formatDate(order.createdAt, lang, 'relative')}
           </Text>
         </View>
         <StatusBadge status={order.status} size="sm" />
@@ -129,7 +130,7 @@ const OrderCard = React.memo(function OrderCard({ order, onPress }: { order: Ord
         </Text>
         {order.finalPrice != null && (
           <Text style={styles.order_price}>
-            {formatPrice(order.finalPrice, order.currency ?? 'SAR', 'ar')}
+            {formatPrice(order.finalPrice, order.currency ?? 'SAR', lang)}
           </Text>
         )}
       </View>
