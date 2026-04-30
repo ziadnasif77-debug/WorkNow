@@ -119,3 +119,87 @@ describe('authStore — signUpEmail', () => {
     expect(useAuthStore.getState().error).toContain('مسجَّل')
   })
 })
+
+describe('authStore — sendPhoneOtp', () => {
+  beforeEach(resetStore)
+
+  it('throws when recaptchaVerifier is not set', async () => {
+    await expect(useAuthStore.getState().sendPhoneOtp('+966500000000')).rejects.toThrow()
+    expect(useAuthStore.getState().error).toBeTruthy()
+  })
+
+  it('stores confirmationResult on success', async () => {
+    const { signInWithPhoneNumber } = require('firebase/auth')
+    const mockConfirmation = { confirm: jest.fn() }
+    signInWithPhoneNumber.mockResolvedValueOnce(mockConfirmation)
+
+    useAuthStore.setState({ recaptchaVerifier: {} as never })
+    await useAuthStore.getState().sendPhoneOtp('+966500000000')
+    expect(useAuthStore.getState().confirmationResult).toBe(mockConfirmation)
+    expect(useAuthStore.getState().isLoading).toBe(false)
+  })
+})
+
+describe('authStore — confirmPhoneOtp', () => {
+  beforeEach(resetStore)
+
+  it('throws when no OTP session', async () => {
+    await expect(useAuthStore.getState().confirmPhoneOtp('123456')).rejects.toThrow()
+  })
+
+  it('clears confirmationResult on success', async () => {
+    const mockConfirm = jest.fn(() => Promise.resolve())
+    useAuthStore.setState({ confirmationResult: { confirm: mockConfirm } as never })
+    await useAuthStore.getState().confirmPhoneOtp('123456')
+    expect(useAuthStore.getState().confirmationResult).toBeNull()
+    expect(useAuthStore.getState().isLoading).toBe(false)
+  })
+
+  it('sets Arabic error on wrong OTP', async () => {
+    const mockConfirm = jest.fn(() => Promise.reject(new Error('wrong')))
+    useAuthStore.setState({ confirmationResult: { confirm: mockConfirm } as never })
+    await expect(useAuthStore.getState().confirmPhoneOtp('000000')).rejects.toThrow()
+    expect(useAuthStore.getState().error).toBeTruthy()
+  })
+})
+
+describe('authStore — signOut', () => {
+  beforeEach(resetStore)
+
+  it('clears user state after sign out', async () => {
+    useAuthStore.setState({
+      firebaseUser: { uid: 'u1' } as never,
+      appUser:      { uid: 'u1' } as never,
+      role:         'customer',
+    })
+    await useAuthStore.getState().signOut()
+    const s = useAuthStore.getState()
+    expect(s.firebaseUser).toBeNull()
+    expect(s.appUser).toBeNull()
+    expect(s.role).toBeNull()
+  })
+})
+
+describe('authStore — completeProfile', () => {
+  beforeEach(resetStore)
+
+  it('calls httpsCallable and resolves', async () => {
+    const { httpsCallable } = require('firebase/functions')
+    const mockFn = jest.fn(() => Promise.resolve({ data: {} }))
+    httpsCallable.mockReturnValueOnce(mockFn)
+
+    await useAuthStore.getState().completeProfile({ displayName: 'Ahmed', role: 'customer' } as never)
+    expect(mockFn).toHaveBeenCalled()
+    expect(useAuthStore.getState().isLoading).toBe(false)
+  })
+
+  it('sets error on failure', async () => {
+    const { httpsCallable } = require('firebase/functions')
+    httpsCallable.mockReturnValueOnce(jest.fn(() => Promise.reject(new Error('network'))))
+
+    await expect(
+      useAuthStore.getState().completeProfile({ displayName: 'X', role: 'customer' } as never)
+    ).rejects.toThrow()
+    expect(useAuthStore.getState().error).toBeTruthy()
+  })
+})

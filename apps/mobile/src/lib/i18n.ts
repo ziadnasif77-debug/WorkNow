@@ -801,6 +801,10 @@ const EXTRA_AR = {
     locationStepSub: 'سيستخدم المزوّد هذا العنوان للوصول إليك',
     confirmLocation: 'تأكيد الموقع', useCurrentLocation: 'استخدام موقعي الحالي',
     mapUnavailable: 'الخريطة غير متاحة', mapUnavailableSub: 'سيتم استخدام موقعك الحالي',
+    tracking: {
+      providerOnWay: 'المزوّد في الطريق إليك', waitingForLocation: 'في انتظار موقع المزوّد...',
+      provider: 'المزوّد', destination: 'موقعك',
+    },
     newOrder: 'طلب جديد', noOrders: 'لا طلبات بعد', noOrdersDesc: 'ابدأ بإنشاء طلبك الأول',
     photos: 'الصور', photosCount: 'صورة', price: 'السعر',
     quoteAccepted: 'تم قبول العرض', quoteExpired: 'انتهت صلاحية العرض',
@@ -977,6 +981,10 @@ const EXTRA_EN = {
     locationStepSub: 'The provider will use this address to reach you',
     confirmLocation: 'Confirm Location', useCurrentLocation: 'Use My Current Location',
     mapUnavailable: 'Map unavailable', mapUnavailableSub: 'Your current location will be used',
+    tracking: {
+      providerOnWay: 'Provider is on the way', waitingForLocation: 'Waiting for provider location...',
+      provider: 'Provider', destination: 'Your location',
+    },
     noOrdersDesc: 'Start by creating your first order',
     photos: 'Photos', photosCount: 'photos', price: 'Price',
     quoteAccepted: 'Quote accepted', quoteExpired: 'Quote expired',
@@ -1149,6 +1157,10 @@ const EXTRA_NO = {
     locationStepSub: 'Leverandøren bruker denne adressen for å finne deg',
     confirmLocation: 'Bekreft posisjon', useCurrentLocation: 'Bruk min nåværende posisjon',
     mapUnavailable: 'Kart utilgjengelig', mapUnavailableSub: 'Din nåværende posisjon vil bli brukt',
+    tracking: {
+      providerOnWay: 'Leverandøren er på vei', waitingForLocation: 'Venter på leverandørens posisjon...',
+      provider: 'Leverandør', destination: 'Din posisjon',
+    },
     noOrdersDesc: 'Start med å opprette din første bestilling',
     photos: 'Bilder', photosCount: 'bilder', price: 'Pris',
     quoteAccepted: 'Tilbud akseptert', quoteExpired: 'Tilbud utløpt',
@@ -1323,6 +1335,10 @@ const EXTRA_SV = {
     locationStepSub: 'Leverantören använder denna adress för att nå dig',
     confirmLocation: 'Bekräfta plats', useCurrentLocation: 'Använd min nuvarande plats',
     mapUnavailable: 'Karta ej tillgänglig', mapUnavailableSub: 'Din nuvarande plats kommer att användas',
+    tracking: {
+      providerOnWay: 'Leverantören är på väg', waitingForLocation: 'Väntar på leverantörens plats...',
+      provider: 'Leverantör', destination: 'Din plats',
+    },
     noOrdersDesc: 'Börja med att skapa din första beställning',
     photos: 'Foton', photosCount: 'foton', price: 'Pris',
     quoteAccepted: 'Offert godkänd', quoteExpired: 'Offert utgången',

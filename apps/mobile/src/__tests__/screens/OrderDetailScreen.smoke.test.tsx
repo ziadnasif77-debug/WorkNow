@@ -25,6 +25,8 @@ jest.mock('../../stores/ordersStore', () => ({
 jest.mock('../../hooks/useAuth', () => ({
   useAuth: () => ({ user: { uid: 'cust-1' }, isCustomer: true, isProvider: false }),
 }))
+jest.mock('../../hooks/useProviderTracking', () => ({ useProviderTracking: jest.fn() }))
+jest.mock('../../hooks/useOrderTracking',    () => ({ useOrderTracking:    jest.fn(() => null) }))
 jest.mock('../../lib/analytics', () => ({
   Analytics: { orderViewed: jest.fn(), quoteAccepted: jest.fn() },
 }))

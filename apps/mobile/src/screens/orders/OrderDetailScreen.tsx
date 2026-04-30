@@ -13,12 +13,37 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useOrdersStore } from '../../stores/ordersStore'
 import { useAuth } from '../../hooks/useAuth'
+import { useProviderTracking } from '../../hooks/useProviderTracking'
+import { useOrderTracking } from '../../hooks/useOrderTracking'
 import { Analytics } from '../../lib/analytics'
 import { StatusBadge, StatusTimeline, QuoteCard } from '../../components/orders'
 import { Button, Card, FooterCTA, InfoRow, LoadingState } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
+
+// Lazy-require react-native-maps (same pattern as MapLocationPicker)
+let MapView: React.ComponentType<{
+  style?: object
+  region?: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number }
+  provider?: string | null
+  scrollEnabled?: boolean
+  zoomEnabled?: boolean
+  pitchEnabled?: boolean
+  rotateEnabled?: boolean
+}> | null = null
+let Marker: React.ComponentType<{
+  coordinate: { latitude: number; longitude: number }
+  pinColor?: string
+  title?: string
+}> | null = null
+try {
+  const mod = require('react-native-maps') as { default: typeof MapView; Marker: typeof Marker }
+  MapView = mod.default
+  Marker  = mod.Marker
+} catch { /* Expo Go fallback */ }
+
+const TRACKING_STATUSES = ['confirmed', 'in_progress']
 
 export default function OrderDetailScreen() {
   const { t, i18n } = useTranslation()
@@ -39,6 +64,14 @@ export default function OrderDetailScreen() {
   useEffect(() => {
     if (id) void loadOrderDetail(id)
   }, [id])
+
+  // Provider: publish GPS location while order is active
+  useProviderTracking(id, activeOrder, user?.uid)
+
+  // Customer: subscribe to provider's live location
+  const providerLoc = useOrderTracking(
+    isCustomer && activeOrder && TRACKING_STATUSES.includes(activeOrder.status) ? id : null
+  )
 
   if (orderLoading || !activeOrder) {
     return (
@@ -159,6 +192,58 @@ export default function OrderDetailScreen() {
         <Card style={{ margin: Spacing.md }}>
           <StatusTimeline currentStatus={o.status} />
         </Card>
+
+        {/* ── Live provider tracking map ───────────────────────────────── */}
+        {isCustomer && TRACKING_STATUSES.includes(o.status) && MapView && Marker && (
+          <Card style={{ margin: Spacing.md, overflow: 'hidden', padding: 0 }}>
+            {/* Banner */}
+            <View style={styles.tracking_banner}>
+              <Text style={styles.tracking_dot}>🟢</Text>
+              <Text style={styles.tracking_label}>
+                {providerLoc
+                  ? t('orders.tracking.providerOnWay')
+                  : t('orders.tracking.waitingForLocation')}
+              </Text>
+            </View>
+
+            {providerLoc ? (
+              <MapView
+                style={styles.tracking_map}
+                provider="google"
+                scrollEnabled={false}
+                zoomEnabled={false}
+                pitchEnabled={false}
+                rotateEnabled={false}
+                region={{
+                  latitude:      providerLoc.lat,
+                  longitude:     providerLoc.lng,
+                  latitudeDelta:  0.012,
+                  longitudeDelta: 0.012,
+                }}
+              >
+                {/* Provider marker */}
+                <Marker
+                  coordinate={{ latitude: providerLoc.lat, longitude: providerLoc.lng }}
+                  pinColor={Colors.primary}
+                  title={o.providerName ?? t('orders.tracking.provider')}
+                />
+                {/* Customer destination marker */}
+                <Marker
+                  coordinate={{ latitude: o.location.latitude, longitude: o.location.longitude }}
+                  pinColor={Colors.error}
+                  title={t('orders.tracking.destination')}
+                />
+              </MapView>
+            ) : (
+              <View style={styles.tracking_placeholder}>
+                <Text style={styles.tracking_placeholder_icon}>📍</Text>
+                <Text style={styles.tracking_placeholder_text}>
+                  {t('orders.tracking.waitingForLocation')}
+                </Text>
+              </View>
+            )}
+          </Card>
+        )}
 
         {/* ── Order info ───────────────────────────────────────────────── */}
         <Card style={{ margin: Spacing.md }}>
@@ -372,6 +457,20 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.border,
   },
   chat_icon: { fontSize: IconSize.md },
+
+  tracking_banner: {
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+    padding: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border,
+  },
+  tracking_dot:   { fontSize: 10 },
+  tracking_label: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, color: Colors.black },
+  tracking_map:   { width: '100%', height: 200 },
+  tracking_placeholder: {
+    height: 120, alignItems: 'center', justifyContent: 'center',
+    gap: Spacing.sm, backgroundColor: Colors.gray100,
+  },
+  tracking_placeholder_icon: { fontSize: 32 },
+  tracking_placeholder_text: { fontSize: FontSize.sm, color: Colors.gray500 },
 
   modal_overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   modal_sheet: {

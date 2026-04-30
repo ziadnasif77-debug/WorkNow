@@ -61,6 +61,18 @@ jest.mock('expo-image', () => {
   return { Image: (props) => React.createElement(Image, props) }
 })
 
+// expo-location mock (native ExpoLocation module not available in jest)
+jest.mock('expo-location', () => ({
+  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+  getForegroundPermissionsAsync:     jest.fn(() => Promise.resolve({ status: 'granted' })),
+  getCurrentPositionAsync:           jest.fn(() => Promise.resolve({
+    coords: { latitude: 24.7136, longitude: 46.6753, altitude: null, accuracy: 10, heading: null, speed: null },
+    timestamp: Date.now(),
+  })),
+  reverseGeocodeAsync: jest.fn(() => Promise.resolve([{ city: 'Riyadh', region: 'Riyadh', isoCountryCode: 'SA' }])),
+  Accuracy: { Lowest: 1, Low: 2, Balanced: 3, High: 4, Highest: 5, BestForNavigation: 6 },
+}))
+
 // MMKV mock (native module not available in jest)
 jest.mock('react-native-mmkv', () => {
   const store = new Map()
@@ -89,10 +101,23 @@ jest.mock('expo-notifications', () => ({
   addNotificationReceivedListener:         jest.fn(() => ({ remove: jest.fn() })),
   addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
   addPushTokenListener:                    jest.fn(() => ({ remove: jest.fn() })),
-  removeNotificationSubscription:          jest.fn(),
-  setNotificationHandler:                  jest.fn(),
+  removeNotificationSubscription:                jest.fn(),
+  setNotificationHandler:                        jest.fn(),
+  getLastNotificationResponseAsync:              jest.fn(() => Promise.resolve(null)),
+  getPresentedNotificationsAsync:                jest.fn(() => Promise.resolve([])),
+  dismissNotificationAsync:                      jest.fn(() => Promise.resolve()),
+  setNotificationCategoryAsync:                  jest.fn(() => Promise.resolve()),
+  getNotificationCategoriesAsync:                jest.fn(() => Promise.resolve([])),
   AndroidImportance: { MAX: 5, HIGH: 4, DEFAULT: 3, LOW: 2, MIN: 1 },
   IosAuthorizationStatus: { AUTHORIZED: 2, PROVISIONAL: 3 },
+}))
+
+// expo-store-review mock (native ExpoStoreReview module not available in jest)
+jest.mock('expo-store-review', () => ({
+  isAvailableAsync:    jest.fn(() => Promise.resolve(false)),
+  requestReview:       jest.fn(() => Promise.resolve()),
+  storeUrl:            jest.fn(() => null),
+  hasAction:           jest.fn(() => Promise.resolve(false)),
 }))
 
 // expo-updates mock
@@ -179,6 +204,92 @@ jest.mock('@react-native-firebase/crashlytics', () => () => ({
 jest.mock('@react-native-firebase/app', () => ({
   default: { apps: [] },
 }), { virtual: true })
+
+// Analytics mock (lib/analytics wraps firebase analytics)
+jest.mock('./src/lib/analytics', () => ({
+  Analytics: {
+    signUpStart:          jest.fn(),
+    signUpComplete:       jest.fn(),
+    login:                jest.fn(),
+    kycSubmitted:         jest.fn(),
+    kycApproved:          jest.fn(),
+    providerSearch:       jest.fn(),
+    providerProfileView:  jest.fn(),
+    categorySelected:     jest.fn(),
+    orderStarted:         jest.fn(),
+    orderSubmitted:       jest.fn(),
+    quoteReceived:        jest.fn(),
+    quoteAccepted:        jest.fn(),
+    paymentStarted:       jest.fn(),
+    paymentComplete:      jest.fn(() => Promise.resolve()),
+    orderCompleted:       jest.fn(),
+    orderCancelled:       jest.fn(),
+    chatMessageSent:      jest.fn(),
+    reviewSubmitted:      jest.fn(),
+    disputeOpened:        jest.fn(),
+    subscriptionStarted:  jest.fn(),
+    subscriptionUpgraded: jest.fn(),
+    notificationTapped:   jest.fn(),
+    setUserProperties:    jest.fn(() => Promise.resolve()),
+  },
+  initAnalytics: jest.fn(),
+}))
+
+// @react-native-async-storage/async-storage mock
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem:     jest.fn(() => Promise.resolve(null)),
+  setItem:     jest.fn(() => Promise.resolve()),
+  removeItem:  jest.fn(() => Promise.resolve()),
+  clear:       jest.fn(() => Promise.resolve()),
+  getAllKeys:   jest.fn(() => Promise.resolve([])),
+  multiGet:    jest.fn(() => Promise.resolve([])),
+  multiSet:    jest.fn(() => Promise.resolve()),
+  multiRemove: jest.fn(() => Promise.resolve()),
+}))
+
+// react-native-webview mock
+jest.mock('react-native-webview', () => {
+  const React = require('react')
+  const { View } = require('react-native')
+  return {
+    __esModule: true,
+    default: (props) => React.createElement(View, { testID: 'webview', ...props }),
+    WebView: (props) => React.createElement(View, { testID: 'webview', ...props }),
+  }
+})
+
+// expo-document-picker mock
+jest.mock('expo-document-picker', () => ({
+  getDocumentAsync: jest.fn(() => Promise.resolve({ canceled: true, assets: [] })),
+  DocumentPickerAsset: {},
+}))
+
+// @react-native-community/netinfo mock (package uses default import)
+jest.mock('@react-native-community/netinfo', () => ({
+  __esModule: true,
+  default: {
+    fetch:            jest.fn(() => Promise.resolve({ isConnected: true, isInternetReachable: true })),
+    addEventListener: jest.fn(() => jest.fn()),
+    configure:        jest.fn(),
+  },
+  useNetInfo: jest.fn(() => ({ isConnected: true, isInternetReachable: true })),
+}))
+
+// @react-native-community/datetimepicker mock
+jest.mock('@react-native-community/datetimepicker', () => {
+  const React = require('react')
+  const { View } = require('react-native')
+  return { __esModule: true, default: (props) => React.createElement(View, props) }
+})
+
+// lib/monitoring mock (Sentry/Crashlytics stub — native modules not available in jest)
+jest.mock('./src/lib/monitoring', () => ({
+  captureError:    jest.fn(),
+  captureMessage:  jest.fn(),
+  setUser:         jest.fn(),
+  addBreadcrumb:   jest.fn(),
+  initMonitoring:  jest.fn(),
+}))
 
 // ── Fetch polyfill (firebase/functions uses fetch at module load time) ─────────
 // jsdom provides fetch in newer versions, but add a fallback for pnpm/node compat
