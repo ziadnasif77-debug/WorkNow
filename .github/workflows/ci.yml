@@ -190,12 +190,107 @@ jobs:
           extra_args: --only-verified
         continue-on-error: true
 
-  # ─── Job 6: Deploy to Staging (on merge to main) ──────────────────────────
+  # ─── Job 6: E2E Detox Tests (Android — push to main only) ───────────────────
+  e2e-android:
+    name: E2E Tests (Android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: [unit-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Enable KVM (hardware acceleration for emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared packages
+        run: pnpm turbo build --filter=@workfix/types --filter=@workfix/utils --filter=@workfix/config
+
+      - name: Expo Prebuild (generate Android native code)
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --clean --non-interactive
+        env:
+          EXPO_PUBLIC_FIREBASE_API_KEY:             ${{ secrets.DEV_FIREBASE_API_KEY }}
+          EXPO_PUBLIC_FIREBASE_PROJECT_ID:          ${{ secrets.DEV_FIREBASE_PROJECT_ID }}
+          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN:         ${{ secrets.DEV_FIREBASE_AUTH_DOMAIN }}
+          EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET:      ${{ secrets.DEV_FIREBASE_STORAGE_BUCKET }}
+          EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.DEV_FIREBASE_MESSAGING_SENDER_ID }}
+          EXPO_PUBLIC_FIREBASE_APP_ID:              ${{ secrets.DEV_FIREBASE_APP_ID }}
+          EXPO_PUBLIC_ENV:                          development
+
+      - name: Build Android debug APK
+        working-directory: apps/mobile
+        run: pnpm build:e2e
+
+      - name: AVD Cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-33
+
+      - name: Create AVD snapshot (if not cached)
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          profile: Pixel 6
+          avd-name: Pixel_6_API_33
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "AVD snapshot created"
+
+      - name: Run Detox E2E tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          profile: Pixel 6
+          avd-name: Pixel_6_API_33
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          working-directory: apps/mobile
+          script: pnpm test:e2e
+
+      - name: Upload E2E artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detox-artifacts
+          path: apps/mobile/artifacts/
+
+  # ─── Job 7: Deploy to Staging (on merge to main) ──────────────────────────
   deploy-staging:
     name: Deploy → Staging
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [unit-tests, rules-tests, integration-tests]
+    needs: [unit-tests, rules-tests, integration-tests, e2e-android]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
