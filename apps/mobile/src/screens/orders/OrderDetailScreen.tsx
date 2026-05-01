@@ -188,7 +188,7 @@ export default function OrderDetailScreen() {
             </View>
 
             {providerLoc ? (
-              // @ts-ignore — children (Marker) are valid react-native-maps children
+              // @ts-expect-error — react-native-maps MapView type omits children prop
               <MapView
                 style={styles.tracking_map}
                 provider="google"
