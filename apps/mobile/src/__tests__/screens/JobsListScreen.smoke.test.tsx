@@ -9,7 +9,7 @@ jest.mock('../../stores/jobsStore', () => ({
   useJobsStore: jest.fn(() => ({
     jobs: [], jobsLoading: false, loadJobs: jest.fn(),
   })),
-})).catch?.(() => {})
+}))
 jest.mock('@workfix/utils', () => ({ formatDate: jest.fn(() => 'today') }))
 
 // jobsStore may not exist — catch import error gracefully

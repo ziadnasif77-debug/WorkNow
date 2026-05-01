@@ -12,7 +12,7 @@ const mockStoreState = {
 }
 jest.mock('../../stores/paymentsStore', () => {
   const mock = jest.fn(() => mockStoreState)
-  mock.getState = jest.fn(() => mockStoreState)
+  ;(mock as unknown as { getState: jest.Mock }).getState = jest.fn(() => mockStoreState)
   return { usePaymentsStore: mock }
 })
 
