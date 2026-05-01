@@ -226,3 +226,57 @@ export const updateProfile = callable(async (data, context) => {
   await db.collection('providerProfiles').doc(uid).update(updates)
   return { ok: true }
 })
+
+// ── getProviderStats ──────────────────────────────────────────────────────────
+// Aggregates order history + profile data for the provider's stats screen.
+// Replaces direct Firestore reads in ProviderStatsScreen.
+export const getProviderStats = callable(async (_data, context) => {
+  const { uid } = requireAuth(context)
+  await rateLimit(uid, 'getProviderStats')
+  validate(z.object({}), _data)
+
+  const ordersSnap = await db.collection('orders')
+    .where('providerId', '==', uid)
+    .get()
+
+  const orders = ordersSnap.docs.map(d => d.data())
+  const now = new Date()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+
+  const completed  = orders.filter(o => o['status'] === 'closed')
+  const cancelled  = orders.filter(o => o['status'] === 'cancelled')
+  const thisMonth  = completed.filter(
+    o => (o['closedAt']?.toDate?.() ?? new Date(0)) >= monthStart,
+  )
+
+  const profileSnap = await db.collection('providerProfiles').doc(uid).get()
+  const profile = profileSnap.exists ? profileSnap.data() : undefined
+
+  return {
+    totalOrders:       orders.length,
+    completedOrders:   completed.length,
+    cancelledOrders:   cancelled.length,
+    totalEarnings:     completed.reduce((s, o) => s + (o['netAmount'] ?? 0), 0),
+    avgRating:         profile?.['avgRating']    ?? 0,
+    totalReviews:      profile?.['totalReviews'] ?? 0,
+    thisMonthOrders:   thisMonth.length,
+    thisMonthEarnings: thisMonth.reduce((s, o) => s + (o['netAmount'] ?? 0), 0),
+  }
+})
+
+// ── getMyServices ─────────────────────────────────────────────────────────────
+// Returns all services owned by the calling provider.
+// Replaces direct Firestore reads in MyServicesScreen.
+export const getMyServices = callable(async (_data, context) => {
+  const { uid } = requireAuth(context)
+  await rateLimit(uid, 'getMyServices')
+  validate(z.object({}), _data)
+
+  const snap = await db.collection('services')
+    .where('providerId', '==', uid)
+    .get()
+
+  return {
+    services: snap.docs.map(d => ({ ...d.data(), id: d.id })),
+  }
+})

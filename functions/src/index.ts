@@ -14,7 +14,7 @@ export const auth = { completeProfile, setProviderType }
 export { uploadKyc }  // called as 'uploadKyc' (no prefix)
 
 // ── Marketplace ───────────────────────────────────────────────────────────────
-export { searchProviders, getProviderProfile, updateProfile } from './marketplace'
+export { searchProviders, getProviderProfile, updateProfile, getProviderStats, getMyServices } from './marketplace'
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 export {
