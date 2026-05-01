@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import * as Location from 'expo-location'
+import i18n from '../lib/i18n'
 
 interface LocationState {
   lat:       number | null
@@ -13,6 +14,7 @@ interface LocationState {
   isLoading: boolean
   error:     string | null
   refresh:   () => Promise<void>
+  setManual: (lat: number, lng: number) => void
 }
 
 // Default: Riyadh, Saudi Arabia
@@ -53,7 +55,7 @@ export function useLocation(): LocationState {
         setCountry(place.isoCountryCode ?? DEFAULT.country)
       }
     } catch {
-      setError('تعذّر تحديد موقعك')
+      setError(i18n.t('common.locationError'))
       setLat(DEFAULT.lat)
       setLng(DEFAULT.lng)
     } finally {
@@ -61,7 +63,12 @@ export function useLocation(): LocationState {
     }
   }
 
+  function setManual(manualLat: number, manualLng: number) {
+    setLat(manualLat)
+    setLng(manualLng)
+  }
+
   useEffect(() => { void fetch() }, [])
 
-  return { lat, lng, city, country, isLoading, error, refresh: fetch }
+  return { lat, lng, city, country, isLoading, error, refresh: fetch, setManual }
 }

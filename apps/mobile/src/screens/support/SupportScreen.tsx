@@ -20,6 +20,30 @@ const SUPPORT_PAGES: Record<string, { title_key: string; url: string }> = {
   privacy: { title_key: 'privacy.screenTitle', url: 'https://workfix.app/privacy' },
 }
 
+// Static fallback shown when the device is offline
+const OFFLINE_HTML = (title: string) => `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{font-family:-apple-system,sans-serif;padding:24px;background:#f9f9f9;color:#333;text-align:center}
+  h2{color:#2563eb;margin-top:48px}
+  p{color:#666;line-height:1.7;margin:12px 0}
+  a{color:#2563eb;font-weight:bold}
+  .icon{font-size:48px;margin:32px 0 16px}
+</style>
+</head>
+<body>
+  <div class="icon">📶</div>
+  <h2>${title}</h2>
+  <p>لا يوجد اتصال بالإنترنت حالياً.</p>
+  <p>يُرجى التحقق من اتصالك ثم إعادة المحاولة.</p>
+  <p style="margin-top:32px">للتواصل معنا:<br>
+    <a href="mailto:support@workfix.app">support@workfix.app</a><br>
+    <a href="tel:+966112345678">+966 11 234 5678</a>
+  </p>
+</body>
+</html>`
+
 export default function SupportScreen() {
   const _router      = useRouter()
   const { page }     = useLocalSearchParams<{ page?: string }>()
@@ -42,7 +66,11 @@ export default function SupportScreen() {
       )}
 
       <WebView
-        source={{ uri: config.url }}
+        source={
+          isConnected
+            ? { uri: config.url }
+            : { html: OFFLINE_HTML(t(config.title_key)), baseUrl: '' }
+        }
         style={styles.webview}
         javaScriptEnabled
         userAgent="WorkFix/1.0 Mobile"

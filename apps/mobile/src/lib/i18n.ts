@@ -760,7 +760,7 @@ const EXTRA_AR = {
   common: {
     all: 'الكل', back: 'رجوع', cancel: 'إلغاء', done: 'تم', error: 'خطأ',
     km: 'كم', minutes: 'دقيقة', next: 'التالي', retry: 'إعادة المحاولة',
-    there: 'صديقنا', sar: 'ر.س',
+    there: 'صديقنا', sar: 'ر.س', locationError: 'تعذّر تحديد موقعك',
   },
   errors: {
     insufficientBalance: 'الرصيد غير كافٍ', invalidAmount: 'مبلغ غير صحيح',
@@ -799,6 +799,12 @@ const EXTRA_AR = {
     descriptionLabel: 'الوصف', details: 'تفاصيل الطلب',
     locationRequired: 'يرجى تفعيل خدمة الموقع', locationStep: 'موقعك',
     locationStepSub: 'سيستخدم المزوّد هذا العنوان للوصول إليك',
+    confirmLocation: 'تأكيد الموقع', useCurrentLocation: 'استخدام موقعي الحالي',
+    mapUnavailable: 'الخريطة غير متاحة', mapUnavailableSub: 'سيتم استخدام موقعك الحالي',
+    tracking: {
+      providerOnWay: 'المزوّد في الطريق إليك', waitingForLocation: 'في انتظار موقع المزوّد...',
+      provider: 'المزوّد', destination: 'موقعك',
+    },
     newOrder: 'طلب جديد', noOrders: 'لا طلبات بعد', noOrdersDesc: 'ابدأ بإنشاء طلبك الأول',
     photos: 'الصور', photosCount: 'صورة', price: 'السعر',
     quoteAccepted: 'تم قبول العرض', quoteExpired: 'انتهت صلاحية العرض',
@@ -939,7 +945,7 @@ const EXTRA_EN = {
     startConversation: 'Start conversation with provider', takePhoto: 'Take Photo',
     openError: 'Failed to open conversation',
   },
-  common: { all: 'All', there: 'there' },
+  common: { all: 'All', there: 'there', locationError: 'Could not determine your location' },
   errors: {
     insufficientBalance: 'Insufficient balance', invalidAmount: 'Invalid amount',
     invalidDuration: 'Invalid duration', invalidEmail: 'Invalid email',
@@ -973,6 +979,12 @@ const EXTRA_EN = {
     details: 'Order Details',
     locationRequired: 'Please enable location services', locationStep: 'Your Location',
     locationStepSub: 'The provider will use this address to reach you',
+    confirmLocation: 'Confirm Location', useCurrentLocation: 'Use My Current Location',
+    mapUnavailable: 'Map unavailable', mapUnavailableSub: 'Your current location will be used',
+    tracking: {
+      providerOnWay: 'Provider is on the way', waitingForLocation: 'Waiting for provider location...',
+      provider: 'Provider', destination: 'Your location',
+    },
     noOrdersDesc: 'Start by creating your first order',
     photos: 'Photos', photosCount: 'photos', price: 'Price',
     quoteAccepted: 'Quote accepted', quoteExpired: 'Quote expired',
@@ -1109,7 +1121,7 @@ const EXTRA_NO = {
     startConversation: 'Start samtale med leverandør', takePhoto: 'Ta bilde',
     openError: 'Kunne ikke åpne samtalen',
   },
-  common: { all: 'Alle', there: 'der' },
+  common: { all: 'Alle', there: 'der', locationError: 'Kunne ikke bestemme din posisjon' },
   errors: {
     insufficientBalance: 'Utilstrekkelig saldo', invalidAmount: 'Ugyldig beløp',
     invalidDuration: 'Ugyldig varighet', invalidEmail: 'Ugyldig e-post',
@@ -1143,6 +1155,12 @@ const EXTRA_NO = {
     details: 'Bestillingsdetaljer',
     locationRequired: 'Aktiver posisjonstjenester', locationStep: 'Din posisjon',
     locationStepSub: 'Leverandøren bruker denne adressen for å finne deg',
+    confirmLocation: 'Bekreft posisjon', useCurrentLocation: 'Bruk min nåværende posisjon',
+    mapUnavailable: 'Kart utilgjengelig', mapUnavailableSub: 'Din nåværende posisjon vil bli brukt',
+    tracking: {
+      providerOnWay: 'Leverandøren er på vei', waitingForLocation: 'Venter på leverandørens posisjon...',
+      provider: 'Leverandør', destination: 'Din posisjon',
+    },
     noOrdersDesc: 'Start med å opprette din første bestilling',
     photos: 'Bilder', photosCount: 'bilder', price: 'Pris',
     quoteAccepted: 'Tilbud akseptert', quoteExpired: 'Tilbud utløpt',
@@ -1281,7 +1299,7 @@ const EXTRA_SV = {
     startConversation: 'Starta konversation med leverantör', takePhoto: 'Ta foto',
     openError: 'Kunde inte öppna konversationen',
   },
-  common: { all: 'Alla', there: 'där' },
+  common: { all: 'Alla', there: 'där', locationError: 'Kunde inte fastställa din plats' },
   errors: {
     insufficientBalance: 'Otillräckligt saldo', invalidAmount: 'Ogiltigt belopp',
     invalidDuration: 'Ogiltig varaktighet', invalidEmail: 'Ogiltig e-post',
@@ -1315,6 +1333,12 @@ const EXTRA_SV = {
     details: 'Beställningsinformation',
     locationRequired: 'Aktivera platstjänster', locationStep: 'Din plats',
     locationStepSub: 'Leverantören använder denna adress för att nå dig',
+    confirmLocation: 'Bekräfta plats', useCurrentLocation: 'Använd min nuvarande plats',
+    mapUnavailable: 'Karta ej tillgänglig', mapUnavailableSub: 'Din nuvarande plats kommer att användas',
+    tracking: {
+      providerOnWay: 'Leverantören är på väg', waitingForLocation: 'Väntar på leverantörens plats...',
+      provider: 'Leverantör', destination: 'Din plats',
+    },
     noOrdersDesc: 'Börja med att skapa din första beställning',
     photos: 'Foton', photosCount: 'foton', price: 'Pris',
     quoteAccepted: 'Offert godkänd', quoteExpired: 'Offert utgången',

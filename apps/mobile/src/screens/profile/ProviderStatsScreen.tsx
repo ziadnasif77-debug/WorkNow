@@ -1,5 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Provider Statistics Screen — earnings, orders, ratings overview
+// Data fetched via Cloud Function (no direct Firestore access in screens)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react'
@@ -7,21 +8,24 @@ import {
   View, Text, StyleSheet, ScrollView,
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
-import { firestore, firebaseAuth } from '../../lib/firebase'
+import { getFunctions, httpsCallable } from 'firebase/functions'
+import { firebaseApp, firebaseAuth } from '../../lib/firebase'
 import { formatPrice } from '@workfix/utils'
 import { Card, LoadingState } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 
+const functions        = getFunctions(firebaseApp, 'me-central1')
+const getProviderStatsFn = httpsCallable(functions, 'marketplace-getProviderStats')
+
 interface Stats {
-  totalOrders:     number
-  completedOrders: number
-  cancelledOrders: number
-  totalEarnings:   number
-  avgRating:       number
-  totalReviews:    number
-  thisMonthOrders: number
+  totalOrders:      number
+  completedOrders:  number
+  cancelledOrders:  number
+  totalEarnings:    number
+  avgRating:        number
+  totalReviews:     number
+  thisMonthOrders:  number
   thisMonthEarnings: number
 }
 
@@ -39,38 +43,12 @@ export default function ProviderStatsScreen() {
   }, [uid])
 
   async function loadStats() {
-    if (!uid) return
     setLoading(true)
     try {
-      const snap = await getDocs(
-        query(collection(firestore, 'orders'), where('providerId', '==', uid)),
-      )
-      const orders = snap.docs.map(d => d.data())
-      const now     = new Date()
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-
-      const completed    = orders.filter(o => o['status'] === 'closed')
-      const cancelled    = orders.filter(o => o['status'] === 'cancelled')
-      const thisMonth    = completed.filter(o =>
-        (o['closedAt']?.toDate?.() ?? new Date(0)) >= monthStart,
-      )
-      const totalEarn    = completed.reduce((s, o) => s + (o['netAmount'] ?? 0), 0)
-      const monthEarn    = thisMonth.reduce((s, o) => s + (o['netAmount'] ?? 0), 0)
-
-      // Use doc() directly — Firestore doesn't index the internal 'id' field
-      const profileSnap = await getDoc(doc(firestore, 'providerProfiles', uid))
-      const profile = profileSnap.exists() ? profileSnap.data() : undefined
-
-      setStats({
-        totalOrders:      orders.length,
-        completedOrders:  completed.length,
-        cancelledOrders:  cancelled.length,
-        totalEarnings:    totalEarn,
-        avgRating:        profile?.['avgRating'] ?? 0,
-        totalReviews:     profile?.['totalReviews'] ?? 0,
-        thisMonthOrders:  thisMonth.length,
-        thisMonthEarnings: monthEarn,
-      })
+      const result = await getProviderStatsFn({})
+      setStats(result.data as Stats)
+    } catch {
+      // non-critical — leave stats null; UI shows nothing
     } finally {
       setLoading(false)
     }

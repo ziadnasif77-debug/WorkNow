@@ -9,13 +9,16 @@ import {
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { collection, query, where, getDocs } from 'firebase/firestore'
-import { firestore, firebaseAuth } from '../../lib/firebase'
+import { getFunctions, httpsCallable } from 'firebase/functions'
+import { firebaseApp, firebaseAuth } from '../../lib/firebase'
 import { formatPrice } from '@workfix/utils'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Badge, Card, EmptyState, SkeletonList, SegmentControl } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
 import MyJobsScreen from '../jobs/MyJobsScreen'
+
+const functions        = getFunctions(firebaseApp, 'me-central1')
+const getMyServicesFn  = httpsCallable(functions, 'marketplace-getMyServices')
 
 interface Service {
   id: string
@@ -41,12 +44,12 @@ export default function MyServicesScreen() {
   useEffect(() => {
     if (!uid || activeTab !== 'services') return
     setLoading(true)
-    void getDocs(
-      query(collection(firestore, 'services'), where('providerId', '==', uid)),
-    ).then(snap => {
-      setServices(snap.docs.map(d => ({ ...d.data(), id: d.id } as Service)))
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    void getMyServicesFn({}).then(result => {
+      const data = result.data as { services: Service[] }
+      setServices(data.services)
+    }).catch(() => {
+      // non-critical — leave services empty
+    }).finally(() => setLoading(false))
   }, [uid, activeTab])
 
   return (

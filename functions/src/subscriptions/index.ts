@@ -121,6 +121,16 @@ export const tapSubscriptionWebhook = functions
 
     functions.logger.info('Tap subscription webhook', { status: event.status, id: event.id })
 
+    // Idempotency: skip duplicate deliveries using event.id as a dedup key
+    const eventRef = db.collection('webhookEvents').doc(`sub_${event.id}`)
+    const existing = await eventRef.get()
+    if (existing.exists) {
+      functions.logger.info('Duplicate subscription webhook, skipping', { id: event.id })
+      res.status(200).json({ received: true })
+      return
+    }
+    await eventRef.set({ processedAt: serverTimestamp(), type: 'subscription', status: event.status })
+
     try {
     if (event.status === 'ACTIVE') {
       const uid  = event.metadata?.provider_id
