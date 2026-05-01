@@ -15,8 +15,8 @@ import { useNotifications } from '../../hooks/useNotifications'
 import { useNotificationsStore } from '../../stores/notificationsStore'
 import { useAuthStore }          from '../../stores/authStore'
 
-const mockNotifStore = useNotificationsStore as jest.Mock
-const mockAuthStore  = useAuthStore          as jest.Mock
+const mockNotifStore = useNotificationsStore as unknown as jest.Mock
+const mockAuthStore  = useAuthStore          as unknown as jest.Mock
 
 const mockFns = {
   registerToken:          jest.fn(() => Promise.resolve()),

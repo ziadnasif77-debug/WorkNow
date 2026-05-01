@@ -57,7 +57,7 @@ describe('jobsStore', () => {
     await act(async () => {
       await result.current.createJob({
         title: 'Test', description: 'Desc', location: 'Riyadh',
-        jobType: 'full_time', providerId: 'prov-1',
+        jobType: 'full_time',
       }).catch(() => {})
     })
     expect(result.current.actionLoading).toBe(false)

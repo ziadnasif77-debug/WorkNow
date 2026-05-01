@@ -1476,10 +1476,10 @@ function deepMerge<T extends Record<string, unknown>>(
 
 void i18n.use(initReactI18next).init({
   resources: {
-    ar: { translation: deepMerge(ar as unknown as Record<string, Record<string, string>>, EXTRA_AR) },
-    en: { translation: deepMerge(en as unknown as Record<string, Record<string, string>>, EXTRA_EN) },
-    no: { translation: deepMerge(no as unknown as Record<string, Record<string, string>>, EXTRA_NO) },
-    sv: { translation: deepMerge(sv as unknown as Record<string, Record<string, string>>, EXTRA_SV) },
+    ar: { translation: deepMerge(ar as unknown as Record<string, unknown>, EXTRA_AR) },
+    en: { translation: deepMerge(en as unknown as Record<string, unknown>, EXTRA_EN) },
+    no: { translation: deepMerge(no as unknown as Record<string, unknown>, EXTRA_NO) },
+    sv: { translation: deepMerge(sv as unknown as Record<string, unknown>, EXTRA_SV) },
   },
   lng:          savedLang,
   fallbackLng:  'en',

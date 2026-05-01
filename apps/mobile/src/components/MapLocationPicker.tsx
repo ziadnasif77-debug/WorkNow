@@ -74,6 +74,7 @@ export function MapLocationPicker({ initialLat, initialLng, onConfirm, style }: 
 
   return (
     <View style={[styles.container, style]}>
+      {/* @ts-ignore — local MapView type omits children; Marker is a valid child at runtime */}
       <MapView
         style={styles.map}
         initialRegion={region}

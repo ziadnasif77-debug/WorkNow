@@ -22,27 +22,7 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
 import type { SupportedLocale } from '@workfix/types'
-
-// Lazy-require react-native-maps (same pattern as MapLocationPicker)
-let MapView: React.ComponentType<{
-  style?: object
-  region?: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number }
-  provider?: string | null
-  scrollEnabled?: boolean
-  zoomEnabled?: boolean
-  pitchEnabled?: boolean
-  rotateEnabled?: boolean
-}> | null = null
-let Marker: React.ComponentType<{
-  coordinate: { latitude: number; longitude: number }
-  pinColor?: string
-  title?: string
-}> | null = null
-try {
-  const mod = require('react-native-maps') as { default: typeof MapView; Marker: typeof Marker }
-  MapView = mod.default
-  Marker  = mod.Marker
-} catch { /* Expo Go fallback */ }
+import MapView, { Marker } from 'react-native-maps'
 
 const TRACKING_STATUSES = ['confirmed', 'in_progress']
 
@@ -195,7 +175,7 @@ export default function OrderDetailScreen() {
         </Card>
 
         {/* ── Live provider tracking map ───────────────────────────────── */}
-        {isCustomer && TRACKING_STATUSES.includes(o.status) && MapView && Marker && (
+        {isCustomer && TRACKING_STATUSES.includes(o.status) && (
           <Card style={{ margin: Spacing.md, overflow: 'hidden', padding: 0 }}>
             {/* Banner */}
             <View style={styles.tracking_banner}>
@@ -208,6 +188,7 @@ export default function OrderDetailScreen() {
             </View>
 
             {providerLoc ? (
+              // @ts-ignore — children (Marker) are valid react-native-maps children
               <MapView
                 style={styles.tracking_map}
                 provider="google"
