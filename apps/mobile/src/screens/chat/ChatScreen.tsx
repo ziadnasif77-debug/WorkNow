@@ -19,11 +19,11 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { LoadingState } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
-import type { Message } from '@workfix/types'
+import type { Message, SupportedLocale } from '@workfix/types'
 
 export default function ChatScreen() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language as import('@workfix/types').SupportedLocale
+  const lang = i18n.language as SupportedLocale
   const router   = useRouter()
   const { id: orderId } = useLocalSearchParams<{ id: string }>()
   const { user } = useAuth()
@@ -286,7 +286,7 @@ function MessageBubble({
   message:    Message
   isMine:     boolean
   showAvatar: boolean
-  lang:       import('@workfix/types').SupportedLocale
+  lang:       SupportedLocale
 }) {
   const isImage = message.mediaType === 'image' && message.mediaUrl
 

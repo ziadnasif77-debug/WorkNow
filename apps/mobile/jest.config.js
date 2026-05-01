@@ -48,6 +48,7 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/app/**',
   ],
+  testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
   coverageThreshold: {
     global: { branches: 35, functions: 36, lines: 50 },
   },

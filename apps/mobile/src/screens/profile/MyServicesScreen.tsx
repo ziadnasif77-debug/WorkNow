@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { firebaseApp, firebaseAuth } from '../../lib/firebase'
 import { formatPrice } from '@workfix/utils'
+import type { SupportedLocale } from '@workfix/types'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Badge, Card, EmptyState, SkeletonList, SegmentControl } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight } from '../../constants/theme'
@@ -33,7 +34,7 @@ type Tab = 'services' | 'jobs'
 
 export default function MyServicesScreen() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language as import('@workfix/types').SupportedLocale
+  const lang = i18n.language as SupportedLocale
   const _router  = useRouter()
   const uid      = firebaseAuth.currentUser?.uid
 
@@ -84,7 +85,7 @@ export default function MyServicesScreen() {
             renderItem={({ item }) => (
               <Card>
                 <View style={styles.service_top}>
-                  <Text style={styles.service_name}>{item.name[lang] ?? item.name.ar}</Text>
+                  <Text style={styles.service_name}>{item.name[lang as 'ar' | 'en'] ?? item.name.ar}</Text>
                   <Badge
                     label={item.isActive ? t('jobs.active') : t('jobs.inactive')}
                     variant={item.isActive ? 'success' : 'neutral'}

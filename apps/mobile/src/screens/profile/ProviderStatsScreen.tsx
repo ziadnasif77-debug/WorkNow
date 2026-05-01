@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { firebaseApp, firebaseAuth } from '../../lib/firebase'
 import { formatPrice } from '@workfix/utils'
+import type { SupportedLocale } from '@workfix/types'
 import { Card, LoadingState } from '../../components/ui'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
@@ -31,7 +32,7 @@ interface Stats {
 
 export default function ProviderStatsScreen() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language as import('@workfix/types').SupportedLocale
+  const lang = i18n.language as SupportedLocale
   const uid   = firebaseAuth.currentUser?.uid
 
   const [stats,   setStats]   = useState<Stats | null>(null)
