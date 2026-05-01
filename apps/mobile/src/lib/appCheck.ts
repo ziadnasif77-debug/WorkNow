@@ -62,7 +62,7 @@ function setDebugToken(): void {
   const debugToken = process.env['EXPO_PUBLIC_APP_CHECK_DEBUG_TOKEN']
   if (debugToken) {
     // Firebase checks this global before generating a real token in debug builds
-    ;(globalThis as Record<string, unknown>)['FIREBASE_APPCHECK_DEBUG_TOKEN'] = debugToken
+    (globalThis as Record<string, unknown>)['FIREBASE_APPCHECK_DEBUG_TOKEN'] = debugToken
   }
 }
 
