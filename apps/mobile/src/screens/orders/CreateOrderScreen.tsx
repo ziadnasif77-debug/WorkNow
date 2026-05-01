@@ -25,12 +25,13 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
 import { firebaseAuth } from '../../lib/firebase'
 import { formatDate } from '@workfix/utils'
+import type { SupportedLocale } from '@workfix/types'
 
 type Step = 1 | 2 | 3
 
 export default function CreateOrderScreen() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language as import('@workfix/types').SupportedLocale
+  const lang = i18n.language as SupportedLocale
   const router      = useRouter()
   const { providerId: _providerId, serviceId } = useLocalSearchParams<{ providerId?: string; serviceId?: string }>()
   const { createOrder, actionLoading, actionError, clearError } = useOrdersStore()

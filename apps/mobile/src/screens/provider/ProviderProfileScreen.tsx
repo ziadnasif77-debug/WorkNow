@@ -16,11 +16,11 @@ import { Avatar, Button, Card, FooterCTA, LoadingState } from '../../components/
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
-import type { Review } from '@workfix/types'
+import type { Review, SupportedLocale } from '@workfix/types'
 
 export default function ProviderProfileScreen() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language as import('@workfix/types').SupportedLocale
+  const lang = i18n.language as SupportedLocale
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const { selectedProvider, profileLoading, getProviderProfile } = useMarketplaceStore()
@@ -158,7 +158,7 @@ export default function ProviderProfileScreen() {
   )
 }
 
-function ReviewCard({ review, lang }: { review: Review; lang: import('@workfix/types').SupportedLocale }) {
+function ReviewCard({ review, lang }: { review: Review; lang: SupportedLocale }) {
   return (
     <View style={reviewStyles.card}>
       <View style={reviewStyles.header}>

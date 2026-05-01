@@ -92,7 +92,7 @@ if (__DEV__ && process.env['EXPO_PUBLIC_USE_EMULATOR'] === 'true') {
 // genuine WorkNow binary running on an unmodified device.
 // initAppCheck() is idempotent — safe to call on hot reloads.
 if (isNewApp) {
-  initAppCheck()
+  void initAppCheck()
 }
 
 // ── Backward-compat exports ───────────────────────────────────────────────────

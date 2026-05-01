@@ -13,11 +13,11 @@ import { useAuth } from '../../hooks/useAuth'
 import { EmptyState, SkeletonList, TabHeader } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, AvatarSize } from '../../constants/theme'
 import { formatDate } from '@workfix/utils'
-import type { Conversation } from '@workfix/types'
+import type { Conversation, SupportedLocale } from '@workfix/types'
 
 export default function ConversationsScreen() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language as import('@workfix/types').SupportedLocale
+  const lang = i18n.language as SupportedLocale
   const router   = useRouter()
   const { user } = useAuth()
   const { conversations, convsLoading, subscribeConversations, unsubscribeAll } = useMessagingStore()
@@ -69,7 +69,7 @@ function ConversationRow({
   conv, myUid, lang, onPress }: {
   conv:    Conversation
   myUid:   string
-  lang:    import('@workfix/types').SupportedLocale
+  lang:    SupportedLocale
   onPress: () => void
 }) {
   const unread     = conv.unreadCount?.[myUid] ?? 0

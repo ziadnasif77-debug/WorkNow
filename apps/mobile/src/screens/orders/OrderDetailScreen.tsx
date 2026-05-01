@@ -21,6 +21,7 @@ import { Button, Card, FooterCTA, InfoRow, LoadingState } from '../../components
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
+import type { SupportedLocale } from '@workfix/types'
 
 // Lazy-require react-native-maps (same pattern as MapLocationPicker)
 let MapView: React.ComponentType<{
@@ -47,7 +48,7 @@ const TRACKING_STATUSES = ['confirmed', 'in_progress']
 
 export default function OrderDetailScreen() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language as import('@workfix/types').SupportedLocale
+  const lang = i18n.language as SupportedLocale
   const router   = useRouter()
   const { id }   = useLocalSearchParams<{ id: string }>()
   const { isCustomer, isProvider, user } = useAuth()

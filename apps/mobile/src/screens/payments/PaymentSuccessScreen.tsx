@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius, IconSize } from '../../constants/theme'
+import type { Currency } from '@workfix/types'
 
 export default function PaymentSuccessScreen() {
   const { t }       = useTranslation()
@@ -26,7 +27,7 @@ export default function PaymentSuccessScreen() {
     if (orderId) void Analytics.paymentComplete(
       orderId,
       parseFloat(amount ?? '0'),
-      (currency ?? 'SAR') as import('@workfix/types').Currency,
+      (currency ?? 'SAR') as Currency,
     )
   }, [])
 

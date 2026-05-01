@@ -12,7 +12,7 @@ import { StatusBadge } from '../../components/orders'
 import { Button, Card, Chip, EmptyState, SkeletonList, TabHeader } from '../../components/ui'
 import { Colors, Spacing, FontSize, FontWeight, Radius } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
-import type { Order, OrderStatus } from '@workfix/types'
+import type { Order, OrderStatus, SupportedLocale } from '@workfix/types'
 
 const STATUS_FILTERS: Array<{ key: OrderStatus | 'all'; label: string }> = [
   { key: 'all',         label: 'الكل' },
@@ -108,7 +108,7 @@ export default function MyOrdersScreen() {
 
 const OrderCard = React.memo(function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language as import('@workfix/types').SupportedLocale
+  const lang = i18n.language as SupportedLocale
 
   return (
     <Card onPress={onPress}>
