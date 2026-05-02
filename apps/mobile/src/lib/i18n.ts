@@ -1478,11 +1478,11 @@ void i18n.use(initReactI18next).init({
   resources: {
     // @ts-expect-error — translation objects are deeply nested; deepMerge handles them at runtime
     ar: { translation: deepMerge(ar as unknown as Record<string, unknown>, EXTRA_AR) },
-    // @ts-expect-error
+    // @ts-expect-error -- translation objects contain nested keys; deepMerge handles recursion
     en: { translation: deepMerge(en as unknown as Record<string, unknown>, EXTRA_EN) },
-    // @ts-expect-error
+    // @ts-expect-error -- translation objects contain nested keys; deepMerge handles recursion
     no: { translation: deepMerge(no as unknown as Record<string, unknown>, EXTRA_NO) },
-    // @ts-expect-error
+    // @ts-expect-error -- translation objects contain nested keys; deepMerge handles recursion
     sv: { translation: deepMerge(sv as unknown as Record<string, unknown>, EXTRA_SV) },
   },
   lng:          savedLang,
