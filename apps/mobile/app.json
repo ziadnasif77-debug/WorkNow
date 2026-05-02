@@ -79,6 +79,7 @@
     },
     "plugins": [
       "./scripts/withAndroidBuildGradle",
+      "./scripts/withAppBuildGradle",
       [
         "expo-build-properties",
         {
