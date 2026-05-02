@@ -78,7 +78,7 @@
       "bundler": "metro"
     },
     "plugins": [
-      "./scripts/withKotlinVersion",
+      "./scripts/withAndroidBuildGradle",
       [
         "expo-build-properties",
         {
