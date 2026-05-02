@@ -38,21 +38,7 @@ jest.mock('react-native-safe-area-context', () => {
   }
 })
 
-// react-native-maps mock (native module not available in jest)
-jest.mock('react-native-maps', () => {
-  const React = require('react')
-  const { View } = require('react-native')
-  const MockMapView = (props) => React.createElement(View, props)
-  const MockMarker = (props) => React.createElement(View, props)
-  MockMapView.Animated = MockMapView
-  return {
-    __esModule: true,
-    default: MockMapView,
-    Marker: MockMarker,
-    PROVIDER_GOOGLE: 'google',
-    PROVIDER_DEFAULT: null,
-  }
-})
+// react-native-maps — components use View directly; no jest.mock needed
 
 // expo-image mock
 jest.mock('expo-image', () => {
