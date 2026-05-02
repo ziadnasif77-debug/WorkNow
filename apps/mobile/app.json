@@ -78,6 +78,7 @@
       "bundler": "metro"
     },
     "plugins": [
+      "./scripts/withKotlinVersion",
       [
         "expo-build-properties",
         {
