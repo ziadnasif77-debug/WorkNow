@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "7177c184-c126-44e9-a170-b20c0d4c4ae1"
+      }
+    },
+    "android": {
+      "package": "com.ziadnasif77.workfix"
+    }
+  }
+}

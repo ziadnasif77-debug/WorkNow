@@ -16,3 +16,5 @@ emulator-data/
 *.tgz
 ios/
 android/
+!apps/mobile/android/
+!apps/mobile/android/build.gradle

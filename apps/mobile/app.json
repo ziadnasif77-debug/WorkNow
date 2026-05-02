@@ -34,7 +34,7 @@
       "icon": "./assets/icon.png"
     },
     "android": {
-      "kotlinVersion": "2.1.0",
+      "kotlinVersion": "1.9.24",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "monochromeImage": "./assets/notification-icon.png",
@@ -78,11 +78,13 @@
       "bundler": "metro"
     },
     "plugins": [
+      "./scripts/withAndroidBuildGradle",
+      "./scripts/withAppBuildGradle",
       [
         "expo-build-properties",
         {
           "android": {
-            "kotlinVersion": "2.1.0"
+            "kotlinVersion": "1.9.24"
           }
         }
       ],
