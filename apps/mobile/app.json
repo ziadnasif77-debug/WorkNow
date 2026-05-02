@@ -78,7 +78,14 @@
       "bundler": "metro"
     },
     "plugins": [
-      "./scripts/withKotlinVersion",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "2.1.0"
+          }
+        }
+      ],
       "expo-router",
       "expo-font",
       [
