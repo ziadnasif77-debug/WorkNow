@@ -14,9 +14,9 @@
                   "development":  {
                                       "developmentClient":  false,
                                       "distribution":  "internal",
-                                      "ios":  {
-                                                  "image": "macos-sequoia-15.3-xcode-16.2"
-                                              },
+                                      "android":  {
+                                                      "image":  "ubuntu-22.04-jdk-17-ndk-r23c"
+                                                  },
                                       "env":  {
                                                   "EXPO_PUBLIC_ENV":  "development",
                                                   "EXPO_PUBLIC_USE_EMULATOR":  "false"
