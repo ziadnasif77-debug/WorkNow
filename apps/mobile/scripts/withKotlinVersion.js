@@ -2,7 +2,7 @@ const { withDangerousMod } = require('@expo/config-plugins')
 const path = require('path')
 const fs = require('fs')
 
-const KOTLIN_VERSION = '2.0.21'
+const KOTLIN_VERSION = '2.1.0'
 
 function patchFile(filePath, replacements) {
   try {
