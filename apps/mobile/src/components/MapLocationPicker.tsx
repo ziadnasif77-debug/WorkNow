@@ -23,8 +23,10 @@ interface MapLocationPickerProps {
   style?:      object
 }
 
-const MapView = View
-const Marker  = View
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MapView = View as unknown as React.ComponentType<any>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Marker  = View as unknown as React.ComponentType<any>
 
 export function MapLocationPicker({ initialLat, initialLng, onConfirm, style }: MapLocationPickerProps) {
   const { t } = useTranslation()
@@ -37,7 +39,6 @@ export function MapLocationPicker({ initialLat, initialLng, onConfirm, style }: 
 
   return (
     <View style={[styles.container, style]}>
-      {/* @ts-expect-error — react-native-maps MapView type omits children prop */}
       <MapView
         style={styles.map}
         initialRegion={region}
