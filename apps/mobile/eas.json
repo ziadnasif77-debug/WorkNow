@@ -15,7 +15,7 @@
                                       "developmentClient":  false,
                                       "distribution":  "internal",
                                       "android":  {
-                                                      "image":  "ubuntu-22.04-jdk-17-ndk-r21e"
+                                                      "image":  "ubuntu-24.04-jdk-17-ndk-r27b"
                                                   },
                                       "env":  {
                                                   "EXPO_PUBLIC_ENV":  "development",
