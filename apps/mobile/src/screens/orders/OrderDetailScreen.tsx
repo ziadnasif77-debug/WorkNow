@@ -22,7 +22,8 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow, IconSize } from '../../constants/theme'
 import { formatDate, formatPrice } from '@workfix/utils'
 import type { SupportedLocale } from '@workfix/types'
-import MapView, { Marker } from 'react-native-maps'
+const MapView = View
+const Marker  = View
 
 const TRACKING_STATUSES = ['confirmed', 'in_progress']
 

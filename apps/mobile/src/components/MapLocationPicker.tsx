@@ -23,29 +23,8 @@ interface MapLocationPickerProps {
   style?:      object
 }
 
-// Lazy-require react-native-maps so the app doesn't crash in Expo Go
-let MapView: React.ComponentType<{
-  style?: object
-  initialRegion?: Region
-  onRegionChangeComplete?: (r: Region) => void
-  provider?: string | null
-}> | null = null
-
-let Marker: React.ComponentType<{
-  coordinate: { latitude: number; longitude: number }
-}> | null = null
-
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mod = require('react-native-maps') as {
-    default: typeof MapView
-    Marker:  typeof Marker
-  }
-  MapView = mod.default
-  Marker  = mod.Marker
-} catch {
-  // Expo Go / web — map will not render
-}
+const MapView = View
+const Marker  = View
 
 export function MapLocationPicker({ initialLat, initialLng, onConfirm, style }: MapLocationPickerProps) {
   const { t } = useTranslation()
@@ -55,22 +34,6 @@ export function MapLocationPicker({ initialLat, initialLng, onConfirm, style }: 
     latitudeDelta:  0.005,
     longitudeDelta: 0.005,
   })
-
-  if (!MapView || !Marker) {
-    return (
-      <View style={[styles.fallback, style]}>
-        <Text style={styles.fallback_icon}>📍</Text>
-        <Text style={styles.fallback_title}>{t('orders.mapUnavailable')}</Text>
-        <Text style={styles.fallback_sub}>{t('orders.mapUnavailableSub')}</Text>
-        <TouchableOpacity
-          style={styles.confirm_btn}
-          onPress={() => onConfirm(initialLat, initialLng)}
-        >
-          <Text style={styles.confirm_text}>{t('orders.useCurrentLocation')}</Text>
-        </TouchableOpacity>
-      </View>
-    )
-  }
 
   return (
     <View style={[styles.container, style]}>
