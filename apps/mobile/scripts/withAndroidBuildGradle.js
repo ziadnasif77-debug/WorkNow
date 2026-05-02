@@ -7,18 +7,18 @@ module.exports = function withAndroidBuildGradle(config) {
       if (!config.modResults.contents.includes('kotlinVersion')) {
         config.modResults.contents = config.modResults.contents.replace(
           /ext\s*\{/,
-          'ext {\n        kotlinVersion = "2.1.0"'
+          'ext {\n        kotlinVersion = "2.0.21"'
         )
       }
       // Replace $kotlinVersion reference with hardcoded version
       config.modResults.contents = config.modResults.contents.replace(
         /kotlin-gradle-plugin:\$kotlinVersion/g,
-        'kotlin-gradle-plugin:2.1.0'
+        'kotlin-gradle-plugin:2.0.21'
       )
       // Replace kotlin_version reference
       config.modResults.contents = config.modResults.contents.replace(
         /kotlin-gradle-plugin:\$kotlin_version/g,
-        'kotlin-gradle-plugin:2.1.0'
+        'kotlin-gradle-plugin:2.0.21'
       )
     }
     return config
