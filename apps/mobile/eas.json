@@ -13,11 +13,11 @@
                            },
                   "development":  {
                                       "extends":  "base",
-                                      "developmentClient":  true,
+                                      "developmentClient":  false,
                                       "distribution":  "internal",
                                       "channel":  "development",
                                       "ios":  {
-                                                  "simulator":  true,
+                                                  "simulator":  false,
                                                   "image": "macos-sequoia-15.3-xcode-16.2"
                                               },
                                       "android":  {
