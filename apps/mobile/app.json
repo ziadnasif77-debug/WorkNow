@@ -34,7 +34,7 @@
       "icon": "./assets/icon.png"
     },
     "android": {
-      "kotlinVersion": "2.0.21",
+      "kotlinVersion": "1.9.24",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "monochromeImage": "./assets/notification-icon.png",
@@ -84,7 +84,7 @@
         "expo-build-properties",
         {
           "android": {
-            "kotlinVersion": "2.0.21"
+            "kotlinVersion": "1.9.24"
           }
         }
       ],
